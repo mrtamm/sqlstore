@@ -447,5 +447,5 @@ It is possible that some of the information regarding the usage of SqlStore
 library was not documented precisely or was forgotten to add here. In addition,
 additional concerns or questions may arise when using this library. In such
 cases feel free to create a topic at
-(the official issue tracker)[https://github.com/mrtamm/sqlstore/issues] of this
+[the official issue tracker](https://github.com/mrtamm/sqlstore/issues) of this
 project.
