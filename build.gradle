@@ -1,0 +1,41 @@
+apply plugin: 'java'
+apply plugin: 'checkstyle'
+
+description = 'SqlStore \u2013 externalize your SQL scripts'
+version = '0.1-SNAPSHOT'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
+sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile 'org.slf4j:slf4j-api:1.7.7'
+  testCompile 'org.testng:testng:6.5.2'
+  testCompile 'org.apache.commons:commons-dbcp2:2.0.1'
+  testCompile 'org.mockito:mockito-core:1.+'
+  testRuntime 'org.apache.derby:derby:10.10.2.0'
+  testRuntime 'ch.qos.logback:logback-classic:1.1.2'
+}
+
+test {
+  useTestNG()
+  debug false
+}
+
+javadoc {
+  options {
+    overview 'src/main/javadoc/overview.html'
+    docTitle project.description + ' (version ' + project.version + ')'
+    windowTitle docTitle
+    encoding 'UTF-8'
+    links 'http://docs.oracle.com/javase/7/docs/api/'
+  }
+}

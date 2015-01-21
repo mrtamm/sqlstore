@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<suppressions>
+  <!-- Methods of test classes are not required to be documented as these methods should be
+  self-documenting. -->
+  <suppress files=".+\/ws\/rocket\/sqlstore\/test\/.+\.java" checks="JavadocMethod" />
+</suppressions>
