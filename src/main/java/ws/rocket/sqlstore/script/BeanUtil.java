@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore.script;
 
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -85,23 +87,26 @@ public final class BeanUtil {
   }
 
   /**
-   * Attempts to resolve the method for reading the given property of the bean class.
+   * Attempts to resolve the method or field for reading the given property of the bean class.
    * <p>
    * The method must be public, non-static, with a non-void return type, and not expecting any
    * parameters. The method name is the property name with first letter in upper-case and with
    * prefix "is" (when return type is 'boolean') or "get".
    * <p>
-   * When the read-method is not found, this method will throw a runtime exception.
+   * When the read-method is not found, this method attempts to find public and non-static field
+   * with the exactly same name as the property.
+   * <p>
+   * When both read-method and field are not found, this method will throw a runtime exception.
    *
    * @param clazz The class from which the method for reading the property is searched.
    * @param property The name of the property (not null, valid minimum length is 1).
-   * @return The method for reading the property.
+   * @return The method or field for reading the property.
    */
-  public static Method requireReader(Class<?> clazz, String property) {
+  public static AccessibleObject requireReader(Class<?> clazz, String property) {
     String suffix = propToTitleCase(property);
     String methodNameGet = "get" + suffix;
     String methodNameIs = "is" + suffix;
-    Method reader = null;
+    AccessibleObject reader = null;
 
     for (Method classMethod : clazz.getMethods()) {
       boolean isMethod = methodNameIs.equals(classMethod.getName())
@@ -120,6 +125,17 @@ public final class BeanUtil {
     }
 
     if (reader == null) {
+      for (Field f : clazz.getFields()) {
+        if (f.getName().equals(property)
+            && Modifier.isPublic(f.getModifiers())
+            && !Modifier.isStatic(f.getModifiers())) {
+          reader = f;
+          break;
+        }
+      }
+    }
+
+    if (reader == null) {
       throw new RuntimeException(String.format("Could not find method "
           + "[public void %s(AnyType arg)] in %s for writing property [%s]",
           methodNameGet, clazz, property));
@@ -129,21 +145,24 @@ public final class BeanUtil {
   }
 
   /**
-   * Attempts to resolve the method for writing the given property of the bean class.
+   * Attempts to resolve the method or field for writing the given property of the bean class.
    * <p>
    * The method must be public, non-static, with a <code>void</code> return type, and expecting a
    * single parameter . The method name is the property name with first letter in upper-case and
    * with prefix "set".
    * <p>
-   * When the write-method is not found, this method will throw a runtime exception.
+   * When the write-method is not found, this method attempts to find public non-final and
+   * non-static field with the exactly same name as the property.
+   * <p>
+   * When both write-method and field are not found, this method will throw a runtime exception.
    *
-   * @param clazz The class from which the method for reading the property is searched.
+   * @param clazz The class from which the method or field for writing the property is searched.
    * @param property The name of the property (not null, valid minimum length is 1).
-   * @return The method for writing the property.
+   * @return The method or field for writing the property.
    */
-  public static Method requireWriter(Class<?> clazz, String property) {
+  public static AccessibleObject requireWriter(Class<?> clazz, String property) {
     String methodName = "set" + propToTitleCase(property);
-    Method writer = null;
+    AccessibleObject writer = null;
 
     for (Method classMethod : clazz.getMethods()) {
       if (methodName.equals(classMethod.getName())
@@ -157,9 +176,22 @@ public final class BeanUtil {
     }
 
     if (writer == null) {
-      throw new RuntimeException(String.format("Could not find method "
-          + "[public void %s(AnyType arg)] in %s for writing property [%s]",
-          methodName, clazz, property));
+      for (Field f : clazz.getFields()) {
+        if (f.getName().equals(property)
+            && Modifier.isPublic(f.getModifiers())
+            && !Modifier.isFinal(f.getModifiers())
+            && !Modifier.isStatic(f.getModifiers())) {
+          writer = f;
+          break;
+        }
+      }
+    }
+
+    if (writer == null) {
+      throw new RuntimeException(String.format("Could not find a method "
+          + "[public void %s(AnyType arg)] nor a public non-static and non-final field [%s] in "
+          + "%s for writing property [%s]",
+          methodName, property, clazz, property));
     }
 
     return writer;
@@ -171,12 +203,23 @@ public final class BeanUtil {
    * Thrown checked exceptions will be wrapped into runtime exceptions.
    *
    * @param inst An object instance.
-   * @param reader The read-method for reading the property.
-   * @return The return-value of the method.
+   * @param reader The read-method or public field for reading the value of the property.
+   * @return The return-value of the property from the given reader.
    */
-  public static Object read(Object inst, Method reader) {
+  public static Object read(Object inst, AccessibleObject reader) {
     try {
-      return reader.invoke(inst);
+      Object result;
+
+      if (reader instanceof Method) {
+        result = ((Method) reader).invoke(inst);
+      } else if (reader instanceof Field) {
+        result = ((Field) reader).get(inst);
+      } else {
+        throw new IllegalArgumentException("Either method or field expected for reading the "
+            + "property value. Got: " + reader);
+      }
+
+      return result;
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
       throw new ScriptSetupException(msgFailed(inst, reader), e);
     }
@@ -191,9 +234,16 @@ public final class BeanUtil {
    * @param writer The write-method for writing the value to a property.
    * @param value The value to write.
    */
-  public static void write(Object inst, Method writer, Object value) {
+  public static void write(Object inst, AccessibleObject writer, Object value) {
     try {
-      writer.invoke(inst, value);
+      if (writer instanceof Method) {
+        ((Method) writer).invoke(inst, value);
+      } else if (writer instanceof Field) {
+        ((Field) writer).set(inst, value);
+      } else {
+        throw new IllegalArgumentException("Either method or field expected for writing the "
+            + "property value. Got: " + writer);
+      }
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
       throw new ScriptSetupException(msgFailed(inst, writer, value), e);
     }
@@ -203,13 +253,13 @@ public final class BeanUtil {
     return Character.toUpperCase(property.charAt(0)) + property.substring(1);
   }
 
-  private static String msgFailed(Object inst, Method method) {
-    return String.format("Failed to call [%s] on [%s].", method, inst);
+  private static String msgFailed(Object inst, AccessibleObject reader) {
+    return String.format("Failed to call [%s] on [%s].", reader, inst);
   }
 
-  private static String msgFailed(Object inst, Method method, Object value) {
+  private static String msgFailed(Object inst, AccessibleObject writer, Object value) {
     return String.format("Failed to call [%s] on [%s] for storing value [%s].",
-        method, inst, value);
+        writer, inst, value);
   }
 
   private BeanUtil() {

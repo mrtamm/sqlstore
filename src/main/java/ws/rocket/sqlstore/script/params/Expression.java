@@ -16,10 +16,12 @@
 
 package ws.rocket.sqlstore.script.params;
 
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
-import ws.rocket.sqlstore.script.BeanUtil;
 import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.script.BeanUtil;
 import ws.rocket.sqlstore.types.Bindings;
 
 /**
@@ -35,7 +37,6 @@ import ws.rocket.sqlstore.types.Bindings;
  * The Java type of an expression is the type of the last property. or the type of the main variable
  * when no properties. SQL type will be derived from the Java type unless explicitly provided. As
  * usually, a value converter must exist to support the Java and SQL types combination.
- *
  */
 public final class Expression extends Param {
 
@@ -50,20 +51,22 @@ public final class Expression extends Param {
    * </ol>
    *
    * @param namedParam The named parameter to bind with (required).
-   * @param fields List of fields in the correct order to read the value of the expression, or to
-   * set the value of the last property. Also determines Java type of the expression.This may be
-   * null or empty when the expression just refers to a named parameter.
+   * @param properties List of property names in the correct order to read the value of the
+   * expression, or to set the value of the last property. Also determines Java type of the
+   * expression.This may be null or empty when the expression just refers to a named parameter.
    * @param sqlType Optional SQL type for this property to override default.
    * @return A new expression instance.
    */
-  public static Expression create(TypeNameParam namedParam, List<String> fields, Integer sqlType) {
+  public static Expression create(TypeNameParam namedParam, List<String> properties,
+      Integer sqlType) {
+
     Class<?> exprJavaType;
     int exprSqlType;
     String expression;
-    Method[] readMethods;
-    Method writeMethod = null;
+    AccessibleObject[] readers;
+    AccessibleObject writer = null;
 
-    if (fields == null || fields.isEmpty()) {
+    if (properties == null || properties.isEmpty()) {
 
       if (sqlType == null) {
         sqlType = namedParam.getSqlType();
@@ -71,26 +74,35 @@ public final class Expression extends Param {
 
       exprJavaType = namedParam.getJavaType();
       exprSqlType = Bindings.getInstance().confirmTypes(exprJavaType, sqlType);
-      readMethods = null;
-      writeMethod = null;
+      readers = null;
+      writer = null;
       expression = namedParam.getName();
 
     } else {
       StringBuilder exprBuilder = new StringBuilder().append(namedParam.getName());
       Class<?> currentType = namedParam.getJavaType();
-      readMethods = new Method[fields.size()];
+      readers = new Method[properties.size()];
 
-      for (int i = 0; i < fields.size(); i++) {
-        String field = fields.get(i);
+      for (int i = 0; i < properties.size(); i++) {
+        String prop = properties.get(i);
 
-        if (i == fields.size() - 1) {
-          writeMethod = BeanUtil.requireWriter(currentType, field);
+        if (i == properties.size() - 1) {
+          writer = BeanUtil.requireWriter(currentType, prop);
         }
 
-        Method reader = BeanUtil.requireReader(currentType, field);
-        readMethods[i] = reader;
-        currentType = reader.getReturnType();
-        exprBuilder.append('.').append(field);
+        AccessibleObject reader = BeanUtil.requireReader(currentType, prop);
+        readers[i] = reader;
+
+        if (reader instanceof Method) {
+          currentType = ((Method) reader).getReturnType();
+        } else if (reader instanceof Field) {
+          currentType = ((Field) reader).getType();
+        } else {
+          throw new IllegalStateException("Expected the reader to be either method or field. Got: "
+              + reader);
+        }
+
+        exprBuilder.append('.').append(prop);
       }
 
       expression = exprBuilder.toString();
@@ -100,8 +112,8 @@ public final class Expression extends Param {
 
     return new Expression(
         namedParam,
-        readMethods,
-        writeMethod,
+        readers,
+        writer,
         expression,
         exprJavaType,
         exprSqlType
@@ -110,18 +122,18 @@ public final class Expression extends Param {
 
   private final TypeNameParam typedVariable;
 
-  private final Method[] readMethods;
+  private final AccessibleObject[] readers;
 
-  private final Method writeMethod;
+  private final AccessibleObject writer;
 
   private final String expression;
 
-  private Expression(TypeNameParam typedVariable, Method[] readMethods, Method writeMethod,
-      String expression, Class<?> javaType, int sqlType) {
+  private Expression(TypeNameParam typedVariable, AccessibleObject[] readers,
+      AccessibleObject writer, String expression, Class<?> javaType, int sqlType) {
     super(javaType, sqlType);
     this.typedVariable = typedVariable;
-    this.readMethods = readMethods;
-    this.writeMethod = writeMethod;
+    this.readers = readers;
+    this.writer = writer;
     this.expression = expression;
   }
 
@@ -129,12 +141,12 @@ public final class Expression extends Param {
   public Object read(QueryContext ctx) {
     Object inst = this.typedVariable.read(ctx);
 
-    if (this.readMethods != null) {
-      for (Method method : this.readMethods) {
+    if (this.readers != null) {
+      for (AccessibleObject reader : this.readers) {
         if (inst == null) {
           break;
         }
-        inst = BeanUtil.read(inst, method);
+        inst = BeanUtil.read(inst, reader);
       }
     }
 
@@ -143,7 +155,7 @@ public final class Expression extends Param {
 
   @Override
   public void write(QueryContext ctx, Object value) {
-    if (this.readMethods == null) {
+    if (this.readers == null) {
       this.typedVariable.write(ctx, value);
       return;
     }
@@ -157,15 +169,15 @@ public final class Expression extends Param {
       this.typedVariable.write(ctx, inst);
     }
 
-    for (int i = 0; i < this.readMethods.length - 1; i++) {
+    for (int i = 0; i < this.readers.length - 1; i++) {
       if (inst == null) {
         break;
       }
-      inst = BeanUtil.read(inst, this.readMethods[i]);
+      inst = BeanUtil.read(inst, this.readers[i]);
     }
 
     if (inst != null) {
-      BeanUtil.write(inst, this.writeMethod, value);
+      BeanUtil.write(inst, this.writer, value);
     }
   }
 

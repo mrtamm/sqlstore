@@ -16,9 +16,11 @@
 
 package ws.rocket.sqlstore.script.params;
 
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import ws.rocket.sqlstore.script.BeanUtil;
 import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.script.BeanUtil;
 import ws.rocket.sqlstore.types.Bindings;
 
 /**
@@ -38,7 +40,7 @@ public final class TypePropParam extends Param {
    * the input data and there are issues that may cause a runtime exception, such as:
    * <ol>
    * <li>the bean is not defined;
-   * <li>the write method for the provided bean property name is not found;
+   * <li>the write method or field for the provided bean property name is not found;
    * <li>the provided non-null SQL type may not be supported with the Java type of the property.
    * </ol>
    *
@@ -52,8 +54,14 @@ public final class TypePropParam extends Param {
    */
   public static TypePropParam create(Class<?> beanType, String property, Integer sqlType,
       boolean firstParam) {
-    Method writer = BeanUtil.requireWriter(beanType, property);
-    Class<?> propertyType = writer.getParameterTypes()[0];
+    AccessibleObject writer = BeanUtil.requireWriter(beanType, property);
+
+    Class<?> propertyType;
+    if (writer instanceof Method) {
+      propertyType = ((Method) writer).getParameterTypes()[0];
+    } else {
+      propertyType = ((Field) writer).getType();
+    }
     sqlType = Bindings.getInstance().confirmTypes(propertyType, sqlType);
 
     return new TypePropParam(beanType, writer, propertyType, sqlType, firstParam);
@@ -61,15 +69,15 @@ public final class TypePropParam extends Param {
 
   private final Class<?> beanType;
 
-  private final Method writeMethod;
+  private final AccessibleObject writer;
 
   private final boolean createBean;
 
-  private TypePropParam(Class<?> beanType, Method writeMethod, Class<?> javaType,
+  private TypePropParam(Class<?> beanType, AccessibleObject writer, Class<?> javaType,
       int sqlType, boolean firstProp) {
     super(javaType, sqlType);
     this.beanType = beanType;
-    this.writeMethod = writeMethod;
+    this.writer = writer;
     this.createBean = firstProp;
   }
 
@@ -89,7 +97,7 @@ public final class TypePropParam extends Param {
       instance = ctx.getLastResultItem();
     }
 
-    BeanUtil.write(instance, this.writeMethod, value);
+    BeanUtil.write(instance, this.writer, value);
   }
 
   /**
@@ -118,7 +126,7 @@ public final class TypePropParam extends Param {
   /**
    * Provides textual representation of this parameter. The returned value has following format:
    * <p>
-   * "&lt;simple class name of bean&gt;.&lt;property write-method name&gt;(&lt;simple class
+   * "&lt;simple class name of bean&gt;.&lt;property write-method/field name&gt;(&lt;simple class
    * name&gt;|&lt;SQL type int value&gt;)"
    * <p>
    * For example: <code>Employee.setBirthDate(Date|93)</code>.
@@ -127,8 +135,13 @@ public final class TypePropParam extends Param {
    */
   @Override
   public String toString() {
-    return this.beanType.getSimpleName() + "." + this.writeMethod.getName()
-        + "(" + super.toString() + ")";
+    String name;
+    if (this.writer instanceof Method) {
+      name = ((Method) this.writer).getName();
+    } else {
+      name = ((Field) this.writer).getName();
+    }
+    return this.beanType.getSimpleName() + "." + name + "(" + super.toString() + ")";
   }
 
 }
