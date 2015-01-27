@@ -35,8 +35,9 @@ public class QueryHintTest {
   private final QueryHints hints = new QueryHints();
 
   public void shouldDoNothing() throws SQLException {
-    // The statement (which is null here) should not be used.
-    this.hints.setHints(null);
+    // The statement (which is null here) should not be used
+    // because initially no hints are specified.
+    new QueryHints().setHints(null);
   }
 
   @Test(expectedExceptions = ScriptSetupException.class)

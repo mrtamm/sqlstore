@@ -19,7 +19,8 @@ package ws.rocket.sqlstore.test.model;
 import java.util.Date;
 
 /**
- * This is a sample table model class used when testing.
+ * This is a sample table model class used when testing. Unlike the Organization model object, this
+ * object (a data structure) provides data access via getter and setter methods.
  */
 public final class Person {
 
