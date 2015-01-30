@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package ws.rocket.sqlstore.script.read;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.InputParams;
 import ws.rocket.sqlstore.script.OutputParams;
 import ws.rocket.sqlstore.script.QueryParam;
+import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.params.Expression;
 import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.params.ParamMode;
@@ -61,10 +65,26 @@ public final class ParamsSet {
   private OutputParams outputParams;
 
   /**
-   * Resets all internally contained data so that this class instance could be reused for handling
-   * the parameters of next script.
+   * Validates that all parameters of the script were actually used, and resets all internally
+   * contained data so that this class instance could be reused for handling the parameters of next
+   * script.
+   *
+   * @param script The script instance for which the current parameters set instance/state was just
+   * used for providing the parameters. (Script is used for providing better error messages.) It is
+   * valid to leave it null (e.g. on parse error) in which case parameters usage check is skipped.
    */
-  public void reset() {
+  public void cleanup(Script script) {
+    if (script != null && !this.inVarParams.isEmpty()) {
+      throw new ScriptSetupException(
+          String.format("Script [%s] (line %d): following IN-parameters were not used: %s",
+              script.getName(), script.getLine(), this.inVarParams.toString()));
+
+    } else if (script != null && !this.outVarParams.isEmpty()) {
+      throw new ScriptSetupException(
+          String.format("Script [%s] (line %d): following OUT-parameters were not used: %s",
+              script.getName(), script.getLine(), this.outVarParams.toString()));
+    }
+
     this.inVarParams.clear();
     this.outVarParams.clear();
     this.outTypeParams.clear();
@@ -223,7 +243,7 @@ public final class ParamsSet {
    * @param sqlType Optional SQL type for the expression when explicitly set next to the expression.
    */
   public void addScriptParam(ParamMode mode, String varName, List<String> fields, Integer sqlType) {
-    TypeNameParam param = getInputParams().get(varName);
+    TypeNameParam param = this.inputParams.get(varName);
 
     if (param == null) {
       if (mode == ParamMode.IN || mode == ParamMode.INOUT) {
@@ -232,10 +252,12 @@ public final class ParamsSet {
             varName, mode.name()));
       }
 
-      param = getOutputParams().get(varName);
+      param = this.outputParams.get(varName);
       mode = ParamMode.OUT;
-    } else if (mode == null) {
-      mode = ParamMode.IN;
+      removeParam(this.outVarParams, varName);
+    } else {
+      mode = mode == null ? ParamMode.IN : mode;
+      removeParam(this.inVarParams, varName);
     }
 
     if (param == null) {
@@ -385,6 +407,15 @@ public final class ParamsSet {
       this.keysResults.add(param);
     } else {
       this.rowsResults.add(param);
+    }
+  }
+
+  private void removeParam(List<TypeNameParam> params, String varName) {
+    for (Iterator<TypeNameParam> it = params.iterator(); it.hasNext();) {
+      if (it.next().getName().equals(varName)) {
+        it.remove();
+        break;
+      }
     }
   }
 

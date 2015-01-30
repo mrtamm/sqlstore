@@ -256,7 +256,7 @@ public final class ScriptReader implements Closeable {
    */
   public Script createScript() {
     Script result = new Script(this.name, this.line, this.script, this.params, this.hints);
-    this.params.reset();
+    this.params.cleanup(result);
     this.name = null;
     this.script = null;
     this.hints = null;
@@ -265,7 +265,7 @@ public final class ScriptReader implements Closeable {
 
   @Override
   public void close() throws IOException {
-    this.params.reset();
+    this.params.cleanup(null);
     this.name = null;
     this.script = null;
     this.hints = null;
