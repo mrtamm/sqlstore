@@ -22,13 +22,17 @@ import java.util.List;
 /**
  * A results container that stores and returns execution results in an <code>ArrayList</code>.
  */
-public final class ListResult implements Result {
+public final class ListResultsCollector implements ResultsCollector {
 
   private final List<Object> result = new ArrayList<>();
 
+  private Object value;
+
+  private boolean valueDefined;
+
   /**
    * {@inheritDoc}
-   * 
+   *
    * @return Class of {@link List}.
    */
   @Override
@@ -37,13 +41,34 @@ public final class ListResult implements Result {
   }
 
   @Override
-  public void addValue(Object value) {
-    this.result.add(value);
+  public void setRowValue(int columnIndex, Object value) {
+    if (columnIndex == 0) {
+      if (this.valueDefined) {
+        throw new IllegalStateException("Attempted to set the list row twice.");
+      }
+      this.valueDefined = true;
+      this.value = value;
+
+    } else {
+      throw new IllegalArgumentException("Expected column index 0, got: " + columnIndex);
+    }
   }
 
   @Override
-  public Object getLastValue() {
-    return this.result.get(this.result.size() - 1);
+  public Object getRowValue(int columnIndex) {
+    if (columnIndex != 0) {
+      throw new IllegalArgumentException("Expected column index 0, got: " + columnIndex);
+    }
+    return this.value;
+  }
+
+  @Override
+  public void rowCompleted() {
+    if (this.valueDefined) {
+      this.result.add(this.value);
+      this.value = null;
+      this.valueDefined = false;
+    }
   }
 
   @Override

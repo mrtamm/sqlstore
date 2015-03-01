@@ -41,16 +41,31 @@ public final class TypeNameParam extends Param {
 
   private final String name;
 
+  private final int pos;
+
   /**
-   * Initializes the parameter properties.
+   * Initializes the parameter properties of a named IN/UPDATE-parameter.
    *
    * @param javaType The Java type of this parameter value (mandatory).
    * @param sqlType SQL type of this parameter value (optional).
    * @param name The parameter name (mandatory).
    */
   public TypeNameParam(Class<?> javaType, Integer sqlType, String name) {
+    this(javaType, sqlType, name, -1);
+  }
+
+  /**
+   * Initializes the parameter properties of a named OUT-parameter.
+   *
+   * @param javaType The Java type of this parameter value (mandatory).
+   * @param sqlType SQL type of this parameter value (optional).
+   * @param name The parameter name (mandatory).
+   * @param pos Zero-based position is needed for named OUT-parameters to store the value correctly.
+   */
+  public TypeNameParam(Class<?> javaType, Integer sqlType, String name, int pos) {
     super(javaType, sqlType);
     this.name = name;
+    this.pos = pos;
   }
 
   /**
@@ -73,10 +88,10 @@ public final class TypeNameParam extends Param {
    * @param argIndex The index of the parameter to be used in error message to be more informative.
    */
   public void validate(Object value, int argIndex) {
-    if (value != null && !getJavaType().isAssignableFrom(value.getClass())) {
+    if (value != null && !supports(value.getClass())) {
       String msg = String.format("Script argument number %d type mismatch: expected %s, got %s",
           argIndex, getJavaType(), value.getClass().getName());
-      throw new RuntimeException(msg);
+      throw new RuntimeException(msg); // ScriptExecuteException
     }
   }
 
@@ -87,7 +102,11 @@ public final class TypeNameParam extends Param {
 
   @Override
   public void write(QueryContext ctx, Object value) {
-    ctx.updateVariable(this.name, value);
+    if (this.pos < 0) { // UPDATE-param
+      ctx.updateVariable(this.name, value);
+    } else { // OUT-param
+      ctx.getResultsCollector().setRowValue(this.pos, value);
+    }
   }
 
   /**
@@ -101,7 +120,11 @@ public final class TypeNameParam extends Param {
    */
   @Override
   public String toString() {
-    return super.toString() + " " + this.name;
+    String txt = super.toString() + " " + this.name;
+    if (this.pos >= 0) {
+      txt += " (result index: " + this.pos + ")";
+    }
+    return txt;
   }
 
 }

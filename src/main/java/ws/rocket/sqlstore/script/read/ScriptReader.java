@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.QueryHints;
 import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.params.ParamMode;
@@ -195,8 +196,8 @@ public final class ScriptReader implements Closeable {
       ParamsCategory category = this.reader.parseParamsType();
 
       if (parsedParamTypes.contains(category)) {
-        throw new RuntimeException("Duplicate parameters category on line " + this.reader.getLine()
-            + " and column " + column);
+        throw new ScriptSetupException("Duplicate parameters category on line %d and column %d.",
+            this.reader.getLine(), column);
       }
       parsedParamTypes.add(category);
 
@@ -211,7 +212,7 @@ public final class ScriptReader implements Closeable {
       } else if (ParamsCategory.HINT == category) {
         parseHintParams();
       } else {
-        throw new RuntimeException("Support for category " + category + " is not yet implemented.");
+        throw new ScriptSetupException("Support for category %s is not yet implemented.", category);
       }
 
       this.reader.requireNext(')');
@@ -318,7 +319,7 @@ public final class ScriptReader implements Closeable {
           String fieldName = this.reader.parseName("field");
           Integer sqlType = parseSqlType();
 
-          this.params.addBeanProp(fieldName, sqlType);
+          this.params.addOutParamBeanProp(fieldName, sqlType);
           this.reader.skipWsp();
         } while (this.reader.skipIfNext(','));
 

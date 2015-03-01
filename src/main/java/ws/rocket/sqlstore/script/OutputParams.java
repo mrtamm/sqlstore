@@ -17,14 +17,16 @@
 package ws.rocket.sqlstore.script;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import ws.rocket.sqlstore.result.ListResultsCollector;
+import ws.rocket.sqlstore.result.MapResultsCollector;
+import ws.rocket.sqlstore.result.ResultsCollector;
+import ws.rocket.sqlstore.result.VoidResultsCollector;
 import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.script.params.TypePropParam;
-import ws.rocket.sqlstore.result.ListResult;
-import ws.rocket.sqlstore.result.MapResult;
-import ws.rocket.sqlstore.result.Result;
-import ws.rocket.sqlstore.result.VoidResult;
 
 /**
  * A collection of parameters that are expected from the script output after execution. These are
@@ -37,7 +39,11 @@ public final class OutputParams {
    */
   public static final OutputParams EMPTY = new OutputParams(new TypeNameParam[0]);
 
-  private final Param[] params;
+  private final Class<?>[] types;
+
+  private final String description;
+
+  private final Map<String, TypeNameParam> namedParams;
 
   /**
    * Creates a new instance of output parameters. The created instance basically wraps given
@@ -50,7 +56,9 @@ public final class OutputParams {
     if (params == null) {
       throw new NullPointerException("OUT-parameters array must not be null");
     }
-    this.params = params;
+    this.description = composeDescription(params);
+    this.namedParams = initNamedParams(params);
+    this.types = getResultTypes(params);
   }
 
   /**
@@ -64,16 +72,7 @@ public final class OutputParams {
    * @return A matching named parameter instance, or null.
    */
   public TypeNameParam get(String name) {
-    TypeNameParam result = null;
-
-    for (Param param : params) {
-      if (param instanceof TypeNameParam && ((TypeNameParam) param).getName().equals(name)) {
-        result = (TypeNameParam) param;
-        break;
-      }
-    }
-
-    return result;
+    return this.namedParams != null ? this.namedParams.get(name) : null;
   }
 
   /**
@@ -85,23 +84,7 @@ public final class OutputParams {
    * @return A Boolean that is true when the script can return a List of values of given type.
    */
   public boolean supportsList(Class<?> type) {
-    boolean supports = false;
-
-    if (this.params.length > 0) {
-      List<Param> p = filterParams();
-
-      if (p.size() != 1) {
-        supports = false;
-      } else if (type == null) {
-        supports = true;
-      } else if (p.get(0) instanceof TypePropParam) {
-        supports = ((TypePropParam) p.get(0)).createsBean(type);
-      } else {
-        supports = type.isAssignableFrom(p.get(0).getJavaType());
-      }
-    }
-
-    return supports;
+    return this.types.length == 1 && (type == null || type.isAssignableFrom(this.types[0]));
   }
 
   /**
@@ -115,16 +98,9 @@ public final class OutputParams {
    * @return A Boolean that is true when the script can return a List of values of given type.
    */
   public boolean supportsMap(Class<?> typeKey, Class<?> typeValue) {
-    boolean supports = false;
-
-    if (this.params.length > 0) {
-      List<Param> p = filterParams();
-      return p.size() == 2
-          && (typeKey == null || typeKey.isAssignableFrom(p.get(0).getJavaType()))
-          && (typeValue == null || typeValue.isAssignableFrom(p.get(1).getJavaType()));
-    }
-
-    return supports;
+    return this.types.length == 2
+        && (typeKey == null || typeKey.isAssignableFrom(this.types[0]))
+        && (typeValue == null || typeValue.isAssignableFrom(this.types[1]));
   }
 
   /**
@@ -133,7 +109,7 @@ public final class OutputParams {
    * @return A boolean that is true when the script does not return any results.
    */
   public boolean isEmpty() {
-    return this.params.length == 0;
+    return this.types.length == 0;
   }
 
   /**
@@ -141,20 +117,18 @@ public final class OutputParams {
    * script does not return back any results, this method will provide a results instance that will
    * throw an exception when one attempts to add a value to it.
    *
-   * @return A new instance of for storing query results.
+   * @return A new instance of results collector for storing query results.
    */
-  public Result createResultContainer() {
-    Result result;
+  public ResultsCollector createResultsCollector() {
+    ResultsCollector result;
 
     if (isEmpty()) {
-      result = new VoidResult();
+      result = VoidResultsCollector.INSTANCE;
     } else {
-      List<Param> p = filterParams();
-
-      if (p.size() == 1) {
-        result = new ListResult();
-      } else if (p.size() == 2) {
-        result = new MapResult();
+      if (this.types.length == 1) {
+        result = new ListResultsCollector();
+      } else if (this.types.length == 2) {
+        result = new MapResultsCollector();
       } else {
         throw new IllegalStateException("A query is not allowed to return more than two "
             + "objects per row");
@@ -174,15 +148,50 @@ public final class OutputParams {
    */
   @Override
   public String toString() {
-    if (this.params.length == 0) {
+    return this.description;
+  }
+
+  // Output parameters may contain TypePropParam's (properties of a type), which evaluate to the
+  // properties of the same bean. The bean instance is created when evaluating the first property in
+  // the list (TypePropParam method reports 'true'). Other TypePropParam properties need to be
+  // ignored when determining the actual amount of returned objects.
+  private Class<?>[] getResultTypes(Param[] params) {
+    List<Class<?>> result = new ArrayList<>(2);
+    int resultIndex = -1;
+
+    for (Param p : params) {
+      if (p instanceof TypePropParam) {
+        int paramResultIndex = ((TypePropParam) p).getResultParamIndex();
+        if (paramResultIndex == resultIndex) {
+          continue;
+        }
+
+        resultIndex = paramResultIndex;
+        result.add(((TypePropParam) p).getResultBeanType());
+      } else {
+        resultIndex++;
+        result.add(p.getJavaType());
+      }
+    }
+
+    if (resultIndex > 1) {
+      throw new IllegalStateException("Currently up to 2 objects can be returned for query results "
+          + "per row; however, detected " + (resultIndex + 1) + " result parameters with these: "
+          + this.description);
+    }
+    return result.toArray(new Class<?>[resultIndex + 1]);
+  }
+
+  private static String composeDescription(Param[] params) {
+    if (params.length == 0) {
       return "";
     }
 
-    StringBuilder sb = new StringBuilder(this.params.length * 16);
+    StringBuilder sb = new StringBuilder(params.length * 16);
     sb.append("OUT(");
 
     boolean first = true;
-    for (Param param : this.params) {
+    for (Param param : params) {
       if (!first) {
         sb.append(", ");
       }
@@ -194,17 +203,19 @@ public final class OutputParams {
     return sb.append(") ").toString();
   }
 
-  // Output parameters may contain TypePropParam's (properties of a type), which evaluate to the
-  // properties of the same bean. The bean instance is created when evaluating the first property in
-  // the list (TypePropParam method reports 'true'). Other TypePropParam properties need to be
-  // ignored when determining the actual amount of returned objects.
-  private List<Param> filterParams() {
-    List<Param> result = new ArrayList<>(this.params.length);
-    for (Param p : this.params) {
-      if (!(p instanceof TypePropParam) || ((TypePropParam) p).createsBean()) {
-        result.add(p);
+  private static Map<String, TypeNameParam> initNamedParams(Param[] params) {
+    Map<String, TypeNameParam> result = null;
+
+    for (Param param : params) {
+      if (param instanceof TypeNameParam) {
+        if (result == null) {
+          result = new HashMap<>(params.length);
+        }
+
+        result.put(((TypeNameParam) param).getName(), (TypeNameParam) param);
       }
     }
+
     return result;
   }
 

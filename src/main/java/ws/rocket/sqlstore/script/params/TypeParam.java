@@ -25,14 +25,18 @@ import ws.rocket.sqlstore.execute.QueryContext;
  */
 public final class TypeParam extends Param {
 
+  private final int resultParamIndex;
+
   /**
    * Initializes the parameter properties.
    *
    * @param javaType The Java type of this parameter value (mandatory).
    * @param sqlType SQL type of this parameter value (mandatory).
+   * @param resultParamIndex The zero-based column index for storing the retrieved value.
    */
-  public TypeParam(Class<?> javaType, int sqlType) {
+  public TypeParam(Class<?> javaType, int sqlType, int resultParamIndex) {
     super(javaType, sqlType);
+    this.resultParamIndex = resultParamIndex;
   }
 
   @Override
@@ -42,7 +46,7 @@ public final class TypeParam extends Param {
 
   @Override
   public void write(QueryContext ctx, Object value) {
-    ctx.pushResultItem(value);
+    ctx.getResultsCollector().setRowValue(this.resultParamIndex, value);
   }
 
 }

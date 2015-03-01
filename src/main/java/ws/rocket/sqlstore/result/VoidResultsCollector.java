@@ -21,11 +21,17 @@ import ws.rocket.sqlstore.ScriptExecuteException;
 /**
  * A results container that checks that no result item is returned from a script execution.
  */
-public final class VoidResult implements Result {
+public final class VoidResultsCollector implements ResultsCollector {
+
+  /**
+   * Since <code>VoidResultsCollector</code> does not have any instance data, it's safe to use this
+   * global instance.
+   */
+  public static final VoidResultsCollector INSTANCE = new VoidResultsCollector();
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @return Class of {@link Void}.
    */
   @Override
@@ -33,19 +39,18 @@ public final class VoidResult implements Result {
     return Void.class;
   }
 
-  /**
-   * Always throws a runtime exception as this results container expects no results.
-   * 
-   * @param value (Not used.)
-   */
   @Override
-  public void addValue(Object value) {
+  public void setRowValue(int columnIndex, Object value) {
     throw new ScriptExecuteException("Expected no results from query");
   }
 
   @Override
-  public Object getLastValue() {
+  public Object getRowValue(int columnIndex) {
     return null;
+  }
+
+  @Override
+  public void rowCompleted() {
   }
 
   @Override
@@ -55,7 +60,7 @@ public final class VoidResult implements Result {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @return Always <code>null</code>.
    */
   @Override

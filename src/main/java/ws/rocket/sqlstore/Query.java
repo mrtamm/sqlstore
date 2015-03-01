@@ -65,7 +65,7 @@ public final class Query {
    */
   Query(ConnectionManager connectionManager, QueryContext ctx) {
     if (connectionManager == null || ctx == null) {
-      throw new NullPointerException("A parameter is undefined");
+      throw new NullPointerException("Both connection manager and query context must be defined");
     }
     this.connectionManager = connectionManager;
     this.ctx = ctx;
@@ -161,12 +161,12 @@ public final class Query {
 
   @SuppressWarnings("unchecked")
   private <T> List<T> extractList(Class<T> valueType) {
-    return (List<T>) this.ctx.getResult();
+    return (List<T>) this.ctx.getResultsCollector().getResult();
   }
 
   @SuppressWarnings("unchecked")
   private <K, V> Map<K, V> extractMap(Class<K> keyType, Class<V> valueType) {
-    return (Map<K, V>) this.ctx.getResult();
+    return (Map<K, V>) this.ctx.getResultsCollector().getResult();
   }
 
   private void checkSupportsListResult(Class<?> javaType) {

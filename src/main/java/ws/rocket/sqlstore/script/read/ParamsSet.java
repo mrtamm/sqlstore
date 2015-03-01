@@ -64,6 +64,8 @@ public final class ParamsSet {
 
   private OutputParams outputParams;
 
+  private int outParamIndex;
+
   /**
    * Validates that all parameters of the script were actually used, and resets all internally
    * contained data so that this class instance could be reused for handling the parameters of next
@@ -94,6 +96,7 @@ public final class ParamsSet {
     this.outFromKeys = false;
     this.inputParams = null;
     this.outputParams = null;
+    this.outParamIndex = 0;
   }
 
   /**
@@ -140,52 +143,31 @@ public final class ParamsSet {
    * @param paramName A name for the parameter (optional)
    *
    * @see #setOutFromKeys(boolean)
-   * @see #addBeanProp(java.lang.String, java.lang.Integer)
+   * @see #addOutParamBeanProp(java.lang.String, java.lang.Integer)
    */
   public void addOutParam(Class<?> javaType, Integer sqlType, String paramName) {
     if (paramName != null) {
       if (this.outFromKeys) {
-        throw new RuntimeException("OUT-params with names not allowed with KEYS-clause");
+        throw new ScriptSetupException("OUT-params with names not allowed with KEYS-clause");
       } else if (!this.outTypeParams.isEmpty()) {
-        throw new RuntimeException("OUT-params with names and without names cannot be mixed");
+        throw new ScriptSetupException("OUT-params with names and without names cannot be mixed");
       }
 
       checkParamName(paramName);
-      this.outVarParams.add(new TypeNameParam(javaType, sqlType, paramName));
+
+      this.outVarParams.add(new TypeNameParam(javaType, sqlType, paramName, this.outParamIndex));
 
     } else {
       if (!this.outVarParams.isEmpty()) {
-        throw new RuntimeException("OUT-params with names and without names cannot be mixed");
+        throw new ScriptSetupException("OUT-params with names and without names cannot be mixed");
       }
 
-      TypeParam param = new TypeParam(javaType, getSqlType(javaType, sqlType));
+      TypeParam param = new TypeParam(javaType, getSqlType(javaType, sqlType), this.outParamIndex);
       this.outTypeParams.add(param);
       addResultParam(param, this.outFromKeys);
     }
-  }
 
-  /**
-   * Informs that following OUT-parameters are the properties of this bean. Definitely unregister
-   * the bean type after the properties have been registered.
-   *
-   * @param beanType The bean type to register.
-   *
-   * @see #addBeanProp(java.lang.String, java.lang.Integer)
-   * @see #unregisterBean()
-   */
-  public void registerBean(Class<?> beanType) {
-    this.propParamBeanType = beanType;
-    this.beanFirstProp = true;
-  }
-
-  /**
-   * Marks the end of bean properties of previously registered bean.
-   *
-   * @see #registerBean(java.lang.Class)
-   */
-  public void unregisterBean() {
-    this.propParamBeanType = null;
-    this.beanFirstProp = false;
+    this.outParamIndex++;
   }
 
   /**
@@ -195,13 +177,13 @@ public final class ParamsSet {
    * @param fieldName The property name (will be validated).
    * @param sqlType Optional SQL type when provided in the SQL file next to the property name.
    */
-  public void addBeanProp(String fieldName, Integer sqlType) {
+  public void addOutParamBeanProp(String fieldName, Integer sqlType) {
     TypePropParam param = TypePropParam.create(this.propParamBeanType, fieldName, sqlType,
-        this.beanFirstProp);
+        this.outParamIndex);
 
     if (this.beanFirstProp) {
       if (!this.outVarParams.isEmpty()) {
-        throw new RuntimeException("OUT-params with names and without names cannot be mixed");
+        throw new ScriptSetupException("OUT-params with names and without names cannot be mixed");
       }
 
       this.outTypeParams.add(param);
@@ -223,8 +205,8 @@ public final class ParamsSet {
   public void addUpdateParam(String paramName, String property, boolean keys) {
     TypeNameParam param = getParamByName(paramName, this.inVarParams);
     if (param == null) {
-      throw new RuntimeException(String.format("There is no parameter with name '%s' "
-          + "defined on this script", paramName));
+      throw new ScriptSetupException("There is no parameter with name '%s' defined on this script",
+          paramName);
     }
 
     Expression expression = Expression.create(param, Collections.singletonList(property), null);
@@ -247,9 +229,9 @@ public final class ParamsSet {
 
     if (param == null) {
       if (mode == ParamMode.IN || mode == ParamMode.INOUT) {
-        throw new RuntimeException(String.format("Expression referring to parameter '%s' was "
-            + "specified as %s-parameter but the parameter is not among input parameters.",
-            varName, mode.name()));
+        throw new ScriptSetupException("Expression referring to parameter '%s' was "
+            + "specified as %s-parameter but the parameter is not among IN-parameters.",
+            varName, mode.name());
       }
 
       param = this.outputParams.get(varName);
@@ -261,8 +243,8 @@ public final class ParamsSet {
     }
 
     if (param == null) {
-      throw new RuntimeException(String.format("There is no parameter with name '%s' "
-          + "defined on this script", varName));
+      throw new ScriptSetupException("There is no parameter with name '%s' defined on this script",
+          varName);
     }
 
     QueryParam queryParam;
@@ -287,6 +269,31 @@ public final class ParamsSet {
     }
 
     this.queryParams.add(queryParam);
+  }
+
+  /**
+   * Informs that following OUT-parameters are the properties of this bean. Definitely unregister
+   * the bean type after the properties have been registered.
+   *
+   * @param beanType The bean type to register.
+   *
+   * @see #addOutParamBeanProp(java.lang.String, java.lang.Integer)
+   * @see #unregisterBean()
+   */
+  public void registerBean(Class<?> beanType) {
+    this.propParamBeanType = beanType;
+    this.beanFirstProp = true;
+  }
+
+  /**
+   * Marks the end of bean properties of previously registered bean.
+   *
+   * @see #registerBean(java.lang.Class)
+   */
+  public void unregisterBean() {
+    this.propParamBeanType = null;
+    this.beanFirstProp = false;
+    this.outParamIndex++;
   }
 
   /**
@@ -394,11 +401,9 @@ public final class ParamsSet {
   }
 
   private void checkParamName(String name) {
-    if (getParamByName(name, this.inVarParams) != null) {
-      throw new RuntimeException("Another parameter with name '" + name + "' is already defined");
-    }
-    if (getParamByName(name, this.outVarParams) != null) {
-      throw new RuntimeException("Another parameter with name '" + name + "' is already defined");
+    if (getParamByName(name, this.inVarParams) != null
+        || getParamByName(name, this.outVarParams) != null) {
+      throw new ScriptSetupException("Another parameter with name '%s' is already defined", name);
     }
   }
 

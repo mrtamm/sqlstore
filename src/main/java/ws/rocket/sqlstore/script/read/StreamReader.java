@@ -24,6 +24,7 @@ import java.lang.reflect.Modifier;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.BeanUtil;
 
 /**
@@ -544,7 +545,7 @@ public final class StreamReader implements Closeable {
   }
 
   private void fail(String reason) {
-    throw new RuntimeException(reason + " on line " + this.line + " and column " + this.column);
+    throw new ScriptSetupException("%s on line %d and column %d.", reason, this.line, this.column);
   }
 
   private String parseClassName() throws IOException {
@@ -558,7 +559,6 @@ public final class StreamReader implements Closeable {
 
     if (this.buffer.length() == 0) {
       fail("Expected a full name of a Java class.");
-      throw new RuntimeException();
     }
 
     return this.buffer.toString();

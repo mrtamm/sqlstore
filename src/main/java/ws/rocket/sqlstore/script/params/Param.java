@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package ws.rocket.sqlstore.script.params;
 
 import ws.rocket.sqlstore.execute.QueryContext;
@@ -68,6 +69,18 @@ public abstract class Param {
    */
   public final Integer getSqlType() {
     return this.sqlType;
+  }
+
+  /**
+   * Informs whether the value of this parameter is assignable to a variable of given Java type.
+   * When the given Java type is null, the result will be false.
+   *
+   * @param javaType The type to check against, may be null.
+   * @return A Boolean that is true when the values of this parameter are assignable to given
+   * variables of given type.
+   */
+  public final boolean supports(Class<?> javaType) {
+    return javaType != null && javaType.isAssignableFrom(this.javaType);
   }
 
   /**

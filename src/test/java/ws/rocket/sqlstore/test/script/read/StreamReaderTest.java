@@ -18,8 +18,8 @@ package ws.rocket.sqlstore.test.script.read;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import org.testng.annotations.Test;
+import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.read.ParamsCategory;
 import ws.rocket.sqlstore.script.read.StreamReader;
 
@@ -35,12 +35,8 @@ import static org.testng.Assert.assertTrue;
 public final class StreamReaderTest {
 
   private StreamReader createReader(String input) throws IOException {
-    try {
-      byte[] bytes = input.getBytes("UTF-8");
-      return new StreamReader(new ByteArrayInputStream(bytes));
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException("UTF-8 is not supported?", e);
-    }
+    byte[] bytes = input.getBytes("UTF-8");
+    return new StreamReader(new ByteArrayInputStream(bytes));
   }
 
   public void shouldBeEmpty() throws IOException {
@@ -83,7 +79,7 @@ public final class StreamReaderTest {
     assertEquals(result, testValue);
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
+  @Test(expectedExceptions = ScriptSetupException.class)
   public void shouldParseAlphaNumFail() throws IOException {
     createReader("!314AlphaNumeRIC").parseAlphaNum();
   }
@@ -93,7 +89,7 @@ public final class StreamReaderTest {
     assertEquals(result, "_abcName");
   }
 
-  @Test(expectedExceptions = RuntimeException.class)
+  @Test(expectedExceptions = ScriptSetupException.class)
   public void shouldParseNameFail() throws IOException {
     createReader(" 12312").parseName("test");
   }

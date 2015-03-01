@@ -221,7 +221,7 @@ public final class BeanUtil {
 
       return result;
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-      throw new ScriptSetupException(msgFailed(inst, reader), e);
+      throw new ScriptSetupException(e, "Failed to call [%s] on [%s].", reader, inst);
     }
   }
 
@@ -245,21 +245,13 @@ public final class BeanUtil {
             + "property value. Got: " + writer);
       }
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-      throw new ScriptSetupException(msgFailed(inst, writer, value), e);
+      throw new ScriptSetupException(e, "Failed to call [%s] on [%s] for storing value [%s].",
+          writer, inst, value);
     }
   }
 
   private static String propToTitleCase(String property) {
     return Character.toUpperCase(property.charAt(0)) + property.substring(1);
-  }
-
-  private static String msgFailed(Object inst, AccessibleObject reader) {
-    return String.format("Failed to call [%s] on [%s].", reader, inst);
-  }
-
-  private static String msgFailed(Object inst, AccessibleObject writer, Object value) {
-    return String.format("Failed to call [%s] on [%s] for storing value [%s].",
-        writer, inst, value);
   }
 
   private BeanUtil() {

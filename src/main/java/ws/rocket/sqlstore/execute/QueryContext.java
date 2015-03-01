@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package ws.rocket.sqlstore.execute;
 
 import java.sql.CallableStatement;
@@ -21,11 +22,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
+import ws.rocket.sqlstore.result.ResultsCollector;
 import ws.rocket.sqlstore.script.QueryHints;
 import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.params.Param;
-import ws.rocket.sqlstore.result.Result;
 import ws.rocket.sqlstore.types.Bindings;
 
 /**
@@ -42,7 +43,7 @@ public final class QueryContext {
 
   private final Map<String, Object> variables;
 
-  private final Result result;
+  private final ResultsCollector resultsCollector;
 
   private int updateCount;
 
@@ -57,7 +58,7 @@ public final class QueryContext {
   public QueryContext(Script script, Object[] args) {
     this.script = script;
     this.variables = script.getInputParams().bind(args);
-    this.result = script.getOutputParams().createResultContainer();
+    this.resultsCollector = script.getOutputParams().createResultsCollector();
   }
 
   /**
@@ -291,38 +292,19 @@ public final class QueryContext {
     for (Param param : this.script.getResultsParams()) {
       binder.readParam(this, param, row, index++);
     }
+    this.resultsCollector.rowCompleted();
   }
 
   /**
-   * Appends a value to the results object.
+   * Provides the results collector instance used for collecting returnable results after query
+   * execution. When the query is not supposed to return anything, the results collector will be a
+   * special instance, which does not return anything (a void). Therefore, the results collector is
+   * always null-safe.
    *
-   * @param value The value to append. May be null.
+   * @return A results collector instance.
    */
-  public void pushResultItem(Object value) {
-    this.result.addValue(value);
-  }
-
-  /**
-   * Retrieves the last value that was added to results.
-   * <p>
-   * This method should be used only in rare cases, such as when the state of a value, that was
-   * stored in results, needs to be updated.
-   * <p>
-   * The method may return null when no value has been added to results.
-   *
-   * @return The last value that was added to results.
-   */
-  public Object getLastResultItem() {
-    return this.result.getLastValue();
-  }
-
-  /**
-   * Provides the results of the current script execution.
-   *
-   * @return The query results. Null when query is not expected to return any results.
-   */
-  public Object getResult() {
-    return this.result.getResult();
+  public ResultsCollector getResultsCollector() {
+    return this.resultsCollector;
   }
 
 }

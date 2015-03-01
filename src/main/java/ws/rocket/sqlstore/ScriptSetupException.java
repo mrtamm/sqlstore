@@ -27,19 +27,34 @@ public final class ScriptSetupException extends RuntimeException {
    * Creates a new instance for wrapping the explicit SQL exception.
    *
    * @param message Message describing the problem.
+   * @param msgParams Optional parameters for the message.
+   *
+   * @see String#format(java.lang.String, java.lang.Object...)
    */
-  public ScriptSetupException(String message) {
-    super(message);
+  public ScriptSetupException(String message, Object... msgParams) {
+    super(fmt(message, msgParams));
   }
 
   /**
    * Creates a new instance for wrapping the explicit SQL exception.
    *
-   * @param message Message describing the problem.
    * @param cause The original exception.
+   * @param message Message describing the problem.
+   * @param msgParams Optional parameters for the message.
+   *
+   * @see String#format(java.lang.String, java.lang.Object...)
    */
-  public ScriptSetupException(String message, Throwable cause) {
-    super(message, cause);
+  public ScriptSetupException(Throwable cause, String message, Object... msgParams) {
+    super(fmt(message, msgParams), cause);
+  }
+
+  private static String fmt(String msg, Object[] params) {
+    if (msg == null) {
+      msg = "[no error description was given]";
+    } else if (params != null && params.length > 0) {
+      msg = String.format(msg, params);
+    }
+    return msg;
   }
 
 }

@@ -48,12 +48,12 @@ public final class TypePropParam extends Param {
    * @param property The property name of the bean where the value will be stored. Also determines
    * Java type of this parameter.
    * @param sqlType Optional SQL type for this property to override default.
-   * @param firstParam Is this parameter the first of the bean properties. Determines if this
-   * parameter also creates the bean when the value is to be stored.
+   * @param initParamIndex The zero-based index value of the results (OUT) parameter where the value
+   * will be stored in a property.
    * @return A new parameter instance.
    */
   public static TypePropParam create(Class<?> beanType, String property, Integer sqlType,
-      boolean firstParam) {
+      int initParamIndex) {
     AccessibleObject writer = BeanUtil.requireWriter(beanType, property);
 
     Class<?> propertyType;
@@ -64,21 +64,21 @@ public final class TypePropParam extends Param {
     }
     sqlType = Bindings.getInstance().confirmTypes(propertyType, sqlType);
 
-    return new TypePropParam(beanType, writer, propertyType, sqlType, firstParam);
+    return new TypePropParam(beanType, writer, propertyType, sqlType, initParamIndex);
   }
 
   private final Class<?> beanType;
 
   private final AccessibleObject writer;
 
-  private final boolean createBean;
+  private final int resultParamIndex;
 
   private TypePropParam(Class<?> beanType, AccessibleObject writer, Class<?> javaType,
-      int sqlType, boolean firstProp) {
+      int sqlType, int resultParamIndex) {
     super(javaType, sqlType);
     this.beanType = beanType;
     this.writer = writer;
-    this.createBean = firstProp;
+    this.resultParamIndex = resultParamIndex;
   }
 
   @Override
@@ -88,39 +88,36 @@ public final class TypePropParam extends Param {
 
   @Override
   public void write(QueryContext ctx, Object value) {
-    Object instance;
+    if (value != null) {
+      Object instance = ctx.getResultsCollector().getRowValue(this.resultParamIndex);
 
-    if (this.createBean) {
-      instance = BeanUtil.newInstance(this.beanType);
-      ctx.pushResultItem(instance);
-    } else {
-      instance = ctx.getLastResultItem();
+      if (instance == null) {
+        instance = BeanUtil.newInstance(this.beanType);
+        ctx.getResultsCollector().setRowValue(this.resultParamIndex, instance);
+      }
+
+      BeanUtil.write(instance, this.writer, value);
     }
-
-    BeanUtil.write(instance, this.writer, value);
   }
 
   /**
-   * Informs whether parameter also creates the bean instance and stores it in result values. This
-   * normally happens when the property if the first among the list of properties for storing
-   * result-set values.
+   * Provides the zero-based index value of the results (OUT) parameter where the value will be
+   * stored in a property.
    *
-   * @return A Boolean that is true when this parameter creates a new instance of bean.
+   * @return An integer, normally 0 or 1.
    */
-  public boolean createsBean() {
-    return this.createBean;
+  public int getResultParamIndex() {
+    return this.resultParamIndex;
   }
 
   /**
-   * Informs whether parameter also creates the bean instance of given type and stores it in result
-   * values. This normally happens when the property if the first among the list of properties for
-   * storing result-set values.
+   * Provides the Java type of the results (OUT) parameter where the value will be stored in a
+   * property.
    *
-   * @param expectedType The expected type of created bean.
-   * @return A Boolean that is true when this parameter creates a new instance of bean given type.
+   * @return A Java class.
    */
-  public boolean createsBean(Class<?> expectedType) {
-    return this.createBean && expectedType != null && expectedType.isAssignableFrom(this.beanType);
+  public Class<?> getResultBeanType() {
+    return this.beanType;
   }
 
   /**

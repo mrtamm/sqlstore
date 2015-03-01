@@ -37,7 +37,7 @@ package ws.rocket.sqlstore.result;
  * result types. For now, all the choices are hard-coded, and this interface serves as the common
  * API of the implementation classes.
  */
-public interface Result {
+public interface ResultsCollector {
 
   /**
    * The kind of collection class that will be returned by {@link #getResult()}. The returned type
@@ -49,21 +49,43 @@ public interface Result {
   Class<?> getType();
 
   /**
-   * Adds a value to the results.
+   * Sets a value for current row.
+   * <p>
+   * ResultsCollector containers may support multiple Java objects per row, such as
+   * {@link MapResultsCollector}, which supports two values per row (key and its value). Therefore,
+   * column index is needed to show the position where the value needs to be stored (e.g. for
+   * <code>MapResultsCollector</code>, index 0 stores the value as the key of the map, 1 as the
+   * corresponding map value). ResultsCollector container must validate the column index to spot
+   * suspicious behaviour. That includes storing a value for same column multiple times.
    *
+   * @param columnIndex Zero-based index indicating the column where the value needs to be stored.
    * @param value The value to add.
    */
-  void addValue(Object value);
+  void setRowValue(int columnIndex, Object value);
 
   /**
-   * Provides the last registered value. May return null when such value is undefined.
-   * 
-   * @return The previously registered value, or null.
+   * Provides the last registered value for current row. May return null when such value is
+   * undefined. The value returned is the same value that was set using
+   * {@link #setRowValue(int, java.lang.Object)} in the most recent call.
+   * <p>
+   * When no value has been registered for current row at given column index, the result will be
+   * null.
+   *
+   * @param columnIndex Zero-based index indicating the column from where the value needs to be
+   * returned.
+   * @return The previously registered value in given column index, or null.
    */
-  Object getLastValue();
+  Object getRowValue(int columnIndex);
 
   /**
-   * Informs whether at least one result has been added or not.
+   * Sends a signal to this result container that the current result-set row has been processed. The
+   * implementation can safely prepare for the next row.
+   */
+  void rowCompleted();
+
+  /**
+   * Informs whether at least one result has been added or not. This means that the
+   * {@link #rowCompleted()} method has been called at least once to be not empty.
    *
    * @return A Boolean that is true when no result item has been added to this container instance.
    */
