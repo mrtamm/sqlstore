@@ -49,8 +49,7 @@ public final class DateMapper implements ValueMapper {
     int result = providedType != null ? providedType : Types.TIMESTAMP;
 
     if (result != Types.TIMESTAMP && result != Types.DATE && result != Types.TIME) {
-      throw new ScriptSetupException("Cannot use SQL type #" + providedType
-          + " with java.util.Date.");
+      throw new ScriptSetupException("Cannot use SQL type #%d with java.util.Date.", providedType);
     }
 
     return result;

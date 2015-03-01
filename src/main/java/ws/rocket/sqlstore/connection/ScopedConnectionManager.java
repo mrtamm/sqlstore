@@ -77,7 +77,7 @@ public final class ScopedConnectionManager implements ConnectionManager {
         this.connection = this.connectionManager.obtain(false);
         this.connection.setAutoCommit(false);
       } catch (SQLException e) {
-        throw new ScriptExecuteException("Failed to turn off auto-commit", e);
+        throw new ScriptExecuteException(e, "Failed to turn off auto-commit");
       }
     }
 
@@ -87,7 +87,7 @@ public final class ScopedConnectionManager implements ConnectionManager {
         LOG.trace("Began a scoped session by creating a savepoint.");
       } catch (SQLException e) {
         this.savepoint = null;
-        throw new ScriptExecuteException("Failed to create a savepoint", e);
+        throw new ScriptExecuteException(e, "Failed to create a savepoint");
       }
     }
 
@@ -113,7 +113,7 @@ public final class ScopedConnectionManager implements ConnectionManager {
         this.savepoint = this.connection.setSavepoint();
         LOG.trace("Scoped session commit by renewing current savepoint.");
       } catch (SQLException e) {
-        throw new ScriptExecuteException("Failed to release previous savepoint", e);
+        throw new ScriptExecuteException(e, "Failed to release previous savepoint");
       }
     }
   }
@@ -136,7 +136,7 @@ public final class ScopedConnectionManager implements ConnectionManager {
         this.connection.rollback(this.savepoint);
         LOG.trace("Scoped session rollback by discarding changes after current savepoint.");
       } catch (SQLException e) {
-        throw new ScriptExecuteException("Failed to rollback to a savepoint", e);
+        throw new ScriptExecuteException(e, "Failed to rollback to a savepoint");
       }
     }
   }
@@ -153,7 +153,7 @@ public final class ScopedConnectionManager implements ConnectionManager {
         this.connection.releaseSavepoint(this.savepoint);
         LOG.trace("Scoped session released by releasing current savepoint.");
       } catch (SQLException e) {
-        throw new ScriptExecuteException("Failed to release current savepoint", e);
+        throw new ScriptExecuteException(e, "Failed to release current savepoint");
       } finally {
         this.savepoint = null;
       }

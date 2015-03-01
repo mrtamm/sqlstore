@@ -54,8 +54,8 @@ public final class BooleanMapper implements ValueMapper {
         && providedType != Types.DECIMAL && providedType != Types.NUMERIC
         && providedType != Types.INTEGER && providedType != Types.SMALLINT
         && providedType != Types.TINYINT) {
-      throw new ScriptSetupException("Boolean value binding for SQL type #" + providedType
-          + " is not supported.");
+      throw new ScriptSetupException("Boolean value binding for SQL type #%d is not supported.",
+          providedType);
     }
 
     return providedType;

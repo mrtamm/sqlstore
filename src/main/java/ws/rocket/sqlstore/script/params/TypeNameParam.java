@@ -16,6 +16,7 @@
 
 package ws.rocket.sqlstore.script.params;
 
+import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.execute.QueryContext;
 
 /**
@@ -41,7 +42,7 @@ public final class TypeNameParam extends Param {
 
   private final String name;
 
-  private final int pos;
+  private final int resultParamIndex;
 
   /**
    * Initializes the parameter properties of a named IN/UPDATE-parameter.
@@ -60,12 +61,13 @@ public final class TypeNameParam extends Param {
    * @param javaType The Java type of this parameter value (mandatory).
    * @param sqlType SQL type of this parameter value (optional).
    * @param name The parameter name (mandatory).
-   * @param pos Zero-based position is needed for named OUT-parameters to store the value correctly.
+   * @param resultParamIndex Zero-based position is needed for named OUT-parameters to store the
+   * value correctly.
    */
-  public TypeNameParam(Class<?> javaType, Integer sqlType, String name, int pos) {
+  public TypeNameParam(Class<?> javaType, Integer sqlType, String name, int resultParamIndex) {
     super(javaType, sqlType);
     this.name = name;
-    this.pos = pos;
+    this.resultParamIndex = resultParamIndex;
   }
 
   /**
@@ -89,9 +91,9 @@ public final class TypeNameParam extends Param {
    */
   public void validate(Object value, int argIndex) {
     if (value != null && !supports(value.getClass())) {
-      String msg = String.format("Script argument number %d type mismatch: expected %s, got %s",
+      throw new ScriptExecuteException(
+          "Script argument with index %d type mismatch: expected %s, got %s",
           argIndex, getJavaType(), value.getClass().getName());
-      throw new RuntimeException(msg); // ScriptExecuteException
     }
   }
 
@@ -102,10 +104,10 @@ public final class TypeNameParam extends Param {
 
   @Override
   public void write(QueryContext ctx, Object value) {
-    if (this.pos < 0) { // UPDATE-param
+    if (this.resultParamIndex < 0) { // UPDATE-param
       ctx.updateVariable(this.name, value);
     } else { // OUT-param
-      ctx.getResultsCollector().setRowValue(this.pos, value);
+      ctx.getResultsCollector().setRowValue(this.resultParamIndex, value);
     }
   }
 
@@ -121,8 +123,8 @@ public final class TypeNameParam extends Param {
   @Override
   public String toString() {
     String txt = super.toString() + " " + this.name;
-    if (this.pos >= 0) {
-      txt += " (result index: " + this.pos + ")";
+    if (this.resultParamIndex >= 0) {
+      txt += " (result index: " + this.resultParamIndex + ")";
     }
     return txt;
   }

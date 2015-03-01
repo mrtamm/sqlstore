@@ -78,13 +78,13 @@ public final class ParamsSet {
   public void cleanup(Script script) {
     if (script != null && !this.inVarParams.isEmpty()) {
       throw new ScriptSetupException(
-          String.format("Script [%s] (line %d): following IN-parameters were not used: %s",
-              script.getName(), script.getLine(), this.inVarParams.toString()));
+          "Script [%s] (line %d): following IN-parameters were not used: %s",
+          script.getName(), script.getLine(), this.inVarParams.toString());
 
     } else if (script != null && !this.outVarParams.isEmpty()) {
       throw new ScriptSetupException(
-          String.format("Script [%s] (line %d): following OUT-parameters were not used: %s",
-              script.getName(), script.getLine(), this.outVarParams.toString()));
+          "Script [%s] (line %d): following OUT-parameters were not used: %s",
+          script.getName(), script.getLine(), this.outVarParams.toString());
     }
 
     this.inVarParams.clear();

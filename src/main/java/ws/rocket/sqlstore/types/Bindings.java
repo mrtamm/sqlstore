@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package ws.rocket.sqlstore.types;
 
 import java.sql.CallableStatement;
@@ -21,9 +22,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import ws.rocket.sqlstore.ScriptSetupException;
-import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
+import ws.rocket.sqlstore.script.params.Param;
 
 /**
  * A registry of {@link ValueMapper}s that is used by SqlStore at runtime in order to set and later
@@ -189,8 +190,8 @@ public final class Bindings {
     }
 
     if (result == null) {
-      throw new ScriptSetupException("Value of " + type.getName()
-          + " is not supported (no value handler was found that would support it).");
+      throw new ScriptSetupException("Value of %s is not supported (no value handler was found "
+          + "that would support it).", type.getName());
     }
 
     return result;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package ws.rocket.sqlstore.script;
 
 import java.util.Collections;
@@ -84,8 +85,8 @@ public final class InputParams {
    */
   public Map<String, Object> bind(Object[] args) {
     if (args.length != this.params.length) {
-      throw new ScriptExecuteException(String.format("Script input arguments amount mismatch: "
-          + "expected %d, got %d", this.params.length, args.length));
+      throw new ScriptExecuteException("Script input arguments amount mismatch: "
+          + "expected %d, got %d", this.params.length, args.length);
     }
 
     Map<String, Object> context;

@@ -33,30 +33,33 @@ public final class ScriptExecuteException extends RuntimeException {
   /**
    * Constructor for problems that occurred before a script and/or its parameters were determined.
    *
-   * @param message A message describing the problem.
+   * @param message Message describing the problem.
+   * @param msgParams Optional parameters for the message.
    */
-  public ScriptExecuteException(String message) {
-    this(message, null, null);
+  public ScriptExecuteException(String message, Object... msgParams) {
+    this(null, null, message, msgParams);
   }
 
   /**
    * Constructor for problems that occurred after a script and its parameters were determined.
    *
-   * @param message A message describing the problem.
    * @param context The current query context.
+   * @param message Message describing the problem.
+   * @param msgParams Optional parameters for the message.
    */
-  public ScriptExecuteException(String message, QueryContext context) {
-    this(message, null, context);
+  public ScriptExecuteException(QueryContext context, String message, Object... msgParams) {
+    this(null, context, message, msgParams);
   }
 
   /**
    * Constructor for problems that are related to a database connection.
    *
-   * @param message A message describing the problem.
    * @param exception A database/connection exception.
+   * @param message Message describing the problem.
+   * @param msgParams Optional parameters for the message.
    */
-  public ScriptExecuteException(String message, SQLException exception) {
-    this(message, exception, null);
+  public ScriptExecuteException(SQLException exception, String message, Object... msgParams) {
+    this(exception, null, message, msgParams);
   }
 
   /**
@@ -66,11 +69,12 @@ public final class ScriptExecuteException extends RuntimeException {
    * @param context The current execution context.
    */
   public ScriptExecuteException(SQLException exception, QueryContext context) {
-    this(exception != null ? exception.getMessage() : null, exception, null);
+    this(exception, context, exception != null ? exception.getMessage() : null);
   }
 
-  private ScriptExecuteException(String message, SQLException exception, QueryContext context) {
-    super(message, exception);
+  private ScriptExecuteException(SQLException exception, QueryContext context, String message,
+      Object... msgParams) {
+    super(fmt(message, msgParams), exception);
     this.context = context;
   }
 
@@ -87,6 +91,15 @@ public final class ScriptExecuteException extends RuntimeException {
    */
   public QueryContext getContext() {
     return this.context;
+  }
+
+  private static String fmt(String msg, Object[] params) {
+    if (msg == null) {
+      msg = "[no error description was given]";
+    } else if (params != null && params.length > 0) {
+      msg = String.format(msg, params);
+    }
+    return msg;
   }
 
 }

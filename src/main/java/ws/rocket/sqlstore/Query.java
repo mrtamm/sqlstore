@@ -77,8 +77,8 @@ public final class Query {
    */
   public void execute() {
     if (this.executed) {
-      throw new ScriptExecuteException("Query has been executed and the object cannot be reused",
-          this.ctx);
+      throw new ScriptExecuteException(this.ctx, "Query has been executed and the object "
+          + "cannot be reused");
     }
 
     this.executed = true;
@@ -171,14 +171,14 @@ public final class Query {
 
   private void checkSupportsListResult(Class<?> javaType) {
     if (!this.ctx.supportsList(javaType)) {
-      throw new ScriptExecuteException("Query does not support return type " + javaType, this.ctx);
+      throw new ScriptExecuteException(this.ctx, "Query does not support return type %s", javaType);
     }
   }
 
   private void checkSupportsMapResult(Class<?> keyType, Class<?> valueType) {
     if (!this.ctx.supportsMap(keyType, valueType)) {
-      throw new ScriptExecuteException("Query does not support return type Map<" + keyType
-          + "," + valueType + ">.", this.ctx);
+      throw new ScriptExecuteException(this.ctx, "Query does not support return type Map<%s,%s>.",
+          keyType, valueType);
     }
   }
 

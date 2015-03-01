@@ -69,8 +69,8 @@ public final class DataSourceConnectionManager implements ConnectionManager {
             readOnly, c.getAutoCommit());
 
       } catch (SQLException e) {
-        throw new ScriptExecuteException("Failed to retrieve a database connection from "
-            + "data source", e);
+        throw new ScriptExecuteException(e, "Failed to retrieve a database connection from "
+            + "data source");
       }
     }
 
@@ -90,7 +90,7 @@ public final class DataSourceConnectionManager implements ConnectionManager {
       c.commit();
       LOG.trace("Committed current transaction.");
     } catch (SQLException e) {
-      throw new ScriptExecuteException("Failed to commit transaction", e);
+      throw new ScriptExecuteException(e, "Failed to commit transaction");
     }
   }
 
@@ -107,7 +107,7 @@ public final class DataSourceConnectionManager implements ConnectionManager {
       this.connection.get().rollback();
       LOG.trace("Rolled back current transaction.");
     } catch (SQLException e) {
-      throw new ScriptExecuteException("Failed to roll back transaction", e);
+      throw new ScriptExecuteException(e, "Failed to roll back transaction");
     }
   }
 
@@ -119,8 +119,8 @@ public final class DataSourceConnectionManager implements ConnectionManager {
         c.close();
         LOG.trace("Released current connection.");
       } catch (SQLException e) {
-        throw new ScriptExecuteException("Failed to release a database connection to data source",
-            e);
+        throw new ScriptExecuteException(e, "Failed to release a database connection "
+            + "to data source");
       } finally {
         this.connection.remove();
       }

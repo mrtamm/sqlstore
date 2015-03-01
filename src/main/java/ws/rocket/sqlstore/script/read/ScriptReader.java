@@ -94,9 +94,9 @@ public final class ScriptReader implements Closeable {
               .createScript();
 
           if (results.containsKey(script.getName())) {
-            throw new IllegalStateException(String.format(
+            throw new ScriptSetupException(
                 "The SQL script name %s is defined more than once in %s: %d",
-                script.getName(), resourceName, script.getLine()));
+                script.getName(), resourceName, script.getLine());
           }
 
           results.put(script.getName(), script);

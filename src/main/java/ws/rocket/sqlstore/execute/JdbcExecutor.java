@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package ws.rocket.sqlstore.execute;
 
 import java.sql.CallableStatement;
@@ -178,8 +179,8 @@ public final class JdbcExecutor {
         }
 
         if (columnCount != ctx.getRowColumnCount()) {
-          throw new ScriptSetupException("The result set has " + columnCount
-              + " but the script expects " + ctx.getRowColumnCount() + " columns.");
+          throw new ScriptSetupException("The result set has %d but the script expects %d columns.",
+              columnCount, ctx.getRowColumnCount());
         }
 
         while (results.next()) {
@@ -204,8 +205,8 @@ public final class JdbcExecutor {
         }
 
         if (columnCount != ctx.getKeysColumnCount()) {
-          throw new ScriptSetupException("The KEYS result set has " + columnCount
-              + " but the script expects " + ctx.getKeysColumnCount() + " columns.");
+          throw new ScriptSetupException("The KEYS result set has %d but the script expects %d "
+              + "columns.", columnCount, ctx.getKeysColumnCount());
         }
 
         while (results.next()) {

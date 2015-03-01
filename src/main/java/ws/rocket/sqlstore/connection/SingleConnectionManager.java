@@ -59,7 +59,7 @@ public final class SingleConnectionManager implements ConnectionManager {
         throw new IllegalArgumentException("Connection to database is closed");
       }
     } catch (SQLException e) {
-      throw new ScriptExecuteException("Failed to test whether connection is closed", e);
+      throw new ScriptExecuteException(e, "Failed to test whether connection is closed");
     }
 
     this.connection = connection;
@@ -77,7 +77,7 @@ public final class SingleConnectionManager implements ConnectionManager {
             readOnly, this.connection.getAutoCommit());
 
       } catch (SQLException e) {
-        throw new ScriptExecuteException("Failed to configure connection", e);
+        throw new ScriptExecuteException(e, "Failed to configure connection");
       }
     }
 
@@ -95,7 +95,7 @@ public final class SingleConnectionManager implements ConnectionManager {
       this.connection.commit();
       LOG.trace("Committed current transaction.");
     } catch (SQLException e) {
-      throw new ScriptExecuteException("Failed to commit transaction", e);
+      throw new ScriptExecuteException(e, "Failed to commit transaction");
     }
   }
 
@@ -110,7 +110,7 @@ public final class SingleConnectionManager implements ConnectionManager {
       this.connection.rollback();
       LOG.trace("Rolled back current transaction.");
     } catch (SQLException e) {
-      throw new ScriptExecuteException("Failed to roll back transaction", e);
+      throw new ScriptExecuteException(e, "Failed to roll back transaction");
     }
   }
 
