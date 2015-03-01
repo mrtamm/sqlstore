@@ -117,6 +117,9 @@ public final class TypeNameParam extends Param {
    * <li>"&lt;simple class name&gt; &lt;param name&gt;"
    * <li>"&lt;simple class name&gt;|&lt;SQL type int value&gt; &lt;param name&gt;"
    * </ul>
+   * <p>
+   * When this is a named parameter from OUT-parameters, the returned representation will end with
+   * the index of the OUT-parameter in square brackets, e.g."[0]".
    *
    * @return Textual representation of this parameter instance.
    */
@@ -124,7 +127,7 @@ public final class TypeNameParam extends Param {
   public String toString() {
     String txt = super.toString() + " " + this.name;
     if (this.resultParamIndex >= 0) {
-      txt += " (result index: " + this.resultParamIndex + ")";
+      txt += "[" + this.resultParamIndex + "]";
     }
     return txt;
   }
