@@ -245,6 +245,7 @@ public final class QueryContext {
     for (QueryParam param : this.script.getQueryParams()) {
       binder.readParam(this, param, stmt, index++);
     }
+    this.resultsCollector.rowCompleted();
   }
 
   /**
@@ -259,6 +260,7 @@ public final class QueryContext {
     for (Param param : this.script.getKeysParams()) {
       binder.readParam(this, param, key, index++);
     }
+    this.resultsCollector.rowCompleted();
   }
 
   /**
