@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
+import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.result.ResultsCollector;
 import ws.rocket.sqlstore.script.QueryHints;
 import ws.rocket.sqlstore.script.QueryParam;
@@ -43,7 +44,7 @@ public final class QueryContext {
 
   private final Map<String, Object> variables;
 
-  private final ResultsCollector resultsCollector;
+  private ResultsCollector resultsCollector;
 
   private int updateCount;
 
@@ -59,6 +60,14 @@ public final class QueryContext {
     this.script = script;
     this.variables = script.getInputParams().bind(args);
     this.resultsCollector = script.getOutputParams().createResultsCollector();
+  }
+
+  public void initResultsContainer(Class<?> resultContainerType, Class<?>... columnTypes) {
+    if (this.resultsCollector != null) {
+      throw new ScriptExecuteException("A results collector has already been set.");
+    }
+    this.resultsCollector = this.script.getOutputParams().createResultsCollector(
+        resultContainerType, columnTypes);
   }
 
   /**
@@ -99,31 +108,6 @@ public final class QueryContext {
    */
   public void updateVariable(String name, Object value) {
     this.variables.put(name, value);
-  }
-
-  /**
-   * Informs whether the current script supports <code>java.util.List</code> as return type. The
-   * type of the list items can also be provided to be informed whether that type also matches.
-   *
-   * @param type Optional type of list items to be checked. When null, this check will be skipped.
-   * @return A Boolean that is true when the script can return a list (of items of given type).
-   */
-  public boolean supportsList(Class<?> type) {
-    return this.script.getOutputParams().supportsList(type);
-  }
-
-  /**
-   * Informs whether the current script supports <code>java.util.Map</code> as return type. The type
-   * of the keys/values can also be provided to be informed whether their types also match.
-   *
-   * @param typeKey Optional type of map keys to be checked. When null, this check will be skipped.
-   * @param typeValue Optional type of map values to be checked. When null, this check will be
-   * skipped.
-   * @return A Boolean that is true when the script can return a map (with keys/values of given
-   * type).
-   */
-  public boolean supportsMap(Class<?> typeKey, Class<?> typeValue) {
-    return this.script.getOutputParams().supportsMap(typeKey, typeValue);
   }
 
   /**

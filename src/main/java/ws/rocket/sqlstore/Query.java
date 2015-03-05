@@ -76,13 +76,7 @@ public final class Query {
    * {@link ScriptExecuteException} may be thrown.
    */
   public void execute() {
-    if (this.executed) {
-      throw new ScriptExecuteException(this.ctx, "Query has been executed and the object "
-          + "cannot be reused");
-    }
-
-    this.executed = true;
-    new JdbcExecutor(this.connectionManager).execute(this.ctx);
+    executeWithResults(Void.class);
   }
 
   /**
@@ -98,8 +92,7 @@ public final class Query {
    * @return The first extracted value, or null.
    */
   public <V> V forValue(Class<V> valueType) {
-    checkSupportsListResult(valueType);
-    execute();
+    executeWithResults(List.class, valueType);
     return extractValue(valueType);
   }
 
@@ -116,9 +109,18 @@ public final class Query {
    * @return A list with extracted values.
    */
   public <V> List<V> forValues(Class<V> valueType) {
-    checkSupportsListResult(valueType);
-    execute();
+    executeWithResults(List.class, valueType);
     return extractList(valueType);
+  }
+
+  public Object[] forRow(Class<?>... valueTypes) {
+    executeWithResults(Object[][].class, valueTypes);
+    return extractRow();
+  }
+
+  public Object[][] forRows(Class<?>... valueTypes) {
+    executeWithResults(Object[][].class, valueTypes);
+    return extractRows();
   }
 
   /**
@@ -138,8 +140,7 @@ public final class Query {
    * @return A map with extracted values with an entry per row.
    */
   public <K, V> Map<K, V> forMap(Class<K> value1Type, Class<V> value2Type) {
-    checkSupportsMapResult(value1Type, value2Type);
-    execute();
+    executeWithResults(Map.class, value1Type, value2Type);
     return extractMap(value1Type, value2Type);
   }
 
@@ -152,6 +153,28 @@ public final class Query {
   public int forUpdateCount() {
     execute();
     return this.ctx.getUpdateCount();
+  }
+
+  public void executeWithResults(Class<?> resultsContainerType, Class<?>... columnTypes) {
+    if (this.executed) {
+      throw new ScriptExecuteException(this.ctx, "Query has been executed and the object "
+          + "cannot be reused");
+    }
+
+    this.executed = true;
+    this.ctx.initResultsContainer(resultsContainerType, columnTypes);
+    new JdbcExecutor(this.connectionManager).execute(this.ctx);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> Object[] extractRow() {
+    Object[][] values = extractRows();
+    return values.length == 0 ? null : values[0];
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> Object[][] extractRows() {
+    return (Object[][]) this.ctx.getResultsCollector().getResult();
   }
 
   private <T> T extractValue(Class<T> valueType) {
@@ -167,19 +190,6 @@ public final class Query {
   @SuppressWarnings("unchecked")
   private <K, V> Map<K, V> extractMap(Class<K> keyType, Class<V> valueType) {
     return (Map<K, V>) this.ctx.getResultsCollector().getResult();
-  }
-
-  private void checkSupportsListResult(Class<?> javaType) {
-    if (!this.ctx.supportsList(javaType)) {
-      throw new ScriptExecuteException(this.ctx, "Query does not support return type %s", javaType);
-    }
-  }
-
-  private void checkSupportsMapResult(Class<?> keyType, Class<?> valueType) {
-    if (!this.ctx.supportsMap(keyType, valueType)) {
-      throw new ScriptExecuteException(this.ctx, "Query does not support return type Map<%s,%s>.",
-          keyType, valueType);
-    }
   }
 
 }

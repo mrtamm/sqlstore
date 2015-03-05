@@ -17,9 +17,12 @@
 package ws.rocket.sqlstore.script;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import ws.rocket.sqlstore.ScriptExecuteException;
+import ws.rocket.sqlstore.result.ArrayResultsCollector;
 import ws.rocket.sqlstore.result.ListResultsCollector;
 import ws.rocket.sqlstore.result.MapResultsCollector;
 import ws.rocket.sqlstore.result.ResultsCollector;
@@ -76,34 +79,6 @@ public final class OutputParams {
   }
 
   /**
-   * Informs whether the script supports <code>java.util.List</code> (of query results) as return
-   * type.
-   *
-   * @param type An optional Java type for checking whether the list item type is supported. When
-   * null, this check will be skipped.
-   * @return A Boolean that is true when the script can return a List of values of given type.
-   */
-  public boolean supportsList(Class<?> type) {
-    return this.types.length == 1 && (type == null || type.isAssignableFrom(this.types[0]));
-  }
-
-  /**
-   * Informs whether the script supports <code>java.util.Map</code> (of query results) as return
-   * type.
-   *
-   * @param typeKey An optional Java type for checking whether it is supported as the type of map
-   * keys. When null, this check will be skipped.
-   * @param typeValue An optional Java type for checking whether it is supported as the type of map
-   * values. When null, this check will be skipped.
-   * @return A Boolean that is true when the script can return a List of values of given type.
-   */
-  public boolean supportsMap(Class<?> typeKey, Class<?> typeValue) {
-    return this.types.length == 2
-        && (typeKey == null || typeKey.isAssignableFrom(this.types[0]))
-        && (typeValue == null || typeValue.isAssignableFrom(this.types[1]));
-  }
-
-  /**
    * Informs whether instance contains no output parameters.
    *
    * @return A boolean that is true when the script does not return any results.
@@ -117,22 +92,29 @@ public final class OutputParams {
    * script does not return back any results, this method will provide a results instance that will
    * throw an exception when one attempts to add a value to it.
    *
+   * @param resultContainerType
+   * @param columnTypes
    * @return A new instance of results collector for storing query results.
    */
-  public ResultsCollector createResultsCollector() {
-    ResultsCollector result;
+  public ResultsCollector createResultsCollector(Class<?> resultContainerType, Class<?>... columnTypes) {
+    int colTypesLength = columnTypes == null ? 0 : columnTypes.length;
+    ResultsCollector result = null;
 
-    if (isEmpty()) {
-      result = VoidResultsCollector.INSTANCE;
-    } else {
-      if (this.types.length == 1) {
+    if (supportsColumns(columnTypes)) {
+      if (colTypesLength == 0 && Void.class.equals(resultContainerType)) {
+        result = VoidResultsCollector.INSTANCE;
+      } else if (colTypesLength == 1 && List.class.equals(resultContainerType)) {
         result = new ListResultsCollector();
-      } else if (this.types.length == 2) {
+      } else if (colTypesLength == 2 && Map.class.equals(resultContainerType)) {
         result = new MapResultsCollector();
-      } else {
-        throw new IllegalStateException("A query is not allowed to return more than two "
-            + "objects per row");
+      } else if (Object[][].class.equals(resultContainerType)) {
+        result = new ArrayResultsCollector(this.types.length);
       }
+    }
+
+    if (result == null) {
+      throw new ScriptExecuteException("Query does not support return type %s with column types %s.",
+          resultContainerType.getName(), Arrays.toString(columnTypes));
     }
 
     return result;
@@ -217,6 +199,24 @@ public final class OutputParams {
     }
 
     return result;
+  }
+
+  private boolean supportsColumns(Class<?>... columnTypes) {
+    int colTypesLength = columnTypes == null ? 0 : columnTypes.length;
+    boolean supports = false;
+
+    if (this.types.length == colTypesLength) {
+      supports = true;
+
+      for (Class<?> type : this.types) {
+        if (type != null && !type.isAssignableFrom(type)) {
+          supports = false;
+          break;
+        }
+      }
+    }
+
+    return supports;
   }
 
 }
