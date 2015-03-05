@@ -59,7 +59,6 @@ public final class QueryContext {
   public QueryContext(Script script, Object[] args) {
     this.script = script;
     this.variables = script.getInputParams().bind(args);
-    this.resultsCollector = script.getOutputParams().createResultsCollector();
   }
 
   public void initResultsContainer(Class<?> resultContainerType, Class<?>... columnTypes) {
