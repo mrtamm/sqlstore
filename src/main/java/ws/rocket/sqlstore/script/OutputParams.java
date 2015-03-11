@@ -88,15 +88,23 @@ public final class OutputParams {
   }
 
   /**
-   * Creates a result instance for storing the results of a new execution of the script. When the
-   * script does not return back any results, this method will provide a results instance that will
-   * throw an exception when one attempts to add a value to it.
+   * Creates a result instance for storing the results of a new execution of the script.
+   * <p>
+   * This method also triggers results container validation to make sure that the query can actually
+   * return collected results in given container and that the query actually has as many return
+   * column types (OUT-params) as provided here (also checking that the types match).
+   * <p>
+   * When the script does not return back any results (Void), this method will provide a results
+   * instance that will throw an exception when one attempts to add a value to it.
    *
-   * @param resultContainerType
-   * @param columnTypes
+   * @param resultContainerType The class of the container type, such as Void, Map, List, Object[].
+   * @param columnTypes An array of classes that must match Java types of the OUT-params in the same
+   * order. When a type is null, it will not raise an exception but the corresponding type check
+   * will be just skipped.
    * @return A new instance of results collector for storing query results.
    */
-  public ResultsCollector createResultsCollector(Class<?> resultContainerType, Class<?>... columnTypes) {
+  public ResultsCollector createResultsCollector(Class<?> resultContainerType,
+      Class<?>... columnTypes) {
     int colTypesLength = columnTypes == null ? 0 : columnTypes.length;
     ResultsCollector result = null;
 
@@ -113,7 +121,7 @@ public final class OutputParams {
     }
 
     if (result == null) {
-      throw new ScriptExecuteException("Query does not support return type %s with column types %s.",
+      throw new ScriptExecuteException("Query does not support return type %s with column types %s",
           resultContainerType.getName(), Arrays.toString(columnTypes));
     }
 
@@ -156,11 +164,6 @@ public final class OutputParams {
       }
     }
 
-    if (resultIndex > 1) {
-      throw new IllegalStateException("Currently up to 2 objects can be returned for query results "
-          + "per row; however, detected " + (resultIndex + 1) + " result parameters with these: "
-          + this.description);
-    }
     return result.toArray(new Class<?>[resultIndex + 1]);
   }
 

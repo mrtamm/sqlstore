@@ -61,6 +61,20 @@ public final class QueryContext {
     this.variables = script.getInputParams().bind(args);
   }
 
+  /**
+   * Initializes a query results collector, which is needed when executing a query.
+   * <p>
+   * This method also triggers results container validation to make sure that the query can actually
+   * return collected results in given container and that the query actually has as many return
+   * column types (OUT-params) as provided here (also checking that the types match).
+   *
+   * @param resultContainerType The class of the container type, such as Void, Map, List, Object[].
+   * @param columnTypes An array of classes that must match Java types of the OUT-params in the same
+   * order. When a type is null, it will not raise an exception but the corresponding type check
+   * will be just skipped.
+   * @see ws.rocket.sqlstore.script.OutputParams#createResultsCollector(java.lang.Class,
+   * java.lang.Class...)
+   */
   public void initResultsContainer(Class<?> resultContainerType, Class<?>... columnTypes) {
     if (this.resultsCollector != null) {
       throw new ScriptExecuteException("A results collector has already been set.");
