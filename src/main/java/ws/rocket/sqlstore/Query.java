@@ -113,13 +113,35 @@ public final class Query {
     return extractList(valueType);
   }
 
-  public Object[] forRow(Class<?>... valueTypes) {
-    executeWithResults(Object[][].class, valueTypes);
+  /**
+   * Executes the query while expecting for a row as a result. When no row is returned, this method
+   * will return null. When more than one is returned by the query, only the first will be returned,
+   * though all returned rows will be extracted into Java objects. The corresponding SQLS script can
+   * have as many columns per a result row as necessary, but the script result column types
+   * (OUT-params) must match the column types provided here.
+   *
+   * @param columnTypes The value types into which the row column values will be converted. This
+   * must be same as in the SQLS file. This helps fail faster with unexpected class-cast problems.
+   * @return The first extracted row as an object array of column values, or null.
+   */
+  public Object[] forRow(Class<?>... columnTypes) {
+    executeWithResults(Object[][].class, columnTypes);
     return extractRow();
   }
 
-  public Object[][] forRows(Class<?>... valueTypes) {
-    executeWithResults(Object[][].class, valueTypes);
+  /**
+   * Executes the query while expecting for zero, one, or more rows as a result. When no row is
+   * returned, this method will return an empty Object array. A query hint, when present, may affect
+   * the number of rows so that not all of them would be returned. The corresponding SQLS script can
+   * have as many columns per a result row as necessary, but the script result column types
+   * (OUT-params) must match the column types provided here.
+   *
+   * @param columnTypes The value types into which the row column values will be converted. This
+   * must be same as in the SQLS file. This helps fail faster with unexpected class-cast problems.
+   * @return An object array with extracted rows and columns.
+   */
+  public Object[][] forRows(Class<?>... columnTypes) {
+    executeWithResults(Object[][].class, columnTypes);
     return extractRows();
   }
 
@@ -155,7 +177,7 @@ public final class Query {
     return this.ctx.getUpdateCount();
   }
 
-  public void executeWithResults(Class<?> resultsContainerType, Class<?>... columnTypes) {
+  private void executeWithResults(Class<?> resultsContainerType, Class<?>... columnTypes) {
     if (this.executed) {
       throw new ScriptExecuteException(this.ctx, "Query has been executed and the object "
           + "cannot be reused");

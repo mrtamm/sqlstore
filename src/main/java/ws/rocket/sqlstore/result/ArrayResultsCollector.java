@@ -32,10 +32,16 @@ public final class ArrayResultsCollector implements ResultsCollector {
 
   private Object[] row;
 
-  public ArrayResultsCollector(int rowLength) {
-    this.rowLength = rowLength;
-    this.row = new Object[rowLength];
-    this.valueDefined = new boolean[rowLength];
+  /**
+   * Initializes an array-based results collector. Each row has the same number of columns, which
+   * will be fixed here.
+   *
+   * @param columnCount The number of columns expected in the results.
+   */
+  public ArrayResultsCollector(int columnCount) {
+    this.rowLength = columnCount;
+    this.row = new Object[columnCount];
+    this.valueDefined = new boolean[columnCount];
   }
 
   /**
