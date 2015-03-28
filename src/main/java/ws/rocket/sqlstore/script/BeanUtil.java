@@ -37,6 +37,11 @@ public final class BeanUtil {
     boolean.class
   };
 
+  private static final Class<?>[] PRIMITIVE_WRAPPERS = {
+    Byte.class, Character.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
+    Boolean.class
+  };
+
   /**
    * Attempts to resolve a class of a primitive by the given name.
    *
@@ -48,6 +53,24 @@ public final class BeanUtil {
     for (Class<?> p : PRIMITIVES) {
       if (p.getName().equals(name)) {
         result = p;
+        break;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Attempts to resolve the boxing class for given primitive type.
+   *
+   * @param primitiveClass A Java primitive class.
+   * @return The class of the primitive wrapper, or null.
+   */
+  public static Class<?> getPrimitiveWrapperClass(Class<?> primitiveClass) {
+    Class<?> result = null;
+    for (int i = 0; i < PRIMITIVES.length; i++) {
+      if (primitiveClass == PRIMITIVES[i]) {
+        result = PRIMITIVE_WRAPPERS[i];
+        break;
       }
     }
     return result;

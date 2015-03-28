@@ -129,7 +129,7 @@ public final class QueryContext {
    * @return The SQL script.
    */
   public String getSqlQuery() {
-    return this.script.getSql();
+    return this.script.getSql(this);
   }
 
   /**
@@ -222,7 +222,7 @@ public final class QueryContext {
   public void setParameters(PreparedStatement stmt) throws SQLException {
     int index = 1;
     Bindings binder = Bindings.getInstance();
-    for (QueryParam param : this.script.getQueryParams()) {
+    for (QueryParam param : this.script.getQueryParams(this)) {
       binder.bindParam(this, param, stmt, index++);
     }
   }
@@ -239,7 +239,7 @@ public final class QueryContext {
   public void readParameters(CallableStatement stmt) throws SQLException {
     int index = 1;
     Bindings binder = Bindings.getInstance();
-    for (QueryParam param : this.script.getQueryParams()) {
+    for (QueryParam param : this.script.getQueryParams(this)) {
       binder.readParam(this, param, stmt, index++);
     }
     this.resultsCollector.rowCompleted();

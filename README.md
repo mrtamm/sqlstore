@@ -29,7 +29,7 @@ The project uses [Gradle build tool](http://www.gradle.org/) for development.
 The project is open-sourced under the
 [Apache Software License, version 2.0](LICENSE.md).
 
-No official releases yet. The first release is planned for February 2015.
+No official releases yet. The first release is planned for June 2015.
 
 Suggestions, contributions, and issues are welcome through the
 [issue tracker](https://github.com/mrtamm/sqlstore/issues).

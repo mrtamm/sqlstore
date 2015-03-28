@@ -358,7 +358,7 @@ public final class StreamReader implements Closeable {
    * @throws IOException When a stream-related exception occurs during reading.
    */
   public String parseParamName() throws IOException {
-    return parseName("parameter name");
+    return parseName("parameter");
   }
 
   /**
@@ -465,34 +465,31 @@ public final class StreamReader implements Closeable {
    * closing curly brace is not reached, or the contained SQL query is empty.
    *
    * @param buf The buffer where the result must be stored.
-   * @return The parsed SQL.
+   * @return The last code-point ("{" = parameter; "}" = end of script (part); "(" = condition).
    * @throws IOException When a stream-related exception occurs during reading.
    */
-  public boolean parseSql(StringBuilder buf) throws IOException {
-    boolean paramIsNext = false;
+  public int parseSql(StringBuilder buf) throws IOException {
     int nestedBraces = 0;
     int cp = this.nextChar;
 
     while (cp != -1) {
 
+      // Preprocess the code-point before adding it to buffer:
       if (cp == '{') {
         nestedBraces++;
+
       } else if (cp == '}') {
         nestedBraces--;
 
         if (nestedBraces < 0) {
-          moveNext();
           break;
         }
+
       } else if (cp == '\\') {
         cp = moveNext(); // escaping
 
         if (cp != '$' && cp != '{' && cp != '}' && cp != '\\') {
           buf.append('\\');
-        }
-
-        if (cp == -1) {
-          break;
         }
 
       } else if (cp == '$') {
@@ -501,15 +498,38 @@ public final class StreamReader implements Closeable {
         if (cp == '{') {
           moveNext();
           buf.append('?'); // JDBC parameter placeholder
-          paramIsNext = true;
           break;
         }
 
         buf.append('$');
 
-        if (cp == -1) {
+      } else if (cp == '\n' || cp == '\r') {
+        int[] cps = new int[3];
+        int length = 0;
+
+        cps[length++] = cp;
+        cps[length++] = moveNext(); // expecting exclamation mark
+
+        if (cps[1] == '!') {
+          cps[length++] = moveNext(); // expecting opening parenthesis
+        }
+
+        cp = cps[length - 1];
+
+        if (length == 3 && cps[2] == '(') {
+          moveNext();
           break;
         }
+
+        // The new line does not begin with "!(", so put the chars into buffer and re-evaluate cp.
+        for (int i = 0; i < length - 1 && cps[i] != -1; i++) {
+          buf.appendCodePoint(cps[i]);
+        }
+        continue;
+      }
+
+      if (cp == -1) {
+        break;
       }
 
       buf.appendCodePoint(cp);
@@ -525,7 +545,7 @@ public final class StreamReader implements Closeable {
       trimRightByChar(buf, ' ');
     }
 
-    return paramIsNext;
+    return cp;
   }
 
   private boolean isJavaIdentifier(int cp) {

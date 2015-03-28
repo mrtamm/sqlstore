@@ -239,7 +239,7 @@ public final class ParamsSet {
       removeParam(this.outVarParams, varName);
     } else {
       mode = mode == null ? ParamMode.IN : mode;
-      removeParam(this.inVarParams, varName);
+      markInParamAsUsed(varName);
     }
 
     if (param == null) {
@@ -349,11 +349,12 @@ public final class ParamsSet {
    *
    * @return An array of query parameters. May be empty but never null.
    */
-  public QueryParam[] getQueryParams() {
+  public QueryParam[] resetQueryParams() {
     QueryParam[] result = QueryParam.NO_PARAMS;
 
     if (!this.queryParams.isEmpty()) {
       result = this.queryParams.toArray(new QueryParam[this.queryParams.size()]);
+      this.queryParams.clear();
     }
 
     return result;
@@ -387,6 +388,21 @@ public final class ParamsSet {
     }
 
     return result;
+  }
+
+  /**
+   * Marks an IN-parameter by name as used so that this parameter would not trigger unused parameter
+   * exception. It is safe to call this method multiple times with the same name, i.e. does not
+   * cause unknown parameter exception after it has already been removed.
+   * <p>
+   * This method is intended to be called when handling the SQL part of the script definition to
+   * notify a parameter usage once it is detected in the script. The script parameters are copied
+   * into their own structures by that moment.
+   *
+   * @param paramName The name of the IN-parameter to mark as used.
+   */
+  public void markInParamAsUsed(String paramName) {
+    removeParam(this.inVarParams, paramName);
   }
 
   private TypeNameParam getParamByName(String name, List<TypeNameParam> params) {

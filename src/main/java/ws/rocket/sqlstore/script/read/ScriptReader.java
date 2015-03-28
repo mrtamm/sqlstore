@@ -29,9 +29,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.QueryHints;
+import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.Script;
+import ws.rocket.sqlstore.script.params.Expression;
 import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
+import ws.rocket.sqlstore.script.sql.ConditionAlways;
+import ws.rocket.sqlstore.script.sql.ParamValueEmpty;
+import ws.rocket.sqlstore.script.sql.ParamValueNonEmpty;
+import ws.rocket.sqlstore.script.sql.ParamValueTrue;
+import ws.rocket.sqlstore.script.sql.SqlPart;
+import ws.rocket.sqlstore.script.sql.SqlPartCondition;
 
 /**
  * Helper class for parsing meta-data of a script from an SQLS file and produces a valid
@@ -55,6 +63,10 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
 public final class ScriptReader implements Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(ScriptReader.class);
+
+  private static final String COND_FUNC_EMPTY = "empty";
+
+  private static final String COND_FUNC_TRUE = "true";
 
   /**
    * Loads scripts from an SQLS resource of given class.
@@ -115,7 +127,7 @@ public final class ScriptReader implements Closeable {
 
   private String name;
 
-  private String script;
+  private SqlPart[] sqlParts;
 
   private QueryHints hints;
 
@@ -237,13 +249,38 @@ public final class ScriptReader implements Closeable {
     this.reader.requireNext('{');
     this.reader.skipWsp();
 
-    StringBuilder sql = new StringBuilder(2048);
+    List<SqlPart> parts = new ArrayList<>();
+    SqlPartCondition condition = ConditionAlways.INSTANCE;
 
-    while (this.reader.parseSql(sql)) {
-      parseScriptParam();
+    StringBuilder sql = new StringBuilder(1024);
+    int cp = this.reader.parseSql(sql);
+
+    while (true) {
+      if (cp == '{') {
+        parseScriptParam();
+      } else {
+        String script = sql.toString();
+        boolean hasScript = script.trim().length() > 0;
+
+        if (hasScript) {
+          parts.add(new SqlPart(condition, script, this.params.resetQueryParams()));
+          sql.setLength(0);
+        }
+
+        if (cp == '(') {
+          condition = parseScriptCondition();
+        } else if (cp == '}') {
+          if (parts.size() == 1 || !hasScript) {
+            break;
+          }
+          condition = ConditionAlways.INSTANCE;
+        }
+      }
+
+      cp = this.reader.parseSql(sql);
     }
 
-    this.script = sql.toString();
+    this.sqlParts = parts.toArray(new SqlPart[parts.size()]);
 
     return this;
   }
@@ -256,10 +293,10 @@ public final class ScriptReader implements Closeable {
    * @return The current script information.
    */
   public Script createScript() {
-    Script result = new Script(this.name, this.line, this.script, this.params, this.hints);
+    Script result = new Script(this.name, this.line, this.sqlParts, this.params, this.hints);
     this.params.cleanup(result);
     this.name = null;
-    this.script = null;
+    this.sqlParts = null;
     this.hints = null;
     return result;
   }
@@ -268,7 +305,7 @@ public final class ScriptReader implements Closeable {
   public void close() throws IOException {
     this.params.cleanup(null);
     this.name = null;
-    this.script = null;
+    this.sqlParts = null;
     this.hints = null;
     this.reader.close();
   }
@@ -406,8 +443,7 @@ public final class ScriptReader implements Closeable {
       varName = this.reader.parseParamName();
     }
 
-    while (this.reader.isNext('.')) {
-      this.reader.skipNext();
+    while (this.reader.skipIfNext('.')) {
       fields.add(this.reader.parseParamName());
     }
 
@@ -425,6 +461,57 @@ public final class ScriptReader implements Closeable {
 
     this.reader.skipWsp();
     this.reader.requireNext('}');
+  }
+
+  private SqlPartCondition parseScriptCondition() throws IOException {
+    String func = null;
+    String expr = this.reader.parseParamName();
+
+    if (this.reader.isNext('(')) {
+      if (!COND_FUNC_EMPTY.equals(expr) && !COND_FUNC_TRUE.equals(expr)) {
+        throw new ScriptSetupException("Expected script inclusion condition '%s' or '%s' "
+            + "but got '%s'.", COND_FUNC_EMPTY, COND_FUNC_TRUE, expr);
+      }
+
+      func = expr;
+      this.reader.skipNext();
+      this.reader.skipWsp();
+      expr = this.reader.parseParamName();
+    }
+
+    List<String> properties = new ArrayList<>();
+    while (this.reader.skipIfNext('.')) {
+      properties.add(this.reader.parseParamName());
+    }
+
+    this.reader.skipWsp();
+    if (func != null) {
+      this.reader.requireNext(')');
+    }
+    this.reader.requireNext(')');
+    this.reader.requireNext('{');
+
+    TypeNameParam param = this.params.getInputParams().get(expr);
+    this.params.markInParamAsUsed(expr);
+    QueryParam qp;
+
+    if (properties.isEmpty()) {
+      qp = new QueryParam(ParamMode.IN, param);
+    } else {
+      qp = new QueryParam(ParamMode.IN, Expression.create(param, properties, null));
+    }
+
+    SqlPartCondition result;
+    if (func == null) {
+      result = new ParamValueNonEmpty(qp);
+    } else if (COND_FUNC_EMPTY.equals(func)) {
+      result = new ParamValueEmpty(qp);
+    } else if (COND_FUNC_TRUE.equals(func)) {
+      result = new ParamValueTrue(qp);
+    } else {
+      throw new ScriptSetupException("Unsupported query part condition function: '%s'", func);
+    }
+    return result;
   }
 
   private Integer parseSqlType() throws IOException {

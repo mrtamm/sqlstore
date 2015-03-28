@@ -90,6 +90,11 @@ public final class TypeNameParam extends Param {
    * @param argIndex The index of the parameter to be used in error message to be more informative.
    */
   public void validate(Object value, int argIndex) {
+    if (value == null && getJavaType().isPrimitive()) {
+      throw new ScriptExecuteException(
+          "Script argument with index %d value mismatch: expected a not null value of %s",
+          argIndex, getJavaType());
+    }
     if (value != null && !supports(value.getClass())) {
       throw new ScriptExecuteException(
           "Script argument with index %d type mismatch: expected %s, got %s",

@@ -16,8 +16,13 @@
 
 package ws.rocket.sqlstore.script;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.read.ParamsSet;
+import ws.rocket.sqlstore.script.sql.SqlPart;
 
 /**
  * Contains loaded information about a script.
@@ -61,15 +66,13 @@ public final class Script {
 
   private final int line;
 
-  private final String sql;
+  private final SqlPart[] sqlParts;
 
   private final QueryHints hints;
 
   private final InputParams inputParams;
 
   private final OutputParams outputParams;
-
-  private final QueryParam[] queryParams;
 
   private final Param[] keysParams;
 
@@ -89,29 +92,32 @@ public final class Script {
    *
    * @param name The script name by which it is called. Required.
    * @param line The line number where this script is defined. Required.
-   * @param sql The contained SQL statement/script. Required.
+   * @param sqlParts The contained SQL statement/script with parameters. The script may be divided
+   * into multiple parts some of which may be conditional and thus omitted from an actual query
+   * depending on input parameters. Required.
    * @param params An engine instance taking care of the work related to binding parameters for
    * input and output.
    * @param hints Optional execution hints for the SQL script, if provided in the SQLS file.
    * Otherwise may leave it null.
    */
-  public Script(String name, int line, String sql, ParamsSet params, QueryHints hints) {
+  public Script(String name, int line, SqlPart[] sqlParts, ParamsSet params,
+      QueryHints hints) {
+
     if (name == null || name.isEmpty()) {
       throw new IllegalArgumentException("Query name is undefined");
     } else if (line < 1) {
       throw new IllegalArgumentException("Bad line number for query location");
-    } else if (sql == null || sql.isEmpty()) {
+    } else if (sqlParts == null || sqlParts.length == 0) {
       throw new IllegalArgumentException("SQL script is undefined");
     }
 
     this.name = name;
     this.line = line;
-    this.sql = sql;
+    this.sqlParts = sqlParts;
     this.hints = hints;
 
     this.inputParams = params.getInputParams();
     this.outputParams = params.getOutputParams();
-    this.queryParams = params.getQueryParams();
     this.keysParams = params.getKeysParams();
     this.resultsParams = params.getResultsParams();
 
@@ -120,8 +126,8 @@ public final class Script {
     } else {
       boolean containsOut = false;
 
-      for (QueryParam p : this.queryParams) {
-        if (p.isForOutput()) {
+      for (SqlPart part : this.sqlParts) {
+        if (part.containsOutParam()) {
           containsOut = true;
           break;
         }
@@ -156,10 +162,21 @@ public final class Script {
   /**
    * Provides the SQL query to be used as it is.
    *
+   * @param ctx The query context where the SQL is about to be executed.
    * @return The SQL query string.
    */
-  public String getSql() {
-    return this.sql;
+  public String getSql(QueryContext ctx) {
+    if (this.sqlParts.length == 1) {
+      return this.sqlParts[0].getSqlPart();
+    }
+
+    StringBuilder sql = new StringBuilder();
+    for (SqlPart part : this.sqlParts) {
+      if (part.isApplicable(ctx)) {
+        sql.append(part.getSqlPart());
+      }
+    }
+    return sql.toString();
   }
 
   /**
@@ -209,10 +226,21 @@ public final class Script {
   /**
    * Provides the list of parameters used in the SQL script.
    *
-   * @return An array (possibly empty) of query parameters.
+   * @param ctx The query context where the SQL is about to be executed.
+   * @return A list (possibly empty) of query parameters.
    */
-  public QueryParam[] getQueryParams() {
-    return this.queryParams;
+  public List<QueryParam> getQueryParams(QueryContext ctx) {
+    if (this.sqlParts.length == 1) {
+      return Arrays.asList(this.sqlParts[0].getParams());
+    }
+
+    List<QueryParam> params = new ArrayList<>();
+    for (SqlPart part : this.sqlParts) {
+      if (part.isApplicable(ctx)) {
+        params.addAll(Arrays.asList(part.getParams()));
+      }
+    }
+    return params;
   }
 
   /**
@@ -252,14 +280,6 @@ public final class Script {
       str.append(this.outputParams);
     }
 
-    if (this.queryParams.length > 0) {
-      str.append("\n    SQL parameters {");
-      for (int i = 0; i < this.queryParams.length; i++) {
-        str.append("\n      ").append(i + 1).append(": ").append(this.queryParams[i]);
-      }
-      str.append("\n    }");
-    }
-
     if (this.keysParams.length > 0) {
       str.append("\n    GeneratedKeys {");
       for (int i = 0; i < this.keysParams.length; i++) {
@@ -276,7 +296,11 @@ public final class Script {
       str.append("\n    }");
     }
 
-    str.append("\n{").append(this.sql).append("}\n");
+    str.append("\n{");
+    for (SqlPart part : this.sqlParts) {
+      str.append(part);
+    }
+    str.append("}\n");
 
     return str.toString();
   }

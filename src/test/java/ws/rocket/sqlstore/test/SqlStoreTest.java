@@ -149,7 +149,7 @@ public class SqlStoreTest {
     selectPerson(5L, false);
 
     // Checking that both queries would return equal records.
-    List<Person> persons = this.sqlStore.query("findPersons").forValues(Person.class);
+    List<Person> persons = this.sqlStore.query("findPersons", true).forValues(Person.class);
     assertEquals(persons.size(), 4, "checking Persons count");
 
     for (Person person : persons) {

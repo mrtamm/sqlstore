@@ -17,6 +17,7 @@
 package ws.rocket.sqlstore.script.params;
 
 import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.script.BeanUtil;
 
 /**
  * The base solution of all kinds of parameters. A parameter must always have a Java type. SQL type
@@ -74,13 +75,19 @@ public abstract class Param {
   /**
    * Informs whether the value of this parameter is assignable to a variable of given Java type.
    * When the given Java type is null, the result will be false.
+   * <p>
+   * When the target type is primitive, the input type must match either the primitive or its
+   * wrapper type. However, when the target type is not a primitive type, the input type must also
+   * not be a primitive type.
    *
    * @param javaType The type to check against, may be null.
    * @return A Boolean that is true when the values of this parameter are assignable to given
    * variables of given type.
    */
   public final boolean supports(Class<?> javaType) {
-    return javaType != null && javaType.isAssignableFrom(this.javaType);
+    return javaType != null && (javaType.isAssignableFrom(this.javaType)
+        || this.javaType.isPrimitive()
+        && javaType.isAssignableFrom(BeanUtil.getPrimitiveWrapperClass(this.javaType)));
   }
 
   /**

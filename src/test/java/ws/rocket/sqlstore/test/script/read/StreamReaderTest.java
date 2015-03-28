@@ -179,19 +179,19 @@ public final class StreamReaderTest {
     StreamReader reader = createReader("UPDATE people SET name=${}, birthday=${} WHERE ID=${}}");
     StringBuilder sb = new StringBuilder();
 
-    assertTrue(reader.parseSql(sb), "Expecting an expression for binding value");
+    assertEquals(reader.parseSql(sb), '{');
     assertEquals(sb.toString(), "UPDATE people SET name=?");
     reader.requireNext('}');
 
-    assertTrue(reader.parseSql(sb), "Expecting an expression for binding value");
+    assertEquals(reader.parseSql(sb), '{');
     assertEquals(sb.toString(), "UPDATE people SET name=?, birthday=?");
     reader.requireNext('}');
 
-    assertTrue(reader.parseSql(sb), "Expecting an expression for binding value");
+    assertEquals(reader.parseSql(sb), '{');
     assertEquals(sb.toString(), "UPDATE people SET name=?, birthday=? WHERE ID=?");
     reader.requireNext('}');
 
-    assertFalse(reader.parseSql(sb), "Expecting the end of the SQL script.");
+    assertEquals(reader.parseSql(sb), '}');
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
   }
 
@@ -199,7 +199,7 @@ public final class StreamReaderTest {
     StreamReader reader = createReader("SELECT '\\\\a $ {} \\\\b' FROM temp}");
     StringBuilder sb = new StringBuilder();
 
-    assertFalse(reader.parseSql(sb), "Expecting the end of the SQL script.");
+    assertEquals(reader.parseSql(sb), '}');
     assertEquals(sb.toString(), "SELECT '\\a $ {} \\b' FROM temp");
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
   }
@@ -208,8 +208,26 @@ public final class StreamReaderTest {
     StreamReader reader = createReader("SELECT '\\\\ \\${} \\{ \\} \\' FROM temp}");
     StringBuilder sb = new StringBuilder();
 
-    assertFalse(reader.parseSql(sb), "Expecting the end of the SQL script.");
+    assertEquals(reader.parseSql(sb), '}');
     assertEquals(sb.toString(), "SELECT '\\ ${} { } \\' FROM temp");
+    assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
+  }
+
+  public void shouldParseConditional() throws IOException {
+    StreamReader reader = createReader("SELECT name FROM user\r\n!(condition){ WHERE id = ${}}}");
+    StringBuilder sb = new StringBuilder();
+
+    assertEquals(reader.parseSql(sb), '(');
+    assertEquals(sb.toString(), "SELECT name FROM user\r");
+    assertFalse(reader.isEndOfStream(), "Expecting not to be at the end of stream.");
+  }
+
+  public void shouldNotParseConditional() throws IOException {
+    StreamReader reader = createReader("SELECT name FROM user!(c1){a} \n !(c2){b}\n! (c3){c}}");
+    StringBuilder sb = new StringBuilder();
+
+    assertEquals(reader.parseSql(sb), '}');
+    assertEquals(sb.toString(), "SELECT name FROM user!(c1){a} \n !(c2){b}\n! (c3){c}");
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
   }
 
