@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore.script.sql;
 
+import java.util.Arrays;
+import java.util.List;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 
@@ -24,7 +26,7 @@ import ws.rocket.sqlstore.script.QueryParam;
  * depending on input parameters. For each script there is always an SQL part which will be always
  * included (condition = always).
  */
-public final class SqlPart {
+public final class SqlPart implements SqlScript {
 
   private final SqlPartCondition condition;
 
@@ -54,40 +56,15 @@ public final class SqlPart {
     this.params = params;
   }
 
-  /**
-   * Informs whether this SQL part is applicable in the current query context depending on whether
-   * the SQL part condition is satisfied.
-   *
-   * @param ctx The current query context (required).
-   * @return A Boolean true when the SQL and parameters of this part must be included in the query.
-   */
-  public boolean isApplicable(QueryContext ctx) {
-    return this.condition.isApplicable(ctx);
+  @Override
+  public void appendSql(QueryContext ctx, StringBuilder script, List<QueryParam> params) {
+    if (this.condition.isApplicable(ctx)) {
+      script.append(this.sql);
+      params.addAll(Arrays.asList(this.params));
+    }
   }
 
-  /**
-   * The SQL of this part to be used in the query.
-   *
-   * @return A non empty string.
-   */
-  public String getSqlPart() {
-    return this.sql;
-  }
-
-  /**
-   * The SQL parameters of this part to be used in the query.
-   *
-   * @return An array, which may also be empty.
-   */
-  public QueryParam[] getParams() {
-    return this.params;
-  }
-
-  /**
-   * Informs whether this SQL part contains a reference to parameter in the OUT-parameters.
-   *
-   * @return A boolean true when this part refers to an OUT-parameter of the script.
-   */
+  @Override
   public boolean containsOutParam() {
     boolean containsOut = false;
 

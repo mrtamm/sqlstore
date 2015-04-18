@@ -14,31 +14,8 @@
  * limitations under the License.
  */
 
-package ws.rocket.sqlstore.script.sql;
-
-import ws.rocket.sqlstore.execute.QueryContext;
-
 /**
- * A condition for <code>SqlPart</code> that must always be included in the actually executed query.
+ * Contains functionality and data structures to store an SQL in memory, to support dynamic SQL
+ * construction, and to support some conditions for expressing when to use an SQL part.
  */
-public final class ConditionAlways implements SqlPartCondition {
-
-  /**
-   * This condition is accessible using this reference to singleton instance.
-   */
-  public static final ConditionAlways INSTANCE = new ConditionAlways();
-
-  private ConditionAlways() {
-  }
-
-  @Override
-  public boolean isApplicable(QueryContext ctx) {
-    return true;
-  }
-
-  @Override
-  public String toString() {
-    return "always";
-  }
-
-}
+package ws.rocket.sqlstore.script.sql;

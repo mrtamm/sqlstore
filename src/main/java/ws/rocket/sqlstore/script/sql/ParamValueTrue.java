@@ -22,6 +22,9 @@ import ws.rocket.sqlstore.script.QueryParam;
 /**
  * A condition for <code>SqlPart</code> where the provided query parameter must equal to
  * <code>Boolean.TRUE</code> to be included in the actually executed query.
+ * <p>
+ * This condition is expressed in SQLS file as
+ * <code>!(<strong>true(</strong>var.props<strong>)</strong>){...}</code>.
  */
 public final class ParamValueTrue implements SqlPartCondition {
 

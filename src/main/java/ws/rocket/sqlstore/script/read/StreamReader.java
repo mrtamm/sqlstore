@@ -507,10 +507,15 @@ public final class StreamReader implements Closeable {
         int[] cps = new int[3];
         int length = 0;
 
-        cps[length++] = cp;
-        cps[length++] = moveNext(); // expecting exclamation mark
+        cps[length++] = '\n';
 
-        if (cps[1] == '!') {
+        do {
+          cp = moveNext();
+        } while (cp == '\r' || cp == '\n');
+
+        cps[length++] = cp; // expecting exclamation mark
+
+        if (cp == '!') {
           cps[length++] = moveNext(); // expecting opening parenthesis
         }
 

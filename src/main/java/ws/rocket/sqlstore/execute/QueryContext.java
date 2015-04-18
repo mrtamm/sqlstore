@@ -21,6 +21,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.result.ResultsCollector;
@@ -43,6 +45,8 @@ public final class QueryContext {
   private final Script script;
 
   private final Map<String, Object> variables;
+
+  private final List<QueryParam> sqlParams = new ArrayList<>();
 
   private ResultsCollector resultsCollector;
 
@@ -124,12 +128,14 @@ public final class QueryContext {
   }
 
   /**
-   * Provides the SQL script to be executed.
+   * Provides the SQL script to be executed. This method call also gathers query parameters needed
+   * for the script. These will be later used by {@link #setParameters(java.sql.PreparedStatement)}
+   * and {@link #readParameters(java.sql.CallableStatement)}.
    *
    * @return The SQL script.
    */
   public String getSqlQuery() {
-    return this.script.getSql(this);
+    return script.getSqlAndParams(this, this.sqlParams);
   }
 
   /**
@@ -222,7 +228,7 @@ public final class QueryContext {
   public void setParameters(PreparedStatement stmt) throws SQLException {
     int index = 1;
     Bindings binder = Bindings.getInstance();
-    for (QueryParam param : this.script.getQueryParams(this)) {
+    for (QueryParam param : this.sqlParams) {
       binder.bindParam(this, param, stmt, index++);
     }
   }
@@ -239,7 +245,7 @@ public final class QueryContext {
   public void readParameters(CallableStatement stmt) throws SQLException {
     int index = 1;
     Bindings binder = Bindings.getInstance();
-    for (QueryParam param : this.script.getQueryParams(this)) {
+    for (QueryParam param : this.sqlParams) {
       binder.readParam(this, param, stmt, index++);
     }
     this.resultsCollector.rowCompleted();

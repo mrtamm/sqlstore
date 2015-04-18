@@ -23,6 +23,9 @@ import ws.rocket.sqlstore.script.QueryParam;
  * A condition for <code>SqlPart</code> where the provided query parameter value must be either
  * null, an empty string, an empty array or an empty collection to be included in the actually
  * executed query.
+ * <p>
+ * This condition is expressed in SQLS file as
+ * <code>!(<strong>empty(</strong>var.props<strong>)</strong>){...}</code>.
  */
 public final class ParamValueEmpty implements SqlPartCondition {
 

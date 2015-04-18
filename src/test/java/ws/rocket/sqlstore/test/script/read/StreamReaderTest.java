@@ -214,11 +214,11 @@ public final class StreamReaderTest {
   }
 
   public void shouldParseConditional() throws IOException {
-    StreamReader reader = createReader("SELECT name FROM user\r\n!(condition){ WHERE id = ${}}}");
+    StreamReader reader = createReader("SELECT name FROM user\r\n!(condition){ WHERE id = ${}}\n}");
     StringBuilder sb = new StringBuilder();
 
     assertEquals(reader.parseSql(sb), '(');
-    assertEquals(sb.toString(), "SELECT name FROM user\r");
+    assertEquals(sb.toString(), "SELECT name FROM user");
     assertFalse(reader.isEndOfStream(), "Expecting not to be at the end of stream.");
   }
 

@@ -40,6 +40,8 @@ import ws.rocket.sqlstore.script.sql.ParamValueNonEmpty;
 import ws.rocket.sqlstore.script.sql.ParamValueTrue;
 import ws.rocket.sqlstore.script.sql.SqlPart;
 import ws.rocket.sqlstore.script.sql.SqlPartCondition;
+import ws.rocket.sqlstore.script.sql.SqlParts;
+import ws.rocket.sqlstore.script.sql.SqlScript;
 
 /**
  * Helper class for parsing meta-data of a script from an SQLS file and produces a valid
@@ -127,7 +129,7 @@ public final class ScriptReader implements Closeable {
 
   private String name;
 
-  private SqlPart[] sqlParts;
+  private SqlScript sqlScript;
 
   private QueryHints hints;
 
@@ -248,41 +250,57 @@ public final class ScriptReader implements Closeable {
   public ScriptReader parseSql() throws IOException {
     this.reader.requireNext('{');
     this.reader.skipWsp();
+    this.sqlScript = parseSqlPart(ConditionAlways.INSTANCE, new StringBuilder(1024));
+    return this;
+  }
 
-    List<SqlPart> parts = new ArrayList<>();
-    SqlPartCondition condition = ConditionAlways.INSTANCE;
+  private SqlScript parseSqlPart(SqlPartCondition condition, StringBuilder sb) throws IOException {
+    sb.setLength(0);
+    int cp = this.reader.parseSql(sb);
 
-    StringBuilder sql = new StringBuilder(1024);
-    int cp = this.reader.parseSql(sql);
+    List<SqlScript> innerParts = new ArrayList<>();
 
     while (true) {
       if (cp == '{') {
         parseScriptParam();
-      } else {
-        String script = sql.toString();
-        boolean hasScript = script.trim().length() > 0;
 
-        if (hasScript) {
-          parts.add(new SqlPart(condition, script, this.params.resetQueryParams()));
-          sql.setLength(0);
+      } else {
+        // A little hack to trim whitespace from the end of the last part.
+        if (cp == '}' && condition == ConditionAlways.INSTANCE) {
+          while (sb.length() > 0 && Character.isWhitespace(sb.codePointAt(sb.length() - 1))) {
+            sb.setLength(sb.length() - 1);
+          }
         }
 
-        if (cp == '(') {
-          condition = parseScriptCondition();
-        } else if (cp == '}') {
-          if (parts.size() == 1 || !hasScript) {
-            break;
-          }
-          condition = ConditionAlways.INSTANCE;
+        String script = sb.toString();
+
+        if (sb.length() > 0 && script.trim().length() > 0) {
+          innerParts.add(new SqlPart(condition, script, this.params.resetQueryParams()));
+        }
+
+        if (cp == '}') {
+          break;
+        } else if (cp == '(') {
+          innerParts.add(parseSqlPart(parseScriptCondition(), sb));
+        } else {
+          throw new IllegalStateException("Got unexpected symbol from StreamReader.parseSql(): '"
+              + new String(Character.toChars(cp)) + "' (code point: " + cp + ").");
         }
       }
 
-      cp = this.reader.parseSql(sql);
+      cp = this.reader.parseSql(sb);
     }
 
-    this.sqlParts = parts.toArray(new SqlPart[parts.size()]);
+    sb.setLength(0);
 
-    return this;
+    if (innerParts.isEmpty()) {
+      throw new ScriptSetupException("Empty script block on line %d and column %d.",
+          this.reader.getLine(), this.reader.getColumn());
+    } else if (innerParts.size() == 1) {
+      return innerParts.get(0);
+    }
+
+    return new SqlParts(condition, innerParts.toArray(new SqlScript[innerParts.size()]));
   }
 
   /**
@@ -293,10 +311,10 @@ public final class ScriptReader implements Closeable {
    * @return The current script information.
    */
   public Script createScript() {
-    Script result = new Script(this.name, this.line, this.sqlParts, this.params, this.hints);
+    Script result = new Script(this.name, this.line, this.sqlScript, this.params, this.hints);
     this.params.cleanup(result);
     this.name = null;
-    this.sqlParts = null;
+    this.sqlScript = null;
     this.hints = null;
     return result;
   }
@@ -305,7 +323,7 @@ public final class ScriptReader implements Closeable {
   public void close() throws IOException {
     this.params.cleanup(null);
     this.name = null;
-    this.sqlParts = null;
+    this.sqlScript = null;
     this.hints = null;
     this.reader.close();
   }

@@ -16,13 +16,11 @@
 
 package ws.rocket.sqlstore.script;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.read.ParamsSet;
-import ws.rocket.sqlstore.script.sql.SqlPart;
+import ws.rocket.sqlstore.script.sql.SqlScript;
 
 /**
  * Contains loaded information about a script.
@@ -66,7 +64,7 @@ public final class Script {
 
   private final int line;
 
-  private final SqlPart[] sqlParts;
+  private final SqlScript sqlScript;
 
   private final QueryHints hints;
 
@@ -92,7 +90,7 @@ public final class Script {
    *
    * @param name The script name by which it is called. Required.
    * @param line The line number where this script is defined. Required.
-   * @param sqlParts The contained SQL statement/script with parameters. The script may be divided
+   * @param sqlScript The contained SQL statement/script with parameters. The script may be divided
    * into multiple parts some of which may be conditional and thus omitted from an actual query
    * depending on input parameters. Required.
    * @param params An engine instance taking care of the work related to binding parameters for
@@ -100,20 +98,18 @@ public final class Script {
    * @param hints Optional execution hints for the SQL script, if provided in the SQLS file.
    * Otherwise may leave it null.
    */
-  public Script(String name, int line, SqlPart[] sqlParts, ParamsSet params,
-      QueryHints hints) {
-
+  public Script(String name, int line, SqlScript sqlScript, ParamsSet params, QueryHints hints) {
     if (name == null || name.isEmpty()) {
       throw new IllegalArgumentException("Query name is undefined");
     } else if (line < 1) {
       throw new IllegalArgumentException("Bad line number for query location");
-    } else if (sqlParts == null || sqlParts.length == 0) {
+    } else if (sqlScript == null) {
       throw new IllegalArgumentException("SQL script is undefined");
     }
 
     this.name = name;
     this.line = line;
-    this.sqlParts = sqlParts;
+    this.sqlScript = sqlScript;
     this.hints = hints;
 
     this.inputParams = params.getInputParams();
@@ -124,16 +120,7 @@ public final class Script {
     if (this.inputParams.isEmpty()) {
       this.statementType = StatementType.SIMPLE;
     } else {
-      boolean containsOut = false;
-
-      for (SqlPart part : this.sqlParts) {
-        if (part.containsOutParam()) {
-          containsOut = true;
-          break;
-        }
-      }
-
-      if (containsOut) {
+      if (this.sqlScript.containsOutParam()) {
         this.statementType = StatementType.CALL;
       } else {
         this.statementType = StatementType.PREPARED;
@@ -163,19 +150,12 @@ public final class Script {
    * Provides the SQL query to be used as it is.
    *
    * @param ctx The query context where the SQL is about to be executed.
+   * @param params A list to be filled with query parameters to be used with the returned SQL.
    * @return The SQL query string.
    */
-  public String getSql(QueryContext ctx) {
-    if (this.sqlParts.length == 1) {
-      return this.sqlParts[0].getSqlPart();
-    }
-
-    StringBuilder sql = new StringBuilder();
-    for (SqlPart part : this.sqlParts) {
-      if (part.isApplicable(ctx)) {
-        sql.append(part.getSqlPart());
-      }
-    }
+  public String getSqlAndParams(QueryContext ctx, List<QueryParam> params) {
+    StringBuilder sql = new StringBuilder(128);
+    this.sqlScript.appendSql(ctx, sql, params);
     return sql.toString();
   }
 
@@ -221,26 +201,6 @@ public final class Script {
    */
   public OutputParams getOutputParams() {
     return this.outputParams;
-  }
-
-  /**
-   * Provides the list of parameters used in the SQL script.
-   *
-   * @param ctx The query context where the SQL is about to be executed.
-   * @return A list (possibly empty) of query parameters.
-   */
-  public List<QueryParam> getQueryParams(QueryContext ctx) {
-    if (this.sqlParts.length == 1) {
-      return Arrays.asList(this.sqlParts[0].getParams());
-    }
-
-    List<QueryParam> params = new ArrayList<>();
-    for (SqlPart part : this.sqlParts) {
-      if (part.isApplicable(ctx)) {
-        params.addAll(Arrays.asList(part.getParams()));
-      }
-    }
-    return params;
   }
 
   /**
@@ -297,9 +257,7 @@ public final class Script {
     }
 
     str.append("\n{");
-    for (SqlPart part : this.sqlParts) {
-      str.append(part);
-    }
+    str.append(this.sqlScript);
     str.append("}\n");
 
     return str.toString();
