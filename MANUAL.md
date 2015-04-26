@@ -19,16 +19,20 @@ Tabel of Contents
  5. [Java Type Aliases](#java-type-aliases)
  6. [SQL Script Declaration](#sql-script-declaration)
  7. [SQL Script Parameters](#sql-script-parameters)
+
     1. [Script Input Parameters](#script-input-parameters)
     2. [Script Output Parameters](#script-output-parameters)
     3. [Updated Script Input Parameters](#updated-script-input-parameters)
     4. [Specifying Result-Set Type](#specifying-result-set-type)
     5. [Statement Hints](#statement-hints)
+
 10. [SQL statement](#sql-statement)
+
     1. [Dynamically Included SQL Statement Parts](#dynamically-included-sql-statement-parts)
     1. [Binding for Script Parameters](#binding-for-script-parameters)
     2. [Support for Stored Procedures](#support-for-stored-procedures)
     3. [Escaping Special Characters](#escaping-special-characters)
+
 11. [Additional Information](#additional-information)
 
 
