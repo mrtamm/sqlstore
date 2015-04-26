@@ -37,8 +37,8 @@ Why SqlStore?
 
 The library was designed and created to address these problems:
 
-1. No lightweight and framework-independent libraries to simplify execution of
-   SQL scripts.
+1. Too few lightweight and framework-independent libraries to simplify
+   execution of SQL scripts.
 2. Using JDBC API directly provides faster execution but the code becomes
    repetitive and verbose, accidental typos too easy to make.
 3. SQL scripts do not fit well into Java code. Short scripts are fine, of
@@ -87,8 +87,8 @@ and invoking execution. There are several Java methods for the second part
 depending on whether the script is expected to return any results and how many
 is to be returned.
 
-Here are few examples for class com.sample.db.AuthenticationProvider. First the
-scripts file in class-path.
+Here are few examples for class _com.sample.db.AuthenticationProvider_. First
+is the scripts file in class-path.
 
 _com/sample/db/AuthenticationProvider.sqls_:
 
@@ -134,9 +134,9 @@ public class AuthenticationProvider {
 ```
 
 Regarding the previous sample, notice how in the scripts file the binding
-between parameter values and the SQL script is done. The places where the
-parameter values are substituted are actually replaced with question marks (?),
-as usually with JDBC statements. At execution time, parameter values are
+between parameter values and the SQL script is done. The places, where the
+parameter values are substituted, are actually replaced with question marks
+(?), as usually with JDBC statements. At execution time, parameter values are
 evaluated based on given expressions and are bound to the JDBC statement.
 
 SqlStore also supports transactions as long as the block of statements is
@@ -435,24 +435,25 @@ parameters.
 Although it is possible to compose SQL statements that apply some filters or
 not depending on whether a parameter value is defined, it would be more
 efficient if the statement would just omit a filter clause when its parameter
-is undefined. Of course, describing such scripts where parts may be omitted
+is undefined. Of course, describing such scripts, where parts may be omitted,
 can become complicated to comprehend, it's still often more convenient than
 creating multiple SQL statements for different scenarios.
 
 SqlStore supports dynamic SQL statement parts by describing a condition (when
 to use that part) and the block to include. The condition is an input parameter
-expression that must not be null nor empty (string/array/collection) to include
-the block.
+expression that must not evaluate to null nor empty (string/array/collection)
+to include the block.
 
 Conditional blocks are expressed within SQL script by placing the condition on
 a separate line (starting with an exclamation mark on the first column):
 
 ```
-!(_condition_){ _SQL-script-part_ }
+!(condition){ SQL-script-part }
 ```
 
-Note that there must be no whitespace until the SQL script part block. The
-block itself may contain several lines and its whitespace will be preserved.
+Note that there must be no whitespace until the SQL script part block (i.e.
+from the exclamation mark to the opening curly brace, included). The block
+itself may contain several lines and its whitespace will be preserved.
 
 The `condition` may be one of the following:
 
@@ -462,14 +463,17 @@ The `condition` may be one of the following:
    still evaluates to true.
 2. `empty(inParam.expression)` -- similar to previous, however the opposite:
    the expression must evaluate to null or an empty value.
-3. `true(inParam.expression)` -- the expression must evaluate to `true`.
+3. `true(inParam.expression)` -- the expression must evaluate to a value that
+   is equal to Boolean `true`.
 
 To support more complicated expressions, the preferred method is to define the
 condition in a method of an IN-parameter that returns `true` or `false`
 depending on whether to include the block or not.
 
-Here is an example:
+Here is an example with four conditional blocks using the default condition
+expression (the first one of the three condition types):
 
+```
 findUsers
   IN(UserSearchFilter f)
   OUT(UsersListRow[id, username, name, active, updated]) {
@@ -481,6 +485,7 @@ SELECT id, username, name, active, date_updated
 !(f.updatedBegin){ AND date_updated <= ${f.updatedBegin} }
 !(f.updatedEnd){ AND date_updated >= ${f.updatedEnd} }
 }
+```
 
 ### Binding for Script Parameters
 
