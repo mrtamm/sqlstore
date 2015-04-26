@@ -9,6 +9,28 @@ scripts. The Java class needs to identify the script to be executed by name, and
 pass the required parameters.
 
 
+Tabel of Contents
+-----------------
+
+ 1. [Why SqlStore?](#why-sqlstore)
+ 2. [How Does It Work?](#how-does-it-work)
+ 3. [The Java API of SqlStore](#the-java-api-of-sqlstore)
+ 4. [The SQL Scripts File](#the-sql-scripts-file)
+ 5. [Java Type Aliases](#java-type-aliases)
+ 6. [SQL Script Declaration](#sql-script-declaration)
+ 7. [SQL Script Parameters](#sql-script-parameters)
+    7.1. [Script Input Parameters](#script-input-parameters)
+    7.2. [Script Output Parameters](#script-output-parameters)
+    7.3. [Updated Script Input Parameters](#updated-script-input-parameters)
+    7.4. [Specifying Result-Set Type](#specifying-result-set-type)
+    7.5. [Statement Hints](#statement-hints)
+10. [SQL statement](#sql-statement)
+    10.1. [Dynamically Included SQL Statement Parts](#dynamically-included-sql-statement-parts)
+    10.1. [Binding for Script Parameters](#binding-for-script-parameters)
+    10.2. [Support for Stored Procedures](#support-for-stored-procedures)
+    10.3. [Escaping Special Characters](#escaping-special-characters)
+11. [Additional Information](#additional-information)
+
 
 Why SqlStore?
 -------------
@@ -28,17 +50,15 @@ The library was designed and created to address these problems:
 
 SqlStore supports the most commonly used part of the JDBC API: plain statements,
 prepared statements, call statements (but users of SqlStore don't have to think
-about them). SqlStore itself does not initiate or close connections but just
-uses are previously initiated JDBC connection or data-source.
+about them). In addition, dynamically including or excluding parts of the SQL
+script is also possible when defining scripts. SqlStore itself does not
+initiate or close connections but just uses are previously initiated JDBC
+connection or data-source.
 
-SqlStore does not (yet) support following SQL and JDBC features:
-
-* dynamically constructed SQL for queries depending on the state of parameters,
-* dynamically generated _WHERE x IN (...)_ clauses for a list of values,
-* batch execution of statements
-
-Plans for these features are not yet fixed but they will not make into the
-first release (0.1) for sure.
+SqlStore does not (yet) support dynamically generated _WHERE x IN (...)_
+clauses for a list of values, and batch execution of statements. However, these
+are considered and might be included in future versions when technically
+feasible.
 
 
 How Does It Work?
@@ -66,6 +86,58 @@ Usage of SqlStore Java API consists of two steps: query lookup with parameters,
 and invoking execution. There are several Java methods for the second part
 depending on whether the script is expected to return any results and how many
 is to be returned.
+
+Here are few examples for class com.sample.db.AuthenticationProvider. First the
+scripts file in class-path.
+
+_com/sample/db/AuthenticationProvider.sqls_:
+
+```
+isAuthenticationValid IN(String username, String passwordHash) OUT(boolean) {
+SELECT COUNT(*)
+  FROM users
+ WHERE username = ${username}
+   AND passhash = ${passowrdHash}
+   AND active = 'Y'
+}
+
+addLoginAttempt IN(com.sample.db.login.LoginAttempt login) {
+INSERT INTO login_attempt (id, username, ip_address, auth_time, success)
+VALUES (login_attempt_seq.nextval, ${login.username}, ${login.ipAddress}, SYSDATE, ${login.success})
+}
+```
+
+_com/sample/db/AuthenticationProvider.java_:
+
+```java
+package com.sample.db;
+
+import com.sample.db.login.LoginAttempt;
+import ws.rocket.sqlstore.SqlStore;
+
+public class AuthenticationProvider {
+
+  private final SqlStore sqlStore = SqlStore.load(AuthenticationProvider.class);
+
+  public boolean authenticate(LoginAttempt loginAttempt) {
+    boolean valid = sqlStore.query("isAuthenticationValid",
+        loginAttempt.getUsername(),
+        loginAttempt.getPasswordHash()).forValue(boolean.class);
+
+    loginAttempt.setSuccess(valid);
+
+    sqlStore.query("addLoginAttempt", loginAttempt).execute();
+
+    return valid;
+  }
+}
+```
+
+Regarding the previous sample, notice how in the scripts file the binding
+between parameter values and the SQL script is done. The places where the
+parameter values are substituted are actually replaced with question marks (?),
+as usually with JDBC statements. At execution time, parameter values are
+evaluated based on given expressions and are bound to the JDBC statement.
 
 SqlStore also supports transactions as long as the block of statements is
 defined together:
@@ -324,13 +396,13 @@ supports specifying the hints at script declaration next to other parameters:
 
 where following hints are supported:
 
-1. `queryTimeout=_int in milliseconds_`
-2. `fetchSize=_int_`
-3. `maxRows=_int_`
-4. `maxFieldSize=_int_`
-5. `poolable=_true or false_`
-6. `escapeProcessing=_true or false_`
-7. `readOnly=_true or false_`
+1. `queryTimeout=`_int in milliseconds_
+2. `fetchSize=`_int_
+3. `maxRows=`_int_
+4. `maxFieldSize=`_int_
+5. `poolable=`_true or false_
+6. `escapeProcessing=`_true or false_
+7. `readOnly=`_true or false_
 
 These are the properties of JDBC Statement class and documented there.
 
@@ -357,6 +429,58 @@ SqlStore also sees that this is a simple statement and does not take any
 parameters.
 
 
+
+### Dynamically Included SQL Statement Parts
+
+Although it is possible to compose SQL statements that apply some filters or
+not depending on whether a parameter value is defined, it would be more
+efficient if the statement would just omit a filter clause when its parameter
+is undefined. Of course, describing such scripts where parts may be omitted
+can become complicated to comprehend, it's still often more convenient than
+creating multiple SQL statements for different scenarios.
+
+SqlStore supports dynamic SQL statement parts by describing a condition (when
+to use that part) and the block to include. The condition is an input parameter
+expression that must not be null nor empty (string/array/collection) to include
+the block.
+
+Conditional blocks are expressed within SQL script by placing the condition on
+a separate line (starting with an exclamation mark on the first column):
+
+```
+!(_condition_){ _SQL-script-part_ }
+```
+
+Note that there must be no whitespace until the SQL script part block. The
+block itself may contain several lines and its whitespace will be preserved.
+
+The `condition` may be one of the following:
+
+1. `inParam.expression` -- an expression based on an input parameter, e.g. `f`
+   or `f.prop1.prop2`. This evaluates to true when the expression value is not
+   null and not an empty string/array/collection. For example, Boolean `false`
+   still evaluates to true.
+2. `empty(inParam.expression)` -- similar to previous, however the opposite:
+   the expression must evaluate to null or an empty value.
+3. `true(inParam.expression)` -- the expression must evaluate to `true`.
+
+To support more complicated expressions, the preferred method is to define the
+condition in a method of an IN-parameter that returns `true` or `false`
+depending on whether to include the block or not.
+
+Here is an example:
+
+findUsers
+  IN(UserSearchFilter f)
+  OUT(UsersListRow[id, username, name, active, updated]) {
+SELECT id, username, name, active, date_updated
+  FROM users
+ WHERE active=${f.active}
+!(f.name){ AND name LIKE ${f.name} }
+!(f.username){ AND name LIKE ${f.username} }
+!(f.updatedBegin){ AND date_updated <= ${f.updatedBegin} }
+!(f.updatedEnd){ AND date_updated >= ${f.updatedEnd} }
+}
 
 ### Binding for Script Parameters
 
