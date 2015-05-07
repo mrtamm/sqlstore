@@ -93,6 +93,7 @@ public final class ScriptReader implements Closeable {
    */
   public static Map<String, Script> load(Class<?> clazz) throws IOException {
     Map<String, Script> results = new HashMap<>();
+    long time = System.currentTimeMillis();
     String resourceName = clazz.getSimpleName() + ".sqls";
     InputStream input = clazz.getResourceAsStream(resourceName);
 
@@ -118,7 +119,8 @@ public final class ScriptReader implements Closeable {
       }
     }
 
-    LOG.info("Read {} script(s) from {}", results.size(), resourceName);
+    time = System.currentTimeMillis() - time;
+    LOG.info("Read {} script(s) from {} in {} ms.", results.size(), resourceName, time);
 
     return results;
   }

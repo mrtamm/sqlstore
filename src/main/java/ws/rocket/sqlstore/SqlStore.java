@@ -18,7 +18,12 @@ package ws.rocket.sqlstore;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 import ws.rocket.sqlstore.connection.ConnectionManager;
@@ -67,7 +72,7 @@ public final class SqlStore {
    * @return An SQL store containing all the scripts from the SQLS file.
    * @throws ScriptSetupException When the resource could not be properly read, or it contained
    * syntax or setup errors.
-   * @see DataSourceConnectionManager
+   * @see SharedConnectionManager
    */
   public static SqlStore load(Class<?> forClass) {
     try {
@@ -95,9 +100,7 @@ public final class SqlStore {
    */
   public static SqlStore load(Class<?> forClass, DataSource dataSource) {
     try {
-      return new SqlStore(
-          new DataSourceConnectionManager(dataSource),
-          ScriptReader.load(forClass));
+      return new SqlStore(new DataSourceConnectionManager(dataSource), ScriptReader.load(forClass));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -125,6 +128,74 @@ public final class SqlStore {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Attempts to load scripts for given class, and register a database connection so that loaded
+   * scripts could be executed by name at any time, all put behind a proxy that would invoke the
+   * SqlStore scripts.
+   * <p>
+   * The resource containing the scripts is expected to have same path as the given class package,
+   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
+   * extension (case-sensitive, again).
+   *
+   * @param <P> The proxy instance type, also the class for which scripts are loaded.
+   * @param forClass The class for which the SQLS script is parsed.
+   * @return An SQL store containing all the scripts from the SQLS file.
+   * @throws ScriptSetupException When the resource could not be properly read, or it contained
+   * syntax or setup errors.
+   * @see SharedConnectionManager
+   */
+  public static <P> P proxy(Class<P> forClass) {
+    return createProxy(forClass, load(forClass));
+  }
+
+  /**
+   * Attempts to load scripts for given class, and register a database connection so that loaded
+   * scripts could be executed by name at any time, all put behind a proxy that would invoke the
+   * SqlStore scripts.
+   * <p>
+   * The resource containing the scripts is expected to have same path as the given class package,
+   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
+   * extension (case-sensitive, again).
+   *
+   * @param <P> The proxy instance type, also the class for which scripts are loaded.
+   * @param forClass The class for which the SQLS script is parsed.
+   * @param dataSource The data-source to use at runtime in order to obtain connections and execute
+   * scripts.
+   * @return A proxy of the given class for calling the SqlStore scripts.
+   * @throws ScriptSetupException When the resource could not be properly read, or it contained
+   * syntax or setup errors.
+   * @see DataSourceConnectionManager
+   */
+  public static <P> P proxy(Class<P> forClass, DataSource dataSource) {
+    return createProxy(forClass, load(forClass, dataSource));
+  }
+
+  /**
+   * Attempts to load scripts for given class, and register a database connection so that loaded
+   * scripts could be executed by name at any time, all put behind a proxy that would invoke the
+   * SqlStore scripts.
+   * <p>
+   * The resource containing the scripts is expected to have same path as the given class package,
+   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
+   * extension (case-sensitive, again).
+   *
+   * @param <P> The proxy instance type, also the class for which scripts are loaded.
+   * @param forClass The class for which the SQLS script is parsed.
+   * @param connection The database connection to use at runtime in order to execute scripts.
+   * @return A proxy of the given class for calling the SqlStore scripts.
+   * @throws ScriptSetupException When the resource could not be properly read, or it contained
+   * syntax or setup errors.
+   * @see SingleConnectionManager
+   */
+  public static <P> P proxy(Class<P> forClass, Connection connection) {
+    return createProxy(forClass, load(forClass, connection));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <P> P createProxy(Class<P> c, SqlStore s) {
+    return (P) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c }, s.proxyHandler());
   }
 
   private SqlStore(ConnectionManager connectionHandler, Map<String, Script> scripts) {
@@ -196,6 +267,16 @@ public final class SqlStore {
     }
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(2048);
+    sb.append("SqlStore (").append(this.scripts.size()).append(" scripts):\n");
+    for (Script script : this.scripts.values()) {
+      sb.append(script.toString()).append('\n');
+    }
+    return sb.toString();
+  }
+
   private Query composeQuery(String name, Object[] args) {
     Script script = this.scripts.get(name);
     if (script == null) {
@@ -203,11 +284,113 @@ public final class SqlStore {
     }
 
     QueryContext ctx = new QueryContext(script, args);
-    ConnectionManager con = this.connectionManager;
-    if (con == null) {
-      con = SharedConnectionManager.getInstance();
+    ConnectionManager cm = this.connectionManager;
+    if (cm == null) {
+      cm = SharedConnectionManager.getInstance();
     }
-    return new Query(con, ctx);
+    return new Query(cm, ctx);
+  }
+
+  private ProxyHandler proxyHandler() {
+    return new ProxyHandler(this);
+  }
+
+  /**
+   * Method invocation handler that translates class to abstract methods of the target class into
+   * SqlStore script invocations. To debug the SqlStore instance behind the proxy, use the
+   * <code>toString()</code> method.
+   */
+  private class ProxyHandler implements InvocationHandler {
+
+    private final SqlStore s;
+
+    public ProxyHandler(SqlStore s) {
+      if (s == null) {
+        throw new NullPointerException("SqlStore instance is undefined.");
+      }
+      this.s = s;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      Object result = null;
+
+      if (method.getDeclaringClass() == Object.class) {
+        result = handleObjectMethods(proxy, method, args);
+
+      } else if (!Modifier.isAbstract(method.getModifiers())) {
+        result = method.invoke(proxy, args);
+
+      } else {
+        Query query = this.s.query(method.getName(), args);
+        Class<?> resultType = method.getReturnType();
+
+        if (Void.TYPE.equals(resultType)) {
+          query.execute();
+
+        } else if (int.class.equals(resultType)
+            && method.getAnnotation(UpdateCount.class) != null) {
+          result = query.forUpdateCount();
+
+        } else if (Map.class.equals(resultType)) {
+          result = query.forMap(getKeyType(method), getKeyValueType(method));
+
+        } else if (List.class.equals(resultType)) {
+          result = query.forValues(getRowType(method));
+
+        } else if (Object[][].class.equals(resultType)) {
+          result = query.forRows(getRowTypes(method));
+
+        } else if (Object[].class.equals(resultType)) {
+          result = query.forRow(getRowTypes(method));
+
+        } else {
+          result = query.forValue(resultType);
+        }
+      }
+
+      return result;
+    }
+
+    private Object handleObjectMethods(Object proxy, Method method, Object[] args) {
+      Object result = null;
+
+      switch (method.getName()) {
+        case "toString":
+          String className = proxy.getClass().getInterfaces()[0].getName();
+          result = "SqlStore proxy for " + className + ":\n" + this.s;
+          break;
+        case "equals":
+          result = proxy == args[0];
+          break;
+        case "hashCode":
+          result = System.identityHashCode(proxy);
+          break;
+      }
+
+      return result;
+    }
+
+    private Class<?> getRowType(Method method) {
+      ResultRow r = method.getAnnotation(ResultRow.class);
+      return r != null && r.value() != null && r.value().length > 0 ? r.value()[0] : null;
+    }
+
+    private Class<?>[] getRowTypes(Method method) {
+      ResultRow r = method.getAnnotation(ResultRow.class);
+      return r != null && r.value() != null && r.value().length > 0 ? r.value() : null;
+    }
+
+    private Class<?> getKeyType(Method method) {
+      ResultRow r = method.getAnnotation(ResultRow.class);
+      return r != null && r.value() != null && r.value().length > 0 ? r.value()[0] : null;
+    }
+
+    private Class<?> getKeyValueType(Method method) {
+      ResultRow r = method.getAnnotation(ResultRow.class);
+      return r != null && r.value() != null && r.value().length > 1 ? r.value()[1] : null;
+    }
+
   }
 
 }

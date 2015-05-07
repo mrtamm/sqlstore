@@ -37,16 +37,16 @@ import ws.rocket.sqlstore.test.model.Person;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
- *
- * @author Martti Tamm
+ * Integration tests for checking the overall functionality through SqlStore class.
  */
 public class SqlStoreTest {
 
   private BasicDataSource dataSource;
 
-  private SqlStore sqlStore;
+  private ScriptsFacade scripts;
 
   @BeforeClass
   public void setUp() throws SQLException, IOException {
@@ -93,8 +93,11 @@ public class SqlStoreTest {
 
   @Test
   public void executeQueries() throws SQLException {
-    this.sqlStore = SqlStore.load(getClass());
-    this.sqlStore.printState(System.out);
+    this.scripts = SqlStore.proxy(ScriptsFacade.class);
+
+    assertTrue(this.scripts.equals(this.scripts), "The proxy must equal to itself.");
+    System.out.println("HashCode for the proxy: " + this.scripts.hashCode());
+    System.out.println(this.scripts.toString());
 
     SharedConnectionManager.register(this.dataSource);
     boolean tablesCreated = false;
@@ -115,8 +118,8 @@ public class SqlStoreTest {
   }
 
   private void createTables() {
-    this.sqlStore.query("createTablePerson").execute();
-    this.sqlStore.query("createSampleFunction").execute();
+    this.scripts.createTablePerson();
+    this.scripts.createSampleFunction();
   }
 
   private void addRecords() {
@@ -134,7 +137,7 @@ public class SqlStoreTest {
     person.setName(name);
     person.setDateOfBirth(birthDate);
 
-    int updateCount = this.sqlStore.query("insertPerson", person).forUpdateCount();
+    int updateCount = this.scripts.insertPerson(person);
 
     assertEquals(updateCount, 1, "checking the number of rows updated");
     assertEquals(person.getId(), expectId, "checking the generated ID");
@@ -149,18 +152,18 @@ public class SqlStoreTest {
     selectPerson(5L, false);
 
     // Checking that both queries would return equal records.
-    List<Person> persons = this.sqlStore.query("findPersons", true).forValues(Person.class);
+    List<Person> persons = this.scripts.findPersons(true);
     assertEquals(persons.size(), 4, "checking Persons count");
 
     for (Person person : persons) {
-      Person p = this.sqlStore.query("findPersonById", person.getId()).forValue(Person.class);
+      Person p = this.scripts.findPersonById(person.getId());
       assertNotNull(p, "query should return a Person object");
       assertEquals(p, person, "'findPersons' and 'findPersonById' should return equal Persons");
     }
   }
 
   private void selectPerson(Long id, boolean nonEmpty) {
-    Person p = this.sqlStore.query("findPersonById", id).forValue(Person.class);
+    Person p = this.scripts.findPersonById(id);
 
     if (nonEmpty) {
       assertNotNull(p, "query should return a Person object");
@@ -172,11 +175,11 @@ public class SqlStoreTest {
 
   private void deleteRecords() {
     for (long id = 4; id > 0; id--) {
-      int count = this.sqlStore.query("deletePerson", id).forUpdateCount();
+      int count = this.scripts.deletePerson(id);
       assertEquals(count, 1, "checking the number of rows updated (expecting one)");
     }
 
-    int count = this.sqlStore.query("deletePerson", 4L).forUpdateCount();
+    int count = this.scripts.deletePerson(4L);
     assertEquals(count, 0, "checking the number of rows updated (none expected)");
   }
 
@@ -186,8 +189,8 @@ public class SqlStoreTest {
   }
 
   private void dropTables() {
-    this.sqlStore.query("dropTablePerson").execute();
-    this.sqlStore.query("dropSampleFunction").execute();
+    this.scripts.dropTablePerson();
+    this.scripts.dropSampleFunction();
   }
 
   private static Date toDate(int year, int month, int day) {

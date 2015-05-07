@@ -84,19 +84,21 @@ public final class InputParams {
    * @return A map where the values can be looked up by their parameter names.
    */
   public Map<String, Object> bind(Object[] args) {
-    if (args.length != this.params.length) {
+    int argsLength = args != null ? args.length : 0;
+
+    if (argsLength != this.params.length) {
       throw new ScriptExecuteException("Script input arguments amount mismatch: "
-          + "expected %d, got %d", this.params.length, args.length);
+          + "expected %d, got %d", this.params.length, argsLength);
     }
 
     Map<String, Object> context;
 
-    if (args.length == 0) {
+    if (argsLength == 0) {
       context = Collections.emptyMap();
     } else {
-      context = new HashMap<>(args.length, 1f);
+      context = new HashMap<>(argsLength, 1f);
 
-      for (int i = 0; i < args.length; i++) {
+      for (int i = 0; i < argsLength; i++) {
         this.params[i].validate(args[i], i);
         context.put(this.params[i].getName(), args[i]);
       }
