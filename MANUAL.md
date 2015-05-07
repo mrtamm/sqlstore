@@ -29,7 +29,8 @@ Tabel of Contents
   1. [Binding for Script Parameters](#binding-for-script-parameters)
   2. [Support for Stored Procedures](#support-for-stored-procedures)
   3. [Escaping Special Characters](#escaping-special-characters)
-11. [Additional Information](#additional-information)
+11. Logging (#logging)
+12. [Additional Information](#additional-information)
 
 
 Why SqlStore?
@@ -567,6 +568,22 @@ and keeps them as part of the SQL string when they are in sequence "{" before
 confused and it's inevitable to escape them: `\} \{`.
 
 It is possible to escape the escape-character as well: `\\{` will result `\{`.
+
+
+Logging
+-------
+
+SqlStore uses the SLF4J logging facade API for exposing its activity details. The logger names have
+prefix `ws.rocket.sqlstore`. Usually the INFO-level should be sufficient, as it informs which script
+files are parsed and how much time the loading process took. DEBUG-level adds details about some
+steps involved in executing scripts.
+
+There are some additional TRACE-level loggers when time performance needs to be analyzed:
+
+1. `ws.rocket.sqlstore.timer.EXEC` - logs the time spent for executing a script (`Query.execute()`).
+2. `ws.rocket.sqlstore.timer.DB` - logs the time spent for just executing a prepared JDBC statement.
+
+Both loggers report both script name and duration in milliseconds.
 
 
 Additional Information
