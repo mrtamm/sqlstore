@@ -29,7 +29,7 @@ Tabel of Contents
   1. [Binding for Script Parameters](#binding-for-script-parameters)
   2. [Support for Stored Procedures](#support-for-stored-procedures)
   3. [Escaping Special Characters](#escaping-special-characters)
-11. Logging (#logging)
+11. [Logging](#logging)
 12. [Additional Information](#additional-information)
 
 
