@@ -15,6 +15,11 @@ Tabel of Contents
 1. [Why SqlStore?](#why-sqlstore)
 2. [How Does It Work?](#how-does-it-work)
 3. [The Java API of SqlStore](#the-java-api-of-sqlstore)
+  1. [Working With SqlStore Instance](#working-with-sqlstore-instance)
+  2. [Working With SqlStore Through Proxy Interface](#working-with-sqlstore-through-proxy-interface)
+  3. [Statement Parameter Value Binding](#statement-parameter-value-binding)
+  4. [Exception Handling](#exception-handling)
+  5. [Inspection](#inspection)
 4. [The SQL Scripts File](#the-sql-scripts-file)
 5. [Java Type Aliases](#java-type-aliases)
 6. [SQL Script Declaration](#sql-script-declaration)
@@ -26,9 +31,9 @@ Tabel of Contents
   5. [Statement Hints](#statement-hints)
 10. [SQL statement](#sql-statement)
   1. [Dynamically Included SQL Statement Parts](#dynamically-included-sql-statement-parts)
-  1. [Binding for Script Parameters](#binding-for-script-parameters)
-  2. [Support for Stored Procedures](#support-for-stored-procedures)
-  3. [Escaping Special Characters](#escaping-special-characters)
+  2. [Binding for Script Parameters](#binding-for-script-parameters)
+  3. [Support for Stored Procedures](#support-for-stored-procedures)
+  4. [Escaping Special Characters](#escaping-special-characters)
 11. [Logging](#logging)
 12. [Additional Information](#additional-information)
 
@@ -168,17 +173,129 @@ library. This class is used for loading scripts into memory, calling execution
 of the scripts (including with transactions) and for printing out the loaded
 scripts. Please refer to the documentation of the `SqlStore` class for details.
 
-To support several script results, the `SqlStore.query()` method returns a
-`Query` instance of the script execution context for specifying what the
-calling Java code is expecting for results. Of course, underneath the SqlStore
-library verifies beforehand that the script definition agrees with the expected
-results. Please refer to the documentation of the `Query` class for details.
+### Working With SqlStore Instance
 
-All query-related exceptions are thrown as `ScriptExecutionException`, which is
-a runtime exception and therefore does not have to be caught. The exception may
-also contain an `SQLException` for further details. For printing out an
-exception, it is enough to print out `ScriptExecutionException`, which also
-includes inner exception in its output.
+To begin with, an `SqlStore` instance must be created by loading scripts from a
+scripts file, which is identified by a class:
+
+```java
+SqlStore sql = SqlStore.load(MyClass.class);
+```
+
+The load process also validates the scripts file contents. The file is assumed
+to be located at the same folder and have the same name as the class, only with
+a different extension: `sqls`. This way the scripts are always tied to some Java
+class, and can be identified where they are used.
+
+The `SqlStore.load` method also accepts `javax.sql.DataSource` or
+`java.sql.Connection` instance as its second parameter. The recommended way is
+to provide database access method directly to the `SqlStore` instace.
+
+Alternative approach is shown in the previous code sample where the
+database connection information is omitted. In that case, the connection to use
+must be registered separately (before executing any scripts), and all `SqlStore`
+instances, that have no explicit connection reference, will default to that
+_shared_ one instead:
+
+```java
+import ws.​rocket.​sqlstore.​connection.SharedConnectionManager;
+
+// ...
+
+// Define global javax.sql.DataSource:
+SharedConnectionManager.register(createDataSource());
+// or java.sql.Connection:
+SharedConnectionManager.register(createConnection());
+```
+
+Note that `SharedConnectionManager` can be used to redefine the connection to a
+database without restarting or reloading scripts.
+
+The next logical step is to call the loaded SQL scripts stored in the file. This
+is done by providing the script name and values for its IN-parameters, when
+present.
+
+```java
+Map<String, Integer> counts =
+    SqlStore.query("scriptName", "param1", "param2")
+            .forMap(String.class, Integer.class);
+```
+
+The previous example shows how executing a script consists of two parts:
+
+1. loading the script by name and optional parameters (`query()`), and
+2. executing it by defining the output (`forMap()`).
+
+Since various output types are supported, the second part varies. However,
+looking up the script as the first step is always the same (the object returned
+by the `query()` method cannot be reused for executing multiple times).
+
+Supported execution methods and return types are following:
+
+* `void execute()` – just execute without reading results;
+* `int updateCount()` – execute and read the count of updated rows;
+* `List<V> forValues(Class<V>)` – read the values (with type `V`) of a single
+   column result (empty result returns empty list);
+* `V forValue(Class<V>)` – read the first value (with type `V`) of a single
+  column result (empty result returns `null`);
+* `Object[][] forRows(Class<?>[])` – read the values (where provided classes
+  match the types of columns) of query result with any number of columns and
+  rows (inner `Object[]` represents a row, while outer `Object[][]` is all rows);
+* `Object[] forRow(Class<?>[])` – read the values (where provided classes
+  match the types of columns) of the first row of the query result with any
+  number of columns (empty result returns `null`);
+* `Map<K, V> forMap(Class<K>, Class<V>)` – read key-value pairs from the query
+  result, which is commonly with two columns.
+
+Please refer to the documentation of the `ws.rocket.sqlstore.Query` class for
+more details.
+
+
+### Working With SqlStore Through Proxy Interface
+
+Invoking an SQL script is similar to executing a method of a Java class: it has
+a name, input parameters, and a return type. So to make it even easier, it is
+also  possible to hide the usage of an SqlStore instance behind an interface.
+The same rules as using the instance directly still apply, however, it becomes
+more convenient.
+
+When using the proxy interface, the loading step becomes as following:
+
+```java
+MyQueries queries = SqlStore.proxy(MyQueries.class);
+```
+
+As with the `SqlStore.load()` method, the `proxy()` method also accepts a
+`javax.sql.DataSource` or `java.sql.Connection` as the second parameter.
+
+To invoke a script, SqlStore expects that the name of the called method is the
+name of the script, and its parameters are the IN-parameters for the script. The
+return type of the method is used for evaluating which execution mode is
+selected. Based on the previous example, it can look following:
+
+```java
+Map<String, Integer> counts = queries.scriptName("param1", "param2");
+```
+
+Annotations must be used in certain cases:
+
+1. To return the number of updated rows, the method must return an `int` and
+   must be annotated with `@UpdateCount`;
+2. To specify column types (List or Map value types) when the method returns a
+   `List`, `Map`, or `Object[]`, the method must be annotated with `@ResultRow`;
+
+So the interface method from the previous example must be annotated as:
+
+```java
+@ResultRow({ String.class, Integer.class })
+Map<String, Integer> scriptName(String p1, String p2);
+```
+
+Using the SqlStore proxy solution supports most of the SqlStore features, except
+block queries.
+
+
+### Statement Parameter Value Binding
 
 Another important aspect of executing an SQL script is value binding. To begin
 with, let's mention that it is possible to provide a Java bean object as a query
@@ -192,13 +309,40 @@ property type of a Java Bean can be determined). SqlStore internally uses a list
 of `ValueMapper`s in order to set parameters or read values. The list is
 overridable and customizable but without them SqlStore would not know how to
 handle parameters and results. Therefore, support for a parameter/result value
-type is determined by internally used `ValueMapper` instances, and when a type is
-not supported, SqlStore will inform about this at scripts loading time with a
+type is determined by internally used `ValueMapper` instances, and when a type
+is not supported, SqlStore will inform about this at scripts loading time with a
 `ScriptSetupException`.
 
 The registry of `ValueMapper`s is maintained by the `Bindings` class, which also
 provides methods to update the list of mappers.
 
+
+### Exception Handling
+
+Regarding possible exceptions, there are two specific ones that SqlStore uses.
+
+Loading time failures, regarding the targeted scripts file, are often thrown as
+`ScriptSetupException` where the message often also indicates the exact place
+where the problem was discovered.
+
+All query-related exceptions are thrown as `ScriptExecutionException`, which is
+a runtime exception and therefore does not have to be caught. The exception may
+also contain an `SQLException` for further details. For printing out an
+exception, it is enough to print out `ScriptExecutionException`, which also
+includes inner exception in its output.
+
+
+### Inspection
+
+The `SqlStore` class provides a few methods for inspecting its contents.
+
+The number of scripts within a store instance can be resolved with the `size()`
+method.
+
+Although all the details about the scripts within the store can be printed with
+the `toString()` method, the more preferred solution is to use the
+`printState(PrintStream)` method, which writes directly to the stream and thus
+is more memory-efficient.
 
 
 The SQL Scripts File
