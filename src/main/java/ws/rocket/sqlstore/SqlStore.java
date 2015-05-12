@@ -254,6 +254,15 @@ public final class SqlStore {
   }
 
   /**
+   * Reports the number of scripts within this store.
+   *
+   * @return A positive integer: the count of scripts.
+   */
+  public int size() {
+    return this.scripts.size();
+  }
+
+  /**
    * Prints the internal state with details on contained scripts to given stream. The output is
    * non-standard and is subject to changing. It's main purpose is debugging.
    *
@@ -353,7 +362,7 @@ public final class SqlStore {
     }
 
     private Object handleObjectMethods(Object proxy, Method method, Object[] args) {
-      Object result = null;
+      Object result;
 
       switch (method.getName()) {
         case "toString":
@@ -366,6 +375,8 @@ public final class SqlStore {
         case "hashCode":
           result = System.identityHashCode(proxy);
           break;
+        default:
+          result = null;
       }
 
       return result;

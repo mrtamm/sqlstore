@@ -43,17 +43,19 @@ deletePerson IN(Long id) {
   DELETE FROM person WHERE id = ${id}
 }
 
-findPersons IN(boolean onlyActive)
-OUT(Person[id,name,dateOfBirth|DATE,active|CHAR,dateCreated,createdBy,dateUpdated,updatedBy]) {
+findPersons
+  IN(boolean onlyActive)
+  OUT(Person[id,name,dateOfBirth|DATE,active|CHAR,dateCreated,createdBy,dateUpdated,updatedBy])
+{
 SELECT * FROM person
 !(true(onlyActive)){ WHERE active='Y'}
 }
 
 findPersonById
   IN(long id)
-  OUT(Person[id,name,dateOfBirth,active,dateCreated,createdBy,dateUpdated,updatedBy])
+  OUT(Person[id,name,dateOfBirth|DATE,active|CHAR,dateCreated,createdBy,dateUpdated,updatedBy])
 {
-  SELECT * FROM person WHERE id = ${id}
+SELECT * FROM person WHERE id = ${id}
 }
 
 calcDateCreated IN(Long id) OUT( Date|TIMESTAMP date ) {
