@@ -69,6 +69,32 @@ public final class InputParams {
   }
 
   /**
+   * Informs whether the IN-parameters of a script supports values of given
+   * types. In particular, the amount of parameters and the order must match.
+   * However, given type may be a subtype of the required parameter type.
+   *
+   * @param paramTypes An array of parameter value types that must match the
+   * IN-parameters of a script. <code>null</code> is equivalent to empty array.
+   * @return A boolean true, when the script supports parameter values of given
+   * types.
+   */
+  public boolean supportsTypes(Class<?>... paramTypes) {
+    int paramsLength = paramTypes != null ? paramTypes.length : 0;
+    boolean supports = paramsLength == this.params.length;
+
+    if (supports) {
+      for (int i = 0; i < paramsLength; i++) {
+        if (this.params[i].supports(paramTypes[i])) {
+          supports = false;
+          break;
+        }
+      }
+    }
+
+    return supports;
+  }
+
+  /**
    * Creates a map where given values can be looked up by corresponding parameter names. The map is
    * used in the query context to maintain values accessible to expressions.
    * <p>

@@ -133,7 +133,8 @@ public final class SqlStore {
   /**
    * Attempts to load scripts for given class, and register a database connection so that loaded
    * scripts could be executed by name at any time, all put behind a proxy that would invoke the
-   * SqlStore scripts.
+   * SqlStore scripts. Also checks that the scripts file contains a script for each method of the
+   * interface.
    * <p>
    * The resource containing the scripts is expected to have same path as the given class package,
    * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
@@ -153,7 +154,8 @@ public final class SqlStore {
   /**
    * Attempts to load scripts for given class, and register a database connection so that loaded
    * scripts could be executed by name at any time, all put behind a proxy that would invoke the
-   * SqlStore scripts.
+   * SqlStore scripts. Also checks that the scripts file contains a script for each method of the
+   * interface.
    * <p>
    * The resource containing the scripts is expected to have same path as the given class package,
    * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
@@ -175,7 +177,8 @@ public final class SqlStore {
   /**
    * Attempts to load scripts for given class, and register a database connection so that loaded
    * scripts could be executed by name at any time, all put behind a proxy that would invoke the
-   * SqlStore scripts.
+   * SqlStore scripts. Also checks that the scripts file contains a script for each method of the
+   * interface.
    * <p>
    * The resource containing the scripts is expected to have same path as the given class package,
    * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
@@ -201,6 +204,22 @@ public final class SqlStore {
   private SqlStore(ConnectionManager connectionHandler, Map<String, Script> scripts) {
     this.connectionManager = connectionHandler;
     this.scripts = scripts;
+  }
+
+  /**
+   * Informs whether this instance contains a script with given name and it supports parameter
+   * values of given types. A value type may also be a subtype of the required type (as defined
+   * with the IN-parameters in the scripts file). Note that this method does not check the return
+   * values (OUT-parameters) of the script!
+   *
+   * @param name The exact script name to look for.
+   * @param types The value types that must be supported by the IN-parameters of the script.
+   * Order of the types must match. <code>null</code> is equivalent to an empty array.
+   * @return A Boolean true when such script is contained within this instance.
+   */
+  public boolean hasQuery(String name, Class<?>... types) {
+    Script script = this.scripts.get(name);
+    return script != null && script.getInputParams().supportsTypes(types);
   }
 
   /**
@@ -298,6 +317,17 @@ public final class SqlStore {
       cm = SharedConnectionManager.getInstance();
     }
     return new Query(cm, ctx);
+  }
+
+  private void validateMethods(Class<?> target) {
+    for (Method m : target.getMethods()) {
+      if (m.getDeclaringClass() == Object.class
+          || !Modifier.isAbstract(m.getModifiers())) {
+        continue;
+      }
+
+      hasQuery(m.getName(), m.getParameterTypes());
+    }
   }
 
   private ProxyHandler proxyHandler() {
