@@ -57,10 +57,13 @@ import ws.rocket.sqlstore.script.sql.SqlScript;
  * <li>{@link #createScript()}
  * </ol>
  * <p>
+ * To simplify that work, this class exposes static method {@link #load(java.lang.Class)}, which
+ * parses all the scripts from the scripts file associated with given class.
+ * <p>
  * A <code>ScriptReader</code> instance is bound to a single SQLS file and can be used to parse all
  * the scripts from the file.
  *
- * @see ScriptsReader
+ * @see #load(java.lang.Class)
  */
 public final class ScriptReader implements Closeable {
 

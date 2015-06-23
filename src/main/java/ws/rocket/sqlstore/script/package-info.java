@@ -40,6 +40,6 @@
  * guarantee its correctness. That can be verified only by executing the statement.
  * <p>
  * Currently there is only one provision way for constructing {@literal Script} objects: via {@link
- * ws.rocket.sqlstore.data.read.ScriptReader}.
+ * ws.rocket.sqlstore.script.read.ScriptReader}.
  */
 package ws.rocket.sqlstore.script;

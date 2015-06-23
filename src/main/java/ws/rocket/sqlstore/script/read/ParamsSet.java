@@ -36,9 +36,10 @@ import ws.rocket.sqlstore.types.Bindings;
 /**
  * Helper class for evaluating different sets of parameters as they are parsed from an SQLS file.
  * <p>
- * This class is designed to be reused script-after-script by calling {@link #reset()} after the
- * parameters have been read by the <code>Script</code> constructor. After that, the instance will
- * be ready to evaluate all the parameters of the next script.
+ * This class is designed to be reused script-after-script by calling
+ * {@link #cleanup(ws.rocket.sqlstore.script.Script)} after the parameters have been read by the
+ * <code>Script</code> constructor. After that, the instance will be ready to evaluate all the
+ * parameters of the next script.
  */
 public final class ParamsSet {
 
@@ -301,8 +302,7 @@ public final class ParamsSet {
    * right before evaluating the SQL script so that encountered SQL script parameters would be
    * handled correctly (the referred input/output parameters would be found).
    *
-   * @see #addScriptParam(ws.rocket.sqlstore.data.params.ParamMode, java.lang.String,
-   * java.util.List, java.lang.Integer)
+   * @see #addScriptParam(ParamMode, String, List, Integer)
    * @see #getInputParams()
    * @see #getOutputParams()
    */
