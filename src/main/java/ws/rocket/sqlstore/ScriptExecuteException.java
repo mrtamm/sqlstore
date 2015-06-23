@@ -83,6 +83,25 @@ public final class ScriptExecuteException extends RuntimeException {
     return (SQLException) super.getCause();
   }
 
+  @Override
+  public String toString() {
+    SQLException cause = getCause();
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("ScriptExecuteException: ").append(getMessage()).append('\n');
+    sb.append("SQL state: ").append(cause.getSQLState()).append('\n');
+    sb.append("SQL error code: ").append(cause.getErrorCode());
+
+    int counter = 1;
+    Throwable t = cause;
+    while (t != null) {
+      sb.append("\nCause ").append(counter++).append(". ");
+      sb.append(cause.toString());
+      t = t.getCause();
+    }
+    return sb.toString();
+  }
+
   /**
    * The query context that was being executed. This information is optional, and may be
    * <code>null</code>.
