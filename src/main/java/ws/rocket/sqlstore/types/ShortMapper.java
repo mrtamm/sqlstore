@@ -23,15 +23,15 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 /**
- * Default value mapper for primitive <code>long</code> and objects of <code>java.lang.Long</code>.
- * This mapper does not make any restrictions on SQL type but defaults to <code>NUMERIC</code> when
- * undefined.
+ * Default value mapper for primitive <code>short</code> and objects of
+ * <code>java.lang.Short</code>. This mapper does not make any restrictions on SQL type but defaults
+ * to <code>NUMERIC</code> when undefined.
  */
-public final class LongMapper implements ValueMapper {
+public final class ShortMapper implements ValueMapper {
 
   @Override
   public boolean supports(Class<?> type) {
-    return long.class == type || Long.class == type;
+    return short.class == type || Short.class == type;
   }
 
   @Override
@@ -46,19 +46,19 @@ public final class LongMapper implements ValueMapper {
     if (value == null) {
       ps.setNull(index, sqlType);
     } else {
-      ps.setLong(index, (Long) value);
+      ps.setShort(index, (Short) value);
     }
   }
 
   @Override
-  public Long read(ResultSet rs, int index, int sqlType) throws SQLException {
-    long value = rs.getLong(index);
+  public Short read(ResultSet rs, int index, int sqlType) throws SQLException {
+    short value = rs.getShort(index);
     return rs.wasNull() ? null : value;
   }
 
   @Override
-  public Long read(CallableStatement stmt, int index, int sqlType) throws SQLException {
-    long value = stmt.getLong(index);
+  public Short read(CallableStatement stmt, int index, int sqlType) throws SQLException {
+    short value = stmt.getShort(index);
     return stmt.wasNull() ? null : value;
   }
 

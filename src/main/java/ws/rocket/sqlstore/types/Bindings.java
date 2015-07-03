@@ -81,10 +81,14 @@ public final class Bindings {
     if (instance == null) {
       register(new StringMapper(),
           new IntMapper(),
+          new ShortMapper(),
           new BigDecimalMapper(),
           new LongMapper(),
           new DateMapper(),
-          new BooleanMapper()
+          new BooleanMapper(),
+          new ByteArrayMapper(),
+          new FileMapper(),
+          new InputStreamMapper()
       );
     }
     return instance;
