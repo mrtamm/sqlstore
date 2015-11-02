@@ -313,9 +313,27 @@ type is determined by internally used `ValueMapper` instances, and when a type
 is not supported, SqlStore will inform about this at scripts loading time with a
 `ScriptSetupException`.
 
-The registry of `ValueMapper`s is maintained by the `Bindings` class, which also
-provides methods to update the list of mappers.
+The registry of used `ValueMapper`s is maintained by the `Bindings` class, which
+also provides methods to update the list of mappers. The default Java-to-SQL
+value mappers, are listed in the table below. Please consult the JavaDoc or the
+code of a mapper for more specific details on how they handle value conversions.
+Like the `Bindings` class, all default mapper classes are located in the
+`ws.rocket.sqlstore.types` package.
 
+
+| Mapper            | Handles Java Types | Default SQL type | Other SQL types  |
+| ----------------- | ------------------ | ---------------- | ---------------- |
+| BooleanMapper     | Boolean, boolean   | BOOLEAN          | VARCHAR, CHAR, TINYINT, SMALLINT, INT, DECIMAL, NUMERIC. |
+| StringMapper      | String             | VARCHAR          | CLOB and NCLOB.  |
+| LongMapper        | Long, long         | NUMERIC          | *                |
+| IntMapper         | Integer, int       | NUMERIC          | *                |
+| ShortMapper       | Short, short       | NUMERIC          | *                |
+| DoubleMapper      | Double, double     | NUMERIC          | *                |
+| BigDecimalMapper  | BigDecimal         | NUMERIC          | *                |
+| DateMapper        | java.util.Date and subtypes | TIMESTAMP | DATE, TIME.    |
+| ByteArrayMapper   | byte[]             | BLOB             | CLOB, NCLOB, BINARY, VARBINARY, LONGVARBINARY. |
+| FileMapper        | java.io.File       | BLOB             | CLOB, NCLOB.     |
+| InputStreamMapper | InputStream        | BLOB             | CLOB, NCLOB.     |
 
 ### Exception Handling
 
@@ -444,8 +462,8 @@ Notes:
 1. The category begins with "OUT(", ends with ")", and declares either one or
    two Java types to be returned.
 2. An output parameter declaration begins with a Java type, which is either a
-   previously declared type alias, a fully qualified class name, a primitive type
-   name, or a class name from `java.lang` package.
+   previously declared type alias, a fully qualified class name, a primitive
+   type name, or a class name from `java.lang` package.
 3. A parameter also gets an SQL type, which is a constant value from the
    `java.sql.Types` class. When omitted from declaration, the SQL type will be
    decided by the `ValueMapper` that reports to handle the Java type of the

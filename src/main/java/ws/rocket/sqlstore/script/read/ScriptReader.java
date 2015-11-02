@@ -333,7 +333,21 @@ public final class ScriptReader implements Closeable {
     this.reader.close();
   }
 
-  // Type[|SQLTYPE] name
+  /*
+   * Parses comma separated IN-parameters (enclosed in <code>IN(...)</code>) defining what
+   * parameters are expected for query input (inlcuding their order and corresponding types):
+   * <pre>
+   * JavaType paramName1, JavaType|SQLTYPE paramName2, ...
+   * </pre>
+   * <p>
+   * Here <code>JavaType</code> is a full class name as <code>org.sample.JavaType</code> or an alias
+   * for a full class name. Parameter names are used in the script to inject their values (or values
+   * of their properties) at given position within script. The names can be also be used within
+   * UPDATE-parameters group to define the IN-parameter properties to be updated after query
+   * execution.
+   * <p>
+   * Parsing should end before a closing parenthesis.
+   */
   private void parseInParams() throws IOException {
     do {
       Class<?> javaType = this.reader.parseJavaType();
@@ -347,10 +361,24 @@ public final class ScriptReader implements Closeable {
     } while (this.reader.skipWsp() == ',');
   }
 
-  // Type
-  // Type|SQLTYPE
-  // Type[field]
-  // Type[field|SQLTYPE]
+  /*
+   * Parses OUT-parameter (enclosed in <code>OUT(...)</code>) defining what needs to be extracted
+   * from result-set:
+   * <pre>
+   * JavaType
+   * JavaType|SQLTYPE
+   * JavaType[prop1, prop2, prop3]
+   * JavaType[prop1|SQLTYPE1, prop2|SQLTYPE2, prop3|SQLTYPE3]
+   * </pre>
+   * <p>
+   * Here <code>JavaType</code> is a full class name as <code>org.sample.JavaType</code> or an alias
+   * for a full class name.
+   * <p>
+   * Expressions may be wrapped by <code>KEYS(...)</code> so that it would extract data from
+   * generated keys result-set.
+   * <p>
+   * Parsing should end before a closing parenthesis.
+   */
   private void parseOutParams() throws IOException {
     boolean keys = false;
     boolean evalKeys = true;
@@ -404,6 +432,16 @@ public final class ScriptReader implements Closeable {
     }
   }
 
+  /*
+   * Parses comma-separated parameters that need to be updated with values from result-set, usually
+   * enclosed in <code>UPDATE(...)</code>:
+   * <pre>
+   * IN_Param.nested.prop, IN_Param.nested.prop2
+   * KEYS(IN_Param.nested.prop, IN_Param.nested.prop2)
+   * </pre>
+   * <p>
+   * Parsing should end before a closing parenthesis.
+   */
   private void parseUpdateParams() throws IOException {
     boolean evalKeys = true;
     boolean keys = false;
@@ -434,6 +472,14 @@ public final class ScriptReader implements Closeable {
     } while (this.reader.skipWsp() == ',');
   }
 
+  /*
+   * Parses and immediately stores hints for a script. Hints are comma-separated name-value pairs
+   * within <code>HINT(...)</code>:
+   * <pre>
+   * hintName1=hintValue1, hintName2=hintValue2, ...
+   * </pre>
+   * Parsing should end before a closing parenthesis.
+   */
   private void parseHintParams() throws IOException {
     this.hints = new QueryHints();
 
@@ -450,6 +496,17 @@ public final class ScriptReader implements Closeable {
     } while (this.reader.skipIfNext(','));
   }
 
+  /*
+   * Parses a script parameter expression, which is usually enclosed in <code>${...}</code>:
+   * <pre>
+   * paramName
+   * paramName|TYPE
+   * IN(paramName), OUT(paramName), INOUT(paramName)
+   * IN(paramName|TYPE), OUT(paramName|TYPE), INOUT(paramName|TYPE)
+   * </pre>
+   * <p>
+   * Parsing should end before a closing curly brace.
+   */
   private void parseScriptParam() throws IOException {
     List<String> fields = new ArrayList<>();
     ParamMode mode = ParamMode.IN;
@@ -486,6 +543,32 @@ public final class ScriptReader implements Closeable {
     this.reader.requireNext('}');
   }
 
+  /*
+   * Parses a condition for a part of a script (to evaluate whether that part is to be included in
+   * the executed script). The condition is an expression that evaluates to either true or false.
+   * It is declared within script block where a line begins with an exclamation mark and opening
+   * parenthesis and ends with "){": <code>!(...){</code>. The condition within parenthesis may by
+   * be surrounded by whitespace.
+   * <p>
+   * Examples of valid condition expressions:
+   * <pre>
+   * paramName
+   * paramName.nested.prop
+   * empty( paramName )
+   * empty( paramName.nested.prop )
+   * true( paramName )
+   * true( paramName.nested.prop )
+   * </pre>
+   * <p>
+   * Here <code>empty</code> and <code>true</code> are predicates indicating that the expression
+   * within parenthesis should evaluate to an empty value (String or List, including nulls) or to
+   * boolean true to activate the script block. Without predicates, the expression is evaluated to
+   * true when the parameter (or its [nested] property) is not null nor empty (Object, Boolean,
+   * String or List), i.e. Boolean false value of the property evaluates to true because it is not
+   * undefined, but empty string evaluates to false because it is empty.
+   * <p>
+   * This method parses until the position after an opening curly brace.
+   */
   private SqlPartCondition parseScriptCondition() throws IOException {
     String func = null;
     String expr = this.reader.parseParamName();
@@ -537,6 +620,11 @@ public final class ScriptReader implements Closeable {
     return result;
   }
 
+  /*
+   * Parses an integer value for given <code>java.sql.Types</code> constant by exact name. Assumes
+   * current expression starts with pipe "|" followed by letters. When pipe is not the next
+   * character, SQLTYPE is assumed to be omitted and defaults to null.
+   */
   private Integer parseSqlType() throws IOException {
     return this.reader.skipIfNext('|') ? this.reader.parseSqlType() : null;
   }
