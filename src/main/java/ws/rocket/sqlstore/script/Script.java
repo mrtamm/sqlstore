@@ -76,6 +76,8 @@ public final class Script {
 
   private final Param[] resultsParams;
 
+  private final String[] generatedKeys;
+
   private final StatementType statementType;
 
   /**
@@ -116,6 +118,7 @@ public final class Script {
     this.outputParams = params.getOutputParams();
     this.keysParams = params.getKeysParams();
     this.resultsParams = params.getResultsParams();
+    this.generatedKeys = params.getGenerateKeyColumns();
 
     if (this.inputParams.isEmpty()) {
       this.statementType = StatementType.SIMPLE;
@@ -222,6 +225,16 @@ public final class Script {
   }
 
   /**
+   * Provides the list of column names to be used for retrieving generated keys.
+   *
+   * @return An array (not empty) of column names, or null when this script does not handle
+   * generated keys.
+   */
+  public String[] getGeneratedKeys() {
+    return this.generatedKeys;
+  }
+
+  /**
    * Provides a compact representation of this script information, similar to its original
    * representation in an SQLS file.
    *
@@ -243,7 +256,10 @@ public final class Script {
     if (this.keysParams.length > 0) {
       str.append("\n    GeneratedKeys {");
       for (int i = 0; i < this.keysParams.length; i++) {
-        str.append("\n      ").append(i + 1).append(": ").append(this.keysParams[i]);
+        str.append("\n      ").append(i + 1).append(": ")
+            .append(this.generatedKeys[i])
+            .append(" -> ")
+            .append(this.keysParams[i]);
       }
       str.append("\n    }");
     }

@@ -52,16 +52,23 @@ public class SqlStoreTest {
   public void setUp() throws SQLException, IOException {
     ResourceBundle bundle = ResourceBundle.getBundle("ws.rocket.sqlstore.test.test");
 
-    File dbPath = new File(bundle.getString("jdbc.dbPath"));
-    if (!dbPath.exists()) {
-      dbPath.mkdirs();
-    }
+    String derbyPath = bundle.getString("jdbc.dbPath");
+    if (derbyPath != null) {
+      File dbPath = new File(derbyPath);
 
-    System.setProperty("derby.system.home", dbPath.getCanonicalPath());
+      if (!dbPath.exists()) {
+        dbPath.mkdirs();
+      }
+
+      System.setProperty("derby.system.home", dbPath.getCanonicalPath());
+    }
 
     BasicDataSource ds = new BasicDataSource();
     ds.setDriverClassName(bundle.getString("jdbc.driver"));
     ds.setUrl(bundle.getString("jdbc.url"));
+    ds.setUsername(bundle.getString("jdbc.username"));
+    ds.setPassword(bundle.getString("jdbc.password"));
+    ds.setDefaultCatalog(bundle.getString("jdbc.schema"));
     ds.setDefaultReadOnly(true);
     ds.setDefaultAutoCommit(false);
     ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
@@ -107,8 +114,8 @@ public class SqlStoreTest {
       tablesCreated = true;
       addRecords();
       queryRecords();
-      deleteRecords();
       testProcedure();
+      deleteRecords();
     } finally {
       if (tablesCreated) {
         dropTables();
@@ -184,8 +191,8 @@ public class SqlStoreTest {
   }
 
   private void testProcedure() {
-    // To be done.
-//    Date createdAt = this.sqlStore.query("calcDateCreated", 1L).forValue(Date.class);
+    Date createdAt = this.scripts.calcDateCreated(1L);
+    System.out.println("calcDateCreated() -> " + createdAt);
   }
 
   private void dropTables() {

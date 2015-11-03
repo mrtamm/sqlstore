@@ -114,7 +114,7 @@ public final class JdbcExecutor {
       }
 
       ctx.readParameters(stmt);
-      readResults(stmt, hasData, Statement.NO_GENERATED_KEYS, ctx);
+      readResults(stmt, hasData, false, ctx);
 
     } catch (SQLException e) {
       throw new ScriptExecuteException(e, ctx);
@@ -122,7 +122,7 @@ public final class JdbcExecutor {
   }
 
   private void executePrepared(QueryContext ctx) {
-    int keys = ctx.getQueryKeys();
+    String[] keys = ctx.getQueryKeys();
 
     LOG.debug("About to execute a JDBC PreparedStatement for '{}'", ctx.getName());
 
@@ -138,7 +138,7 @@ public final class JdbcExecutor {
         TIME_DB.trace("Execution of script '{}' in database took {} ms.", ctx.getName(), time);
       }
 
-      readResults(stmt, hasData, keys, ctx);
+      readResults(stmt, hasData, keys.length > 0, ctx);
 
     } catch (SQLException e) {
       throw new ScriptExecuteException(e, ctx);
@@ -151,7 +151,7 @@ public final class JdbcExecutor {
     try (Statement stmt = connection(ctx).createStatement()) {
       ctx.setHints(stmt);
 
-      int keys = ctx.getQueryKeys();
+      String[] keys = ctx.getQueryKeys();
       long time = System.currentTimeMillis();
 
       boolean hasData = stmt.execute(ctx.getSqlQuery(), keys);
@@ -161,13 +161,13 @@ public final class JdbcExecutor {
         TIME_DB.trace("Execution of script '{}' in database took {} ms.", ctx.getName(), time);
       }
 
-      readResults(stmt, hasData, keys, ctx);
+      readResults(stmt, hasData, keys.length > 0, ctx);
     } catch (SQLException e) {
       throw new ScriptExecuteException(e, ctx);
     }
   }
 
-  private void readResults(Statement stmt, boolean hasData, int keys, QueryContext ctx)
+  private void readResults(Statement stmt, boolean hasData, boolean keys, QueryContext ctx)
       throws SQLException {
 
     while (hasData) {
@@ -196,7 +196,7 @@ public final class JdbcExecutor {
       ctx.setUpdateCount(count);
     }
 
-    if (keys == Statement.RETURN_GENERATED_KEYS) {
+    if (keys) {
       try (ResultSet results = stmt.getGeneratedKeys()) {
         int columnCount = results.getMetaData().getColumnCount();
 

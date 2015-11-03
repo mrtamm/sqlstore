@@ -380,8 +380,9 @@ public final class ScriptReader implements Closeable {
    * Parsing should end before a closing parenthesis.
    */
   private void parseOutParams() throws IOException {
-    boolean keys = false;
     boolean evalKeys = true;
+    boolean keysMode = false;
+    String keysColName = null;
     Class<?> javaType;
 
     do {
@@ -389,11 +390,10 @@ public final class ScriptReader implements Closeable {
         javaType = this.reader.parseJavaType();
       } else {
         javaType = this.reader.parseKeysOrJavaType();
-        keys = javaType == null;
-        evalKeys = false;
 
-        if (keys) {
-          this.params.setOutFromKeys(true);
+        if (javaType == null) {
+          evalKeys = false;
+          keysMode = true;
           javaType = this.reader.parseJavaType();
         }
       }
@@ -404,16 +404,24 @@ public final class ScriptReader implements Closeable {
         do {
           this.reader.skipWsp();
 
+          if (keysMode) {
+            keysColName = this.reader.parseKeyColumnName();
+          }
+
           String fieldName = this.reader.parseName("field");
           Integer sqlType = parseSqlType();
 
-          this.params.addOutParamBeanProp(fieldName, sqlType);
+          this.params.addOutParamBeanProp(fieldName, sqlType, keysColName);
           this.reader.skipWsp();
         } while (this.reader.skipIfNext(','));
 
         this.params.unregisterBean();
         this.reader.requireNext(']');
       } else {
+        if (keysMode) {
+          keysColName = this.reader.parseKeyColumnName();
+        }
+
         Integer sqlType = parseSqlType();
         int cp = this.reader.skipWsp();
         String paramName = null;
@@ -422,12 +430,12 @@ public final class ScriptReader implements Closeable {
           paramName = this.reader.parseParamName();
         }
 
-        this.params.addOutParam(javaType, sqlType, paramName);
+        this.params.addOutParam(javaType, sqlType, paramName, keysMode);
       }
 
     } while (this.reader.skipWsp() == ',');
 
-    if (keys && Character.isWhitespace(this.reader.requireNext(')'))) {
+    if (keysMode && Character.isWhitespace(this.reader.requireNext(')'))) {
       this.reader.skipWsp();
     }
   }
@@ -444,29 +452,35 @@ public final class ScriptReader implements Closeable {
    */
   private void parseUpdateParams() throws IOException {
     boolean evalKeys = true;
-    boolean keys = false;
+    boolean keysMode = false;
+    String keysColName = null;
     String paramName;
 
     do {
+      paramName = null;
+
       if (evalKeys) {
         paramName = this.reader.parseKeysOrParamName();
-        keys = paramName == null;
+        keysMode = paramName == null;
+        evalKeys = !keysMode;
+      }
 
-        if (keys) {
-          evalKeys = false;
-          paramName = this.reader.parseParamName();
-        }
-      } else {
+      if (keysMode) {
+        keysColName = this.reader.parseKeyColumnName();
+      }
+
+      if (paramName == null) {
         paramName = this.reader.parseParamName();
       }
 
       this.reader.requireNext('.');
       String property = this.reader.parseParamPropName();
-      this.params.addUpdateParam(paramName, property, keys);
+      this.params.addUpdateParam(paramName, property, keysColName);
 
-      if (keys && this.reader.skipWsp() == ')') {
+      if (keysMode && this.reader.skipWsp() == ')') {
         this.reader.skipNext();
-        keys = false;
+        keysMode = false;
+        keysColName = null;
       }
 
     } while (this.reader.skipWsp() == ',');
@@ -497,7 +511,7 @@ public final class ScriptReader implements Closeable {
   }
 
   /*
-   * Parses a script parameter expression, which is usually enclosed in <code>${...}</code>:
+   * Parses a script parameter expression, which is usually enclosed in <code>?{...}</code>:
    * <pre>
    * paramName
    * paramName|TYPE

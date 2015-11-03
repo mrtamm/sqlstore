@@ -55,9 +55,9 @@ public final class ParamsSet {
 
   private final List<Param> rowsResults = new ArrayList<>();
 
-  private Class<?> propParamBeanType;
+  private final List<String> keysColumns = new ArrayList<>();
 
-  private boolean outFromKeys;
+  private Class<?> propParamBeanType;
 
   private boolean beanFirstProp;
 
@@ -94,19 +94,10 @@ public final class ParamsSet {
     this.queryParams.clear();
     this.keysResults.clear();
     this.rowsResults.clear();
-    this.outFromKeys = false;
+    this.keysColumns.clear();
     this.inputParams = null;
     this.outputParams = null;
     this.outParamIndex = 0;
-  }
-
-  /**
-   * Sets an indicator that the OUT-parameters about to be added apply to generated-keys result-set.
-   *
-   * @param outFromKeys A Boolean that is true to indicate generated-keys result-set parameters.
-   */
-  public void setOutFromKeys(boolean outFromKeys) {
-    this.outFromKeys = outFromKeys;
   }
 
   /**
@@ -141,22 +132,26 @@ public final class ParamsSet {
    *
    * @param javaType The Java type of the parameter (required).
    * @param sqlType The SQL type of the parameter (optional).
-   * @param paramName A name for the parameter (optional)
+   * @param name A name for the parameter or generated key column (required).
+   * @param key When true, the previous parameter is a column name for a generated key to return.
+   * Otherwise, a name for the parameter.
    *
    * @see #setOutFromKeys(boolean)
    * @see #addOutParamBeanProp(java.lang.String, java.lang.Integer)
    */
-  public void addOutParam(Class<?> javaType, Integer sqlType, String paramName) {
-    if (paramName != null) {
-      if (this.outFromKeys) {
-        throw new ScriptSetupException("OUT-params with names not allowed with KEYS-clause");
-      } else if (!this.outTypeParams.isEmpty()) {
+  public void addOutParam(Class<?> javaType, Integer sqlType, String name, boolean key) {
+    if (name == null || name.isEmpty()) {
+      throw new IllegalArgumentException("The 'name' parameter must not be empty");
+    }
+
+    if (!key) {
+      if (!this.outTypeParams.isEmpty()) {
         throw new ScriptSetupException("OUT-params with names and without names cannot be mixed");
       }
 
-      checkParamName(paramName);
+      checkParamName(name);
 
-      this.outVarParams.add(new TypeNameParam(javaType, sqlType, paramName, this.outParamIndex));
+      this.outVarParams.add(new TypeNameParam(javaType, sqlType, name, this.outParamIndex));
 
     } else {
       if (!this.outVarParams.isEmpty()) {
@@ -165,7 +160,8 @@ public final class ParamsSet {
 
       TypeParam param = new TypeParam(javaType, getSqlType(javaType, sqlType), this.outParamIndex);
       this.outTypeParams.add(param);
-      addResultParam(param, this.outFromKeys);
+      addResultParam(param, true);
+      this.keysColumns.add(name);
     }
 
     this.outParamIndex++;
@@ -177,8 +173,9 @@ public final class ParamsSet {
    *
    * @param fieldName The property name (will be validated).
    * @param sqlType Optional SQL type when provided in the SQL file next to the property name.
+   * @param keyColumn If value is from a generated key then its column name. Otherwise null.
    */
-  public void addOutParamBeanProp(String fieldName, Integer sqlType) {
+  public void addOutParamBeanProp(String fieldName, Integer sqlType, String keyColumn) {
     TypePropParam param = TypePropParam.create(this.propParamBeanType, fieldName, sqlType,
         this.outParamIndex);
 
@@ -190,7 +187,11 @@ public final class ParamsSet {
       this.outTypeParams.add(param);
     }
 
-    addResultParam(param, this.outFromKeys);
+    addResultParam(param, keyColumn != null);
+
+    if (keyColumn != null) {
+      this.keysColumns.add(keyColumn);
+    }
 
     this.beanFirstProp = false;
   }
@@ -201,9 +202,9 @@ public final class ParamsSet {
    *
    * @param paramName The IN or OUT parameter name this expression refers to.
    * @param property The property of the IN/OUT-parameter to update with value.
-   * @param keys A Boolean that is true when value is from generated keys.
+   * @param keyColumn If value is from a generated key then its column name. Otherwise null.
    */
-  public void addUpdateParam(String paramName, String property, boolean keys) {
+  public void addUpdateParam(String paramName, String property, String keyColumn) {
     TypeNameParam param = getParamByName(paramName, this.inVarParams);
     if (param == null) {
       throw new ScriptSetupException("There is no parameter with name '%s' defined on this script",
@@ -211,7 +212,11 @@ public final class ParamsSet {
     }
 
     Expression expression = Expression.create(param, Collections.singletonList(property), null);
-    addResultParam(expression, keys);
+    addResultParam(expression, keyColumn != null);
+
+    if (keyColumn != null) {
+      this.keysColumns.add(keyColumn);
+    }
   }
 
   /**
@@ -358,6 +363,18 @@ public final class ParamsSet {
     }
 
     return result;
+  }
+
+  /**
+   * Provides the column names for the generated keys.
+   *
+   * @return An array of generated key column names, or null when script does not use them.
+   */
+  public String[] getGenerateKeyColumns() {
+    if (this.keysColumns.isEmpty()) {
+      return null;
+    }
+    return this.keysColumns.toArray(new String[this.keysColumns.size()]);
   }
 
   /**

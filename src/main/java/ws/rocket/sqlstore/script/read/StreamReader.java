@@ -373,6 +373,28 @@ public final class StreamReader implements Closeable {
   }
 
   /**
+   * Parses and returns a column name that is used for retrieving the value of the generated key.
+   * The expected expression is "COLUMN_NAME -> " (case-insensitive).
+   *
+   * @return The parsed column name.
+   * @throws IOException When a stream-related exception occurs during reading.
+   */
+  public String parseKeyColumnName() throws IOException {
+    String keysColName = parseName("key column name");
+    while (skipIfNext('.')) {
+      keysColName += "." + parseName("key column name");
+    }
+
+    skipWsp();
+    requireNext('-');
+    if (Character.isWhitespace(requireNext('>'))) {
+      skipWsp();
+    }
+
+    return keysColName;
+  }
+
+  /**
    * Parses the <code>KEYS</code> identifier or a Java type, depending which is next.
    * <p>
    * When the next token is "KEYS", this method also moves the reading position right after the
@@ -488,11 +510,11 @@ public final class StreamReader implements Closeable {
       } else if (cp == '\\') {
         cp = moveNext(); // escaping
 
-        if (cp != '$' && cp != '{' && cp != '}' && cp != '\\') {
+        if (cp != '?' && cp != '{' && cp != '}' && cp != '\\') {
           buf.append('\\');
         }
 
-      } else if (cp == '$') {
+      } else if (cp == '?') {
         cp = moveNext(); // check for opening curly brace
 
         if (cp == '{') {
@@ -501,7 +523,7 @@ public final class StreamReader implements Closeable {
           break;
         }
 
-        buf.append('$');
+        buf.append('?');
 
       } else if (cp == '\n' || cp == '\r') {
         int[] cps = new int[3];

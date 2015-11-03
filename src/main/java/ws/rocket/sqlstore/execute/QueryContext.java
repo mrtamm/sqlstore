@@ -42,6 +42,8 @@ import ws.rocket.sqlstore.types.Bindings;
  */
 public final class QueryContext {
 
+  private static final String[] NO_KEYS = new String[0];
+
   private final Script script;
 
   private final Map<String, Object> variables;
@@ -185,11 +187,11 @@ public final class QueryContext {
   /**
    * Provides whether the JDBC statement should also query any auto-generated keys.
    *
-   * @return A constant value from <code>Statement</code> specifying a mode for generated keys.
+   * @return An array of column names for retrieving their values. Empty array when no key expected.
    */
-  public int getQueryKeys() {
-    boolean noKeys = getKeysColumnCount() == 0;
-    return noKeys ? Statement.NO_GENERATED_KEYS : Statement.RETURN_GENERATED_KEYS;
+  public String[] getQueryKeys() {
+    String[] keys = this.script.getGeneratedKeys();
+    return keys != null ? keys : NO_KEYS;
   }
 
   /**
@@ -272,7 +274,7 @@ public final class QueryContext {
    * @return The number of columns in generated keys result-set.
    */
   public int getKeysColumnCount() {
-    return this.script.getKeysParams().length;
+    return this.script.getGeneratedKeys().length;
   }
 
   /**

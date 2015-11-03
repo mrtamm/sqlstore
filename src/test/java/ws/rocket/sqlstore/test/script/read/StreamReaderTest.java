@@ -89,6 +89,24 @@ public final class StreamReaderTest {
     assertEquals(result, "_abcName");
   }
 
+  public void shouldParseColumnNameNoWsp() throws IOException {
+    StreamReader reader = createReader("mytable.column->");
+
+    String result = reader.parseKeyColumnName();
+
+    assertEquals(result, "mytable.column");
+    assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
+  }
+
+  public void shouldParseColumnNameWsp() throws IOException {
+    StreamReader reader = createReader("mytable.column -> ");
+
+    String result = reader.parseKeyColumnName();
+
+    assertEquals(result, "mytable.column");
+    assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
+  }
+
   @Test(expectedExceptions = ScriptSetupException.class)
   public void shouldParseNameFail() throws IOException {
     createReader(" 12312").parseName("test");
@@ -176,7 +194,7 @@ public final class StreamReaderTest {
   }
 
   public void shouldParseSqlWithParams() throws IOException {
-    StreamReader reader = createReader("UPDATE people SET name=${}, birthday=${} WHERE ID=${}}");
+    StreamReader reader = createReader("UPDATE people SET name=?{}, birthday=?{} WHERE ID=?{}}");
     StringBuilder sb = new StringBuilder();
 
     assertEquals(reader.parseSql(sb), '{');
@@ -196,20 +214,20 @@ public final class StreamReaderTest {
   }
 
   public void shouldParseHandleBraces() throws IOException {
-    StreamReader reader = createReader("SELECT '\\\\a $ {} \\\\b' FROM temp}");
+    StreamReader reader = createReader("SELECT '\\\\a ? {} \\\\b' FROM temp}");
     StringBuilder sb = new StringBuilder();
 
     assertEquals(reader.parseSql(sb), '}');
-    assertEquals(sb.toString(), "SELECT '\\a $ {} \\b' FROM temp");
+    assertEquals(sb.toString(), "SELECT '\\a ? {} \\b' FROM temp");
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
   }
 
   public void shouldParseHandleEscaping() throws IOException {
-    StreamReader reader = createReader("SELECT '\\\\ \\${} \\{ \\} \\' FROM temp}");
+    StreamReader reader = createReader("SELECT '\\\\ \\?{} \\{ \\} \\' FROM temp}");
     StringBuilder sb = new StringBuilder();
 
     assertEquals(reader.parseSql(sb), '}');
-    assertEquals(sb.toString(), "SELECT '\\ ${} { } \\' FROM temp");
+    assertEquals(sb.toString(), "SELECT '\\ ?{} { } \\' FROM temp");
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
   }
 
