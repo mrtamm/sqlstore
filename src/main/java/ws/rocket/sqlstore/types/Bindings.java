@@ -80,10 +80,10 @@ public final class Bindings {
   public static Bindings getInstance() {
     if (instance == null) {
       register(new StringMapper(),
+          new LongMapper(),
           new IntMapper(),
           new ShortMapper(),
           new BigDecimalMapper(),
-          new LongMapper(),
           new DateMapper(),
           new BooleanMapper(),
           new ByteArrayMapper(),
