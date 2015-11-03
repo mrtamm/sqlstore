@@ -102,14 +102,14 @@ _com/sample/db/AuthenticationProvider.sqls_:
 isAuthenticationValid IN(String username, String passwordHash) OUT(boolean) {
 SELECT COUNT(*)
   FROM users
- WHERE username = ${username}
-   AND passhash = ${passowrdHash}
+ WHERE username = ?{username}
+   AND passhash = ?{passowrdHash}
    AND active = 'Y'
 }
 
 addLoginAttempt IN(com.sample.db.login.LoginAttempt login) {
 INSERT INTO login_attempt (id, username, ip_address, auth_time, success)
-VALUES (login_attempt_seq.nextval, ${login.username}, ${login.ipAddress}, SYSDATE, ${login.success})
+VALUES (login_attempt_seq.nextval, ?{login.username}, ?{login.ipAddress}, SYSDATE, ?{login.success})
 }
 ```
 
@@ -524,10 +524,42 @@ keys. The former case is supported without explicitly specifying anything.
 However, to extract values from a keys result-set, the columns must be wrapped
 with "KEYS(" and ")" in either OUT- or UPDATE-parameters list.
 
-For example, `UPDATE(KEYS(p.id))` tells to look for generated keys and stored
-the value in the property "id" of an input parameter "p". Of course, when the
-KEYS-clause is used in a script definition, SqlStore will inform the database
-driver to return generated keys.
+Since the generated keys result-set needs a bit of help to know what keys we
+are interested about, the `KEYS(...)` expression is a bit more advanced. For
+each property to copy value into, there must also be the column name where the
+generated value comes from. This is expressed as `KEY_COL_NAME -> var.prop`,
+which reads as store the generated key value from column named `KEY_COL_NAME`
+inside the property `prop` of the IN-parameter named `var`. The whitespace in
+the expression is optional, though recommended.
+
+*Note*: SqlStore only passes the names of the expected generated key columns to
+the JDBC driver via JDBC API. Support for this feature may vary in different
+JDBC drivers from different vendors. For example, it turned out that
+PostgreSQL needs the generated key column name to be in lower case, or it will
+fail with column not found.
+
+The generated keys clause for UPDATE-parameters looks like this:
+
+```
+UPDATE(KEYS(id -> p.id, bar_code -> p.barCode))
+```
+
+Similar generated keys clause for OUT-parameters looks like this:
+
+```
+OUT(KEYS(Product[id -> id, bar_code -> barCode]))
+```
+
+The previous OUT-parameter defines an object of type `Product` where the `id`
+and `barCode` properties will be populated from the generated keys result-set.
+Similar result, but in a Map object instead, can be specified like this:
+
+```
+OUT(KEYS(id -> int, bar_code -> String))
+```
+
+Instead of specifying properties, this time the arrow points to the map
+key/value Java type.
 
 Now that two methods for returning query results have been covered, it is
 important to remember that they cannot be together on the same result-set! A
@@ -591,6 +623,39 @@ For SqlStore, this SQL looks like `SELECT *\n  FROM person\n WHERE active=1`.
 SqlStore also sees that this is a simple statement and does not take any
 parameters.
 
+SQL statement may also take some runtime parameters that will be bound before
+being executed. The parameters for the statement are taken from the
+IN-parameters list by parameter name. To bind an IN-parameter, just specify the
+the corresponding parameter name in appropriate place using a question mark
+followed by a parameter name within curly braces.
+
+
+```
+... IN(boolean|INT active) {
+SELECT * FROM person WHERE active=?{active}
+}
+```
+
+In this example, the executed SQL statement will look like `SELECT * FROM
+person WHERE active=?` where the question mark is the place where the parameter
+value (boolean converted to integer 0 or 1) will be bound.
+
+There is no restriction how many parameters a statement can accept. In
+addition, more complex parameters are supported, as well. When an IN-parameter
+is a bean object with properties (getter-methods), its nested properties can be
+specified in the placeholder expression. Here is an example:
+
+```
+... IN(com.example.SearcFilter filter) {
+SELECT * FROM person WHERE ?{filter.active} IS NULL OR active=?{filter.active}
+}
+```
+
+In the previous example, when the `filter` object property `active` is null,
+all records from the table will be returned. Otherwise, the rows of the table
+will be filtered by the `active` column to match the value from the
+`filter.active` property.
+
 
 
 ### Dynamically Included SQL Statement Parts
@@ -642,18 +707,18 @@ findUsers
   OUT(UsersListRow[id, username, name, active, updated]) {
 SELECT id, username, name, active, date_updated
   FROM users
- WHERE active=${f.active}
-!(f.name){ AND name LIKE ${f.name} }
-!(f.username){ AND name LIKE ${f.username} }
-!(f.updatedBegin){ AND date_updated <= ${f.updatedBegin} }
-!(f.updatedEnd){ AND date_updated >= ${f.updatedEnd} }
+ WHERE active=?{f.active}
+!(f.name){ AND name LIKE ?{f.name} }
+!(f.username){ AND name LIKE ?{f.username} }
+!(f.updatedBegin){ AND date_updated <= ?{f.updatedBegin} }
+!(f.updatedEnd){ AND date_updated >= ?{f.updatedEnd} }
 }
 ```
 
 ### Binding for Script Parameters
 
 However, an SQL can declare that it takes parameter values from the
-IN-parameters clause by wrapping the expression inside "${" and "}":
+IN-parameters clause by wrapping the expression inside "?{" and "}":
 
 
 ```
@@ -667,20 +732,20 @@ INSERT INTO products (
 	created_at,
 	created_by
 ) VALUES (
-	${p.name},
-	${p.description},
-	${p.categoryId},
-	${p.producerId},
-	${p.providerId},
+	?{p.name},
+	?{p.description},
+	?{p.categoryId},
+	?{p.producerId},
+	?{p.providerId},
 	CURRENT_TIMESTAMP,
-	${p.createdBy}
+	?{p.createdBy}
 )
 }
 ```
 
-The places, where `${...}` expressions are used, will be replaced with question
+The places, where `?{...}` expressions are used, will be replaced with question
 marks "?", which is sign used by JDBC to bind a parameter value. The value will
-be read from where the expression suggests. For example, `${p.name}` means that
+be read from where the expression suggests. For example, `?{p.name}` means that
 the value is to be read from the property "name" of the IN-parameter "p".
 Nested properties are supported, too.
 
@@ -700,10 +765,10 @@ value of an INOUT-mode parameter in an expression. Here is a quick demo:
 
 ```
 updatePrice IN(Product p) OUT(BigDecimal total) {
-  {${total} = call update_price(
-                     ${p.productId},
-	                   ${INOUT(p.price)},
-                     ${p.vatPercent}
+  {?{total} = call update_price(
+                     ?{p.productId},
+                     ?{INOUT(p.price)},
+                     ?{p.vatPercent}
                    )}
 }
 ```
@@ -717,12 +782,12 @@ the expression to be updated by the stored procedure).
 
 As with UPDATE-parameters, it is possible to override the default SQL type from
 `ValueMapper`s by providing type name after the expression separated by pipe
-character: `${p.availableSince|DATE}` (default type would TIMESTAMP, for
+character: `?{p.availableSince|DATE}` (default type would TIMESTAMP, for
 example).
 
 It is possible to escape expressions when they are not to be interpreted by
-using a backward-slash, e.g. `\${escapeMe}`. However, this does not have to be
-escaped since it does not begin with "${": `$IWillBePreserved`.
+using a backward-slash, e.g. `\?{escapeMe}`. However, this does not have to be
+escaped since it does not begin with "?{": `?IWillBePreserved`.
 
 Regarding curly braces within SQL statement, SqlStore parser keeps track of them
 and keeps them as part of the SQL string when they are in sequence "{" before
