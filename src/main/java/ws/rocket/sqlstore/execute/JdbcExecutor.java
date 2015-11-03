@@ -114,7 +114,7 @@ public final class JdbcExecutor {
       }
 
       ctx.readParameters(stmt);
-      readResults(stmt, hasData, false, ctx);
+      readResults(stmt, hasData, 0, ctx);
 
     } catch (SQLException e) {
       throw new ScriptExecuteException(e, ctx);
@@ -138,7 +138,7 @@ public final class JdbcExecutor {
         TIME_DB.trace("Execution of script '{}' in database took {} ms.", ctx.getName(), time);
       }
 
-      readResults(stmt, hasData, keys.length > 0, ctx);
+      readResults(stmt, hasData, keys.length, ctx);
 
     } catch (SQLException e) {
       throw new ScriptExecuteException(e, ctx);
@@ -161,13 +161,13 @@ public final class JdbcExecutor {
         TIME_DB.trace("Execution of script '{}' in database took {} ms.", ctx.getName(), time);
       }
 
-      readResults(stmt, hasData, keys.length > 0, ctx);
+      readResults(stmt, hasData, keys.length, ctx);
     } catch (SQLException e) {
       throw new ScriptExecuteException(e, ctx);
     }
   }
 
-  private void readResults(Statement stmt, boolean hasData, boolean keys, QueryContext ctx)
+  private void readResults(Statement stmt, boolean hasData, int keysCount, QueryContext ctx)
       throws SQLException {
 
     while (hasData) {
@@ -196,7 +196,7 @@ public final class JdbcExecutor {
       ctx.setUpdateCount(count);
     }
 
-    if (keys) {
+    if (keysCount > 0) {
       try (ResultSet results = stmt.getGeneratedKeys()) {
         int columnCount = results.getMetaData().getColumnCount();
 
@@ -204,9 +204,9 @@ public final class JdbcExecutor {
           LOG.debug("Reading GeneratedKeys which has {} columns", columnCount);
         }
 
-        if (columnCount != ctx.getKeysColumnCount()) {
+        if (columnCount != keysCount) {
           throw new ScriptSetupException("The KEYS result set has %d but the script expects %d "
-              + "columns.", columnCount, ctx.getKeysColumnCount());
+              + "columns.", columnCount, keysCount);
         }
 
         while (results.next()) {

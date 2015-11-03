@@ -269,15 +269,6 @@ public final class QueryContext {
   }
 
   /**
-   * Informs about the expected amount of columns in a generated keys result-set.
-   *
-   * @return The number of columns in generated keys result-set.
-   */
-  public int getKeysColumnCount() {
-    return this.script.getGeneratedKeys().length;
-  }
-
-  /**
    * Informs about the expected amount of columns in a query results result-set.
    *
    * @return The number of columns in generated keys result-set.
