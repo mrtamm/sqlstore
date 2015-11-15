@@ -20,15 +20,16 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.SqlStore;
 import ws.rocket.sqlstore.connection.SharedConnectionManager;
@@ -42,85 +43,55 @@ import static org.testng.Assert.assertTrue;
 /**
  * Integration tests for checking the overall functionality through SqlStore class.
  */
-public class SqlStoreTest {
+public class DatabaseTest {
 
-  private BasicDataSource dataSource;
+  private static final Logger LOG = LoggerFactory.getLogger(DatabaseTest.class);
 
   private ScriptsFacade scripts;
 
-  @BeforeClass
-  public void setUp() throws SQLException, IOException {
-    ResourceBundle bundle = ResourceBundle.getBundle("ws.rocket.sqlstore.test.test");
-
-    String derbyPath = bundle.getString("jdbc.dbPath");
-    if (derbyPath != null) {
-      File dbPath = new File(derbyPath);
-
-      if (!dbPath.exists()) {
-        dbPath.mkdirs();
-      }
-
-      System.setProperty("derby.system.home", dbPath.getCanonicalPath());
-    }
-
-    BasicDataSource ds = new BasicDataSource();
-    ds.setDriverClassName(bundle.getString("jdbc.driver"));
-    ds.setUrl(bundle.getString("jdbc.url"));
-    ds.setUsername(bundle.getString("jdbc.username"));
-    ds.setPassword(bundle.getString("jdbc.password"));
-    ds.setDefaultCatalog(bundle.getString("jdbc.schema"));
-    ds.setDefaultReadOnly(true);
-    ds.setDefaultAutoCommit(false);
-    ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-    ds.setInitialSize(Integer.parseInt(bundle.getString("jdbc.initialConnections")));
-
-    this.dataSource = ds;
-
-    boolean tableExists;
-    try (Connection c = this.dataSource.getConnection()) {
-      DatabaseMetaData meta = c.getMetaData();
-      try (ResultSet rs = meta.getTables(null, "SQLSTORE", "PERSON", new String[] { "TABLE" })) {
-        tableExists = rs.next();
-      }
-    }
-
-    if (tableExists) {
-      dropTables();
-    }
-  }
-
-  @AfterClass
-  public void tearDown() {
-    try {
-      this.dataSource.close();
-    } catch (SQLException e) {
-      throw new RuntimeException("Unexpected problem when shutting down the data source.", e);
-    }
-  }
-
   @Test
   public void executeQueries() throws SQLException {
-    this.scripts = SqlStore.proxy(ScriptsFacade.class);
-
-    assertTrue(this.scripts.equals(this.scripts), "The proxy must equal to itself.");
-    System.out.println("HashCode for the proxy: " + this.scripts.hashCode());
-    System.out.println(this.scripts.toString());
-
-    SharedConnectionManager.register(this.dataSource);
-    boolean tablesCreated = false;
+    Connection con;
 
     try {
-      createTables();
-      tablesCreated = true;
-      addRecords();
-      queryRecords();
-      testProcedure();
-      deleteRecords();
-    } finally {
-      if (tablesCreated) {
-        dropTables();
+      con = initDbConnection();
+      SharedConnectionManager.register(con);
+
+    } catch (Exception e) {
+      LOG.warn("Database testing was skipped due setup failure: " + e);
+      return;
+    }
+
+    try {
+      this.scripts = SqlStore.proxy(ScriptsFacade.class, con);
+
+      assertTrue(this.scripts.equals(this.scripts), "The proxy must equal to itself.");
+
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("HashCode for the proxy: {}", this.scripts.hashCode());
+        LOG.debug(this.scripts.toString());
       }
+
+      boolean tablesCreated = false;
+
+      try {
+        createTables();
+        tablesCreated = true;
+
+        addRecords();
+        queryRecords();
+        testProcedure();
+        deleteRecords();
+
+      } finally {
+        if (tablesCreated) {
+          dropTables();
+        }
+      }
+
+    } finally {
       SharedConnectionManager.unregister();
+      con.close();
     }
   }
 
@@ -192,12 +163,93 @@ public class SqlStoreTest {
 
   private void testProcedure() {
     Date createdAt = this.scripts.calcDateCreated(1L);
-    System.out.println("calcDateCreated() -> " + createdAt);
+    LOG.debug("calcDateCreated() -> {}", createdAt);
   }
 
   private void dropTables() {
     this.scripts.dropTablePerson();
     this.scripts.dropSampleFunction();
+  }
+
+  private static Connection initDbConnection() throws Exception {
+    ResourceBundle bundle = ResourceBundle.getBundle("ws.rocket.sqlstore.test.test");
+
+    String derbyPath = bundle.getString("jdbc.dbPath");
+    if (derbyPath != null && !derbyPath.isEmpty()) {
+      initDerbyDbPath(derbyPath);
+    }
+
+    Class.forName(bundle.getString("jdbc.driver"));
+
+    Connection con = DriverManager.getConnection(
+        bundle.getString("jdbc.url"),
+        bundle.getString("jdbc.username"),
+        bundle.getString("jdbc.password"));
+    con.setAutoCommit(false);
+    con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+    String schema = bundle.getString("jdbc.schema");
+    String testTable = bundle.getString("jdbc.testTable");
+
+    verifySchemaExists(con, schema);
+    removeTableIfExists(con, schema, testTable);
+
+    return con;
+  }
+
+  private static void initDerbyDbPath(String derbyPath) throws IOException {
+    File dbPath = new File(derbyPath);
+    if (!dbPath.exists()) {
+      dbPath.mkdirs();
+    }
+
+    String canonicalPath = dbPath.getCanonicalPath();
+    LOG.debug("DERBY path: {}", canonicalPath);
+    System.setProperty("derby.system.home", canonicalPath);
+  }
+
+  private static void verifySchemaExists(Connection con, String schema) throws SQLException {
+    if (schema == null || schema.isEmpty() || schema.contains(" ")) {
+      LOG.info("Skipping: verify schema exists.");
+      return;
+    }
+
+    try (ResultSet schemas = con.getMetaData().getSchemas()) {
+      while (schemas.next()) {
+        if (schema.equalsIgnoreCase(schemas.getString(1))) {
+          LOG.info("OK: Schema '{}' exists.", schema);
+          return;
+        }
+      }
+    }
+
+    try (Statement stmt = con.createStatement()) {
+      stmt.execute("CREATE SCHEMA " + schema);
+      LOG.info("OK: Schema '{}' was explicitly created.", schema);
+    }
+  }
+
+  private static void removeTableIfExists(Connection con, String schema, String table)
+      throws SQLException {
+
+    if (table == null || table.isEmpty() || table.contains(" ")) {
+      LOG.info("Skipping: remove table if exists.");
+      return;
+    }
+
+    DatabaseMetaData meta = con.getMetaData();
+
+    try (ResultSet rs = meta.getTables(null, schema, table, new String[] { "TABLE" })) {
+      if (!rs.next()) {
+        LOG.info("OK: Table '{}' does not exist.", table);
+        return;
+      }
+    }
+
+    try (Statement stmt = con.createStatement()) {
+      stmt.execute("DROP TABLE " + table);
+      LOG.info("OK: Table '{}' was explicitly dropped.");
+    }
   }
 
   private static Date toDate(int year, int month, int day) {
