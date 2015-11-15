@@ -71,7 +71,9 @@ public final class SingleConnectionManager implements ConnectionManager {
       this.connectionLock.lock();
 
       try {
-        this.connection.setReadOnly(readOnly);
+        if (this.connection.isReadOnly() != readOnly) {
+          this.connection.setReadOnly(readOnly);
+        }
 
         LOG.trace("Locking current DB connection for a new session (read-only={}, autocommit={})",
             readOnly, this.connection.getAutoCommit());
