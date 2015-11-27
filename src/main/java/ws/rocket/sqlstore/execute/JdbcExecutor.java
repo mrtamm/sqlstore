@@ -154,7 +154,12 @@ public final class JdbcExecutor {
       String[] keys = ctx.getQueryKeys();
       long time = System.currentTimeMillis();
 
-      boolean hasData = stmt.execute(ctx.getSqlQuery(), keys);
+      boolean hasData;
+      if (keys.length == 0) {
+        hasData = stmt.execute(ctx.getSqlQuery());
+      } else {
+        hasData = stmt.execute(ctx.getSqlQuery(), keys);
+      }
 
       time = System.currentTimeMillis() - time;
       if (TIME_DB.isTraceEnabled()) {

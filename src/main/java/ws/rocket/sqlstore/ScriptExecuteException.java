@@ -88,7 +88,7 @@ public final class ScriptExecuteException extends RuntimeException {
     SQLException cause = getCause();
 
     StringBuilder sb = new StringBuilder();
-    sb.append("ScriptExecuteException: ").append(getMessage()).append('\n');
+    sb.append(getClass().getName()).append(": ").append(getMessage()).append('\n');
     sb.append("SQL state: ").append(cause.getSQLState()).append('\n');
     sb.append("SQL error code: ").append(cause.getErrorCode());
 
