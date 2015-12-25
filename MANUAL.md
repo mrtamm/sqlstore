@@ -99,18 +99,20 @@ is the scripts file in class-path.
 _com/sample/db/AuthenticationProvider.sqls_:
 
 ```
-isAuthenticationValid IN(String username, String passwordHash) OUT(boolean) {
+isAuthenticationValid IN(String username, String passwordHash) OUT(boolean)
+====
 SELECT COUNT(*)
   FROM users
  WHERE username = ?{username}
    AND passhash = ?{passowrdHash}
    AND active = 'Y'
-}
+====
 
-addLoginAttempt IN(com.sample.db.login.LoginAttempt login) {
+addLoginAttempt IN(com.sample.db.login.LoginAttempt login)
+====
 INSERT INTO login_attempt (id, username, ip_address, auth_time, success)
 VALUES (login_attempt_seq.nextval, ?{login.username}, ?{login.ipAddress}, SYSDATE, ?{login.success})
-}
+====
 ```
 
 _com/sample/db/AuthenticationProvider.java_:
@@ -406,7 +408,10 @@ several of these as long as script names are unique per file. Whitespace around
 declaration is ignored; where-ever a whitespace character is allowed, it
 includes any kind of white-space character and no matter how many.
 
-		script-name optional-parameters { SQL Script here }
+		script-name optional-parameters
+    ====
+    SQL Script here
+    ====
 
 A script name may contain any character that is allowed for Java identifiers
 (variable/method name).
@@ -607,21 +612,26 @@ SQL statement
 -------------
 
 A script declaration requires an SQL statement right after script name and
-parameters, and within curly braces. SqlStore removes whitespace before and
+parameters, and between separator lines. SqlStore removes whitespace before and
 after the script but keeps them within the statement (this may prove helpful for
 debugging, as well). So here is a simple example:
 
 ```
-{
+====
 SELECT *
   FROM person
  WHERE active=1
-}
+====
 ```
 
 For SqlStore, this SQL looks like `SELECT *\n  FROM person\n WHERE active=1`.
 SqlStore also sees that this is a simple statement and does not take any
 parameters.
+
+The separator before and after the script is at least four equal-signs beginning
+from the first column of the row. Four is the minimal length, separators may be
+longer and don't have to have same length throughout a file. The separators are
+simple, yet distinctive to quickly notice where a script begins and ends.
 
 SQL statement may also take some runtime parameters that will be bound before
 being executed. The parameters for the statement are taken from the
@@ -631,9 +641,10 @@ followed by a parameter name within curly braces.
 
 
 ```
-... IN(boolean|INT active) {
+... IN(boolean|INT active)
+==========================
 SELECT * FROM person WHERE active=?{active}
-}
+==========================
 ```
 
 In this example, the executed SQL statement will look like `SELECT * FROM
@@ -646,9 +657,10 @@ is a bean object with properties (getter-methods), its nested properties can be
 specified in the placeholder expression. Here is an example:
 
 ```
-... IN(com.example.SearcFilter filter) {
+... IN(com.example.SearchFilter filter)
+=======================================
 SELECT * FROM person WHERE ?{filter.active} IS NULL OR active=?{filter.active}
-}
+=======================================
 ```
 
 In the previous example, when the `filter` object property `active` is null,
@@ -704,7 +716,8 @@ expression (the first one of the three condition types):
 ```
 findUsers
   IN(UserSearchFilter f)
-  OUT(UsersListRow[id, username, name, active, updated]) {
+  OUT(UsersListRow[id, username, name, active, updated])
+========================================================
 SELECT id, username, name, active, date_updated
   FROM users
  WHERE active=?{f.active}
@@ -712,7 +725,7 @@ SELECT id, username, name, active, date_updated
 !(f.username){ AND name LIKE ?{f.username} }
 !(f.updatedBegin){ AND date_updated <= ?{f.updatedBegin} }
 !(f.updatedEnd){ AND date_updated >= ?{f.updatedEnd} }
-}
+========================================================
 ```
 
 ### Binding for Script Parameters
@@ -722,7 +735,8 @@ IN-parameters clause by wrapping the expression inside "?{" and "}":
 
 
 ```
-addProduct IN(Product p) UPDATE(KEYS(p.id)) {
+addProduct IN(Product p) UPDATE(KEYS(p.id))
+===========================================
 INSERT INTO products (
 	name,
 	description,
@@ -740,7 +754,7 @@ INSERT INTO products (
 	CURRENT_TIMESTAMP,
 	?{p.createdBy}
 )
-}
+===========================================
 ```
 
 The places, where `?{...}` expressions are used, will be replaced with question
@@ -764,13 +778,14 @@ value of an INOUT-mode parameter in an expression. Here is a quick demo:
 
 
 ```
-updatePrice IN(Product p) OUT(BigDecimal total) {
-  {?{total} = call update_price(
-                     ?{p.productId},
-                     ?{INOUT(p.price)},
-                     ?{p.vatPercent}
-                   )}
-}
+updatePrice IN(Product p) OUT(BigDecimal total)
+===============================================
+{?{total} = call update_price(
+                   ?{p.productId},
+                   ?{INOUT(p.price)},
+                   ?{p.vatPercent}
+                 )}
+===============================================
 ```
 
 The previous sample uses JDBC escape syntax (additional curly braces around
