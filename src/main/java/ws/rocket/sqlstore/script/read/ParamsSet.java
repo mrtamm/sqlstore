@@ -23,6 +23,7 @@ import java.util.List;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.InputParams;
 import ws.rocket.sqlstore.script.OutputParams;
+import ws.rocket.sqlstore.script.QueryHints;
 import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.params.Expression;
@@ -67,6 +68,8 @@ public final class ParamsSet {
 
   private int outParamIndex;
 
+  private QueryHints hints;
+
   /**
    * Validates that all parameters of the script were actually used, and resets all internally
    * contained data so that this class instance could be reused for handling the parameters of next
@@ -98,6 +101,7 @@ public final class ParamsSet {
     this.inputParams = null;
     this.outputParams = null;
     this.outParamIndex = 0;
+    this.hints = null;
   }
 
   /**
@@ -330,6 +334,20 @@ public final class ParamsSet {
   }
 
   /**
+   * Registers a hint for the current script.
+   *
+   * @param hintName The hint name.
+   * @param hintValue The hint value.
+   * @see QueryHints#setHint(String, String)
+   */
+  public void setQueryHint(String hintName, String hintValue) {
+    if (this.hints == null) {
+      this.hints = new QueryHints();
+    }
+    this.hints.setHint(hintName, hintValue);
+  }
+
+  /**
    * Provides the validated input parameters set.
    *
    * @return The input parameters for current script.
@@ -390,6 +408,15 @@ public final class ParamsSet {
     }
 
     return result;
+  }
+
+  /**
+   * Provides the query hints for the current script.
+   *
+   * @return The query hints object, or null, which stands for "no hints defined".
+   */
+  public QueryHints getQueryHints() {
+    return this.hints;
   }
 
   /**

@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.read.ParamsCategory;
 import ws.rocket.sqlstore.script.read.StreamReader;
+import ws.rocket.sqlstore.script.read.block.SqlBuffer;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -157,11 +158,11 @@ public final class StreamReaderTest {
   }
 
   public void shouldParseSqlType() throws IOException {
-    StreamReader reader = createReader("DECIMAL 8000");
+    StreamReader reader = createReader("|DECIMAL |8000");
 
-    assertEquals(reader.parseSqlType(), java.sql.Types.DECIMAL);
+    assertEquals(reader.parseSqlType(), Integer.valueOf(java.sql.Types.DECIMAL));
     reader.skipNext();
-    assertEquals(reader.parseSqlType(), 8000);
+    assertEquals(reader.parseSqlType(), Integer.valueOf(8000));
   }
 
   public void shouldParseKeysNotParamName() throws IOException {
@@ -184,69 +185,108 @@ public final class StreamReaderTest {
     assertEquals(reader.parseKeysOrJavaType(), Integer.class);
   }
 
+  public void shouldParseSqlSeparatorShort() throws IOException {
+    StreamReader reader = createReader("====\n");
+
+    reader.parseSqlSeparator();
+
+    assertTrue(reader.isEndOfStream());
+  }
+
+  public void shouldParseSqlSeparatorLong() throws IOException {
+    StreamReader reader = createReader("============================\n");
+
+    reader.parseSqlSeparator();
+
+    assertTrue(reader.isEndOfStream());
+  }
+
+  public void shouldParseSqlSeparatorAnyChar() throws IOException {
+    StreamReader reader = createReader("==== ABCDE 12345 !@#$%\n");
+
+    reader.parseSqlSeparator();
+
+    assertTrue(reader.isEndOfStream());
+  }
+
   public void shouldParseSql() throws IOException {
-    StreamReader reader = createReader("SELECT id, name, birthday\n FROM people  }");
-    StringBuilder sb = new StringBuilder();
+    StreamReader reader = createReader("SELECT id, name, birthday\n FROM people \n====\n");
+    SqlBuffer sql = new SqlBuffer();
 
-    reader.parseSql(sb);
+    reader.parseSql(sql);
+    sql.trimEnd();
 
-    assertEquals(sb.toString(), "SELECT id, name, birthday\n FROM people");
+    assertEquals(sql.resetSqlContent(), "SELECT id, name, birthday\n FROM people");
   }
 
   public void shouldParseSqlWithParams() throws IOException {
-    StreamReader reader = createReader("UPDATE people SET name=?{}, birthday=?{} WHERE ID=?{}}");
-    StringBuilder sb = new StringBuilder();
+    StreamReader reader = createReader("UPDATE people SET name=?{}, birthday=?{} WHERE ID=?{} "
+        + "\n====\n");
+    SqlBuffer sql = new SqlBuffer();
 
-    assertEquals(reader.parseSql(sb), '{');
-    assertEquals(sb.toString(), "UPDATE people SET name=?");
+    assertEquals(reader.parseSql(sql), '{');
     reader.requireNext('}');
 
-    assertEquals(reader.parseSql(sb), '{');
-    assertEquals(sb.toString(), "UPDATE people SET name=?, birthday=?");
+    assertEquals(reader.parseSql(sql), '{');
     reader.requireNext('}');
 
-    assertEquals(reader.parseSql(sb), '{');
-    assertEquals(sb.toString(), "UPDATE people SET name=?, birthday=? WHERE ID=?");
+    assertEquals(reader.parseSql(sql), '{');
     reader.requireNext('}');
 
-    assertEquals(reader.parseSql(sb), '}');
+    assertEquals(reader.parseSql(sql), '\n');
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
+
+    String sqlContent = sql.trimEnd().resetSqlContent();
+    assertEquals(sqlContent, "UPDATE people SET name=?, birthday=? WHERE ID=?");
   }
 
   public void shouldParseHandleBraces() throws IOException {
-    StreamReader reader = createReader("SELECT '\\\\a ? {} \\\\b' FROM temp}");
-    StringBuilder sb = new StringBuilder();
+    StreamReader reader = createReader("SELECT '\\\\a ? {} \\\\b' FROM temp \n====\n");
+    SqlBuffer sql = new SqlBuffer();
 
-    assertEquals(reader.parseSql(sb), '}');
-    assertEquals(sb.toString(), "SELECT '\\a ? {} \\b' FROM temp");
+    int lastChar = reader.parseSql(sql);
+    String sqlContent = sql.trimEnd().resetSqlContent();
+
+    assertEquals(lastChar, '\n');
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
+    assertEquals(sqlContent, "SELECT '\\a ? {} \\b' FROM temp");
   }
 
   public void shouldParseHandleEscaping() throws IOException {
-    StreamReader reader = createReader("SELECT '\\\\ \\?{} \\{ \\} \\' FROM temp}");
-    StringBuilder sb = new StringBuilder();
+    StreamReader reader = createReader("SELECT '\\\\ \\?{} \\{ \\} \\' FROM temp \n====\n");
+    SqlBuffer sql = new SqlBuffer();
 
-    assertEquals(reader.parseSql(sb), '}');
-    assertEquals(sb.toString(), "SELECT '\\ ?{} { } \\' FROM temp");
+    int lastChar = reader.parseSql(sql);
+    String sqlContent = sql.trimEnd().resetSqlContent();
+
+    assertEquals(lastChar, '\n');
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
+    assertEquals(sqlContent, "SELECT '\\ ?{} { } \\' FROM temp");
   }
 
   public void shouldParseConditional() throws IOException {
-    StreamReader reader = createReader("SELECT name FROM user\r\n!(condition){ WHERE id = ${}}\n}");
-    StringBuilder sb = new StringBuilder();
+    StreamReader reader = createReader("SELECT name FROM user\r\n!(condition){ WHERE id = ${}}\n");
+    SqlBuffer sql = new SqlBuffer();
 
-    assertEquals(reader.parseSql(sb), '(');
-    assertEquals(sb.toString(), "SELECT name FROM user");
+    int lastChar = reader.parseSql(sql);
+    String sqlContent = sql.trimEnd().resetSqlContent();
+
+    assertEquals(lastChar, '(');
     assertFalse(reader.isEndOfStream(), "Expecting not to be at the end of stream.");
+    assertEquals(sqlContent, "SELECT name FROM user");
   }
 
   public void shouldNotParseConditional() throws IOException {
-    StreamReader reader = createReader("SELECT name FROM user!(c1){a} \n !(c2){b}\n! (c3){c}}");
-    StringBuilder sb = new StringBuilder();
+    StreamReader reader = createReader("SELECT name FROM user!(c1){a} \n !(c2){b}\n! (c3){c} "
+        + "\n===========\n");
+    SqlBuffer sql = new SqlBuffer();
 
-    assertEquals(reader.parseSql(sb), '}');
-    assertEquals(sb.toString(), "SELECT name FROM user!(c1){a} \n !(c2){b}\n! (c3){c}");
+    int lastChar = reader.parseSql(sql);
+    String sqlContent = sql.trimEnd().resetSqlContent();
+
+    assertEquals(lastChar, '\n');
     assertTrue(reader.isEndOfStream(), "Expecting end of stream.");
+    assertEquals(sqlContent, "SELECT name FROM user!(c1){a} \n !(c2){b}\n! (c3){c}");
   }
 
 }

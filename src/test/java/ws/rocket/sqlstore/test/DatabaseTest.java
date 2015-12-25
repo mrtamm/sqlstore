@@ -91,7 +91,12 @@ public class DatabaseTest {
 
     } finally {
       SharedConnectionManager.unregister();
-      con.close();
+
+      try {
+        con.close();
+      } catch (SQLException e) {
+        LOG.warn("Exception while closing connection.", e);
+      }
     }
   }
 
@@ -190,9 +195,16 @@ public class DatabaseTest {
 
     String schema = bundle.getString("jdbc.schema");
     String testTable = bundle.getString("jdbc.testTable");
+    String testSequence = bundle.getString("jdbc.testSequence");
 
     verifySchemaExists(con, schema);
-    removeTableIfExists(con, schema, testTable);
+    removeObjectIfExists(con, schema, testTable, "TABLE");
+    removeObjectIfExists(con, schema, testSequence, "SEQUENCE");
+
+    if (testSequence != null && !testSequence.isEmpty()) {
+      execStmt(con, "CREATE SEQUENCE " + testSequence);
+      LOG.info("OK: Sequence '{}' was explicitly created.", schema);
+    }
 
     return con;
   }
@@ -223,33 +235,36 @@ public class DatabaseTest {
       }
     }
 
-    try (Statement stmt = con.createStatement()) {
-      stmt.execute("CREATE SCHEMA " + schema);
-      LOG.info("OK: Schema '{}' was explicitly created.", schema);
-    }
+    execStmt(con, "CREATE SCHEMA " + schema);
+    LOG.info("OK: Schema '{}' was explicitly created.", schema);
   }
 
-  private static void removeTableIfExists(Connection con, String schema, String table)
-      throws SQLException {
+  private static void removeObjectIfExists(Connection con, String schema, String objName,
+      String objType) throws SQLException {
 
-    if (table == null || table.isEmpty() || table.contains(" ")) {
-      LOG.info("Skipping: remove table if exists.");
+    if (objName == null || objName.isEmpty() || objName.contains(" ")) {
+      LOG.info("Skipping: remove object if exists.");
       return;
     }
 
     DatabaseMetaData meta = con.getMetaData();
 
-    try (ResultSet rs = meta.getTables(null, schema, table, new String[] { "TABLE" })) {
+    try (ResultSet rs = meta.getTables(null, schema, objName, new String[] { objType })) {
       if (!rs.next()) {
-        LOG.info("OK: Table '{}' does not exist.", table);
+        LOG.info("OK: {} '{}' does not exist.", objType, objName);
         return;
       }
     }
 
-    try (Statement stmt = con.createStatement()) {
-      stmt.execute("DROP TABLE " + table);
-      LOG.info("OK: Table '{}' was explicitly dropped.");
+    execStmt(con, "DROP " + objType + " " + objName);
+    LOG.info("OK: {} '{}' was explicitly dropped.", objType, objName);
+  }
+
+  private static void execStmt(Connection con, String stmt) throws SQLException {
+    try (Statement s = con.createStatement()) {
+      s.execute(stmt);
     }
+    con.commit();
   }
 
   private static Date toDate(int year, int month, int day) {

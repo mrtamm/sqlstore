@@ -10,8 +10,8 @@
 # Tables (DDL):
 ###############
 
-createTablePerson {
-
+createTablePerson
+=======================================
 CREATE TABLE person (
   id INT GENERATED ALWAYS AS IDENTITY,
   name VARCHAR(100) NOT NULL,
@@ -23,70 +23,82 @@ CREATE TABLE person (
   updated_by INT CONSTRAINT fk_person_updated_by REFERENCES person(id),
   CONSTRAINT pk_person PRIMARY KEY (id)
 )
+=======================================
 
-}
 
-dropTablePerson {
-  DROP TABLE person
-}
+dropTablePerson
+=======================================
+DROP TABLE person
+=======================================
+
 
 ############################
 # Data update scripts (DML):
 ############################
 
-insertPerson
-  IN(Person p)
-  UPDATE(KEYS(ID -> p.id))
-{
+insertPerson IN(Person p) UPDATE(KEYS(ID -> p.id))
+=======================================
 INSERT INTO person (name, date_of_birth, active, date_created, created_by)
 VALUES (?{p.name}, ?{p.dateOfBirth|DATE}, ?{p.active|CHAR}, CURRENT_TIMESTAMP, ?{p.createdBy})
-}
+=======================================
 
-updatePerson IN(Person p) {
-  UPDATE person
-     SET name          = ?{p.name},
-         date_of_birth = ?{p.dateOfBirth|DATE},
-         active        = ?{p.active|CHAR},
-         date_updated  = CURRENT_TIMESTAMP.
-         updated_by    = ?{p.updatedBy}
-   WHERE id            = ?{p.id}
-}
 
-deletePerson IN(Long id) {
-  DELETE FROM person WHERE id = ?{id}
-}
+updatePerson IN(Person p)
+=======================================
+UPDATE person
+   SET name          = ?{p.name},
+       date_of_birth = ?{p.dateOfBirth|DATE},
+       active        = ?{p.active|CHAR},
+       date_updated  = CURRENT_TIMESTAMP.
+       updated_by    = ?{p.updatedBy}
+ WHERE id            = ?{p.id}
+=======================================
+
+
+deletePerson IN(Long id)
+=======================================
+DELETE FROM person WHERE id = ?{id}
+=======================================
+
 
 findPersons
   IN(boolean onlyActive)
   OUT(Person[id,name,dateOfBirth|DATE,active|CHAR,dateCreated,createdBy,dateUpdated,updatedBy])
-{
+=======================================
 SELECT * FROM person
 !(true(onlyActive)){ WHERE active='Y' }
-}
+=======================================
+
 
 findPersonById
   IN(long id)
   OUT(Person[id, name, dateOfBirth|DATE, active|CHAR, dateCreated, createdBy, dateUpdated, updatedBy])
-{
+=======================================
 SELECT * FROM person WHERE id = ?{id}
-}
+=======================================
+
 
 ###########################
 # Calling stored functions:
 ###########################
 
-createSampleFunction {
+createSampleFunction
+=======================================
 CREATE FUNCTION find_date_created(person_id INT) RETURNS TIMESTAMP
   LANGUAGE JAVA
   PARAMETER STYLE JAVA
   RETURNS NULL ON NULL INPUT
   EXTERNAL NAME 'ws.rocket.sqlstore.test.derby.Functions.findDateCreated'
-}
+=======================================
 
-calcDateCreated IN(Long|INTEGER id) OUT(Date|TIMESTAMP date) {
-  ?{OUT(date)} = call find_date_created(?{id})
-}
 
-dropSampleFunction {
-  DROP FUNCTION find_date_created
-}
+calcDateCreated IN(Long|INTEGER id) OUT(Date|TIMESTAMP date)
+=======================================
+{?{OUT(date)} = call find_date_created(?{id})}
+=======================================
+
+
+dropSampleFunction
+=======================================
+DROP FUNCTION find_date_created
+=======================================

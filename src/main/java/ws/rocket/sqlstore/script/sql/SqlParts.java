@@ -79,6 +79,7 @@ public final class SqlParts implements SqlScript {
     for (SqlScript part : this.innerParts) {
       str.append(part.toString()).append('\n');
     }
+    str.setLength(str.length() - 1);
     return str.toString();
   }
 

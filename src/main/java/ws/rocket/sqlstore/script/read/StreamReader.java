@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.BeanUtil;
+import ws.rocket.sqlstore.script.read.block.SqlBuffer;
 
 /**
  * A reader that provides granular API for reading SqlStore configuration file. To simplify usage,
@@ -71,7 +72,17 @@ public final class StreamReader implements Closeable {
     }
 
     this.column++;
-    return this.input.read();
+
+    int c = this.input.read();
+    return c == '\r' ? '\n' : c;
+  }
+
+  private int moveUntilEndOfLine() throws IOException {
+    do {
+      this.nextChar = readNext();
+    } while (this.nextChar != -1 && this.nextChar != '\n');
+
+    return this.nextChar;
   }
 
   private int moveNext() throws IOException {
@@ -86,9 +97,7 @@ public final class StreamReader implements Closeable {
       this.nextChar = readNext();
 
       if (this.nextChar == '#') {
-        do {
-          this.nextChar = readNext();
-        } while (this.nextChar != -1 && this.nextChar != '\n');
+        this.nextChar = moveUntilEndOfLine();
 
       } else if (this.nextChar == '\\') {
         this.escapedChar = this.input.read();
@@ -215,10 +224,10 @@ public final class StreamReader implements Closeable {
   }
 
   /**
-   * The column number (on a line( of the current unprocessed character. Counting columns starts
-   * with zero.
+   * The column number (on a line) of the current unprocessed character. Counting columns starts
+   * with one (zero is the initial value when stream or row parsing has not started).
    *
-   * @return The current column number.
+   * @return The current column number, 1 or greater integer.
    */
   public int getColumn() {
     return this.column;
@@ -450,7 +459,11 @@ public final class StreamReader implements Closeable {
    * @return The parsed SQL type as a <code>java.sql.Types</code> constant.
    * @throws IOException When a stream-related exception occurs during reading.
    */
-  public int parseSqlType() throws IOException {
+  public Integer parseSqlType() throws IOException {
+    if (!skipIfNext('|')) {
+      return null;
+    }
+
     this.buffer.setLength(0);
     int cp = this.nextChar;
 
@@ -480,98 +493,49 @@ public final class StreamReader implements Closeable {
   }
 
   /**
+   * Parses the script block separator. It must begin on first column of the row and at least four
+   * consecutive equal-signs (====), and the rest of the symbols will be ignored until the end of
+   * line.
+   *
+   * @return The first character (on the first column) on the next line.
+   * @throws IOException When a stream-related exception occurs during reading.
+   */
+  public int parseSqlSeparator() throws IOException {
+    if (this.column != 1) {
+      fail("Expected script block separator (====) to begin on first column;");
+    }
+
+    for (int i = 0; i < 4; i++) {
+      requireNext('=');
+    }
+
+    int cp = moveUntilEndOfLine();
+    return cp != -1 ? moveNext() : -1;
+  }
+
+  /**
    * Parses an SQL query starting from current position. The query must be wrapped by curly braces.
    * This method does not check for allowed characters. However, this method trims white-space
    * surrounding lines and joins subsequent lines with a single space character. This method will
    * throw a runtime exception when the current character is not an opening curly brace letter, the
    * closing curly brace is not reached, or the contained SQL query is empty.
    *
-   * @param buf The buffer where the result must be stored.
+   * @param sql The buffer where the parsed SQL must be stored.
    * @return The last code-point ("{" = parameter; "}" = end of script (part); "(" = condition).
    * @throws IOException When a stream-related exception occurs during reading.
    */
-  public int parseSql(StringBuilder buf) throws IOException {
-    int nestedBraces = 0;
+  public int parseSql(SqlBuffer sql) throws IOException {
     int cp = this.nextChar;
 
-    while (cp != -1) {
-
-      // Preprocess the code-point before adding it to buffer:
-      if (cp == '{') {
-        nestedBraces++;
-
-      } else if (cp == '}') {
-        nestedBraces--;
-
-        if (nestedBraces < 0) {
-          break;
-        }
-
-      } else if (cp == '\\') {
-        cp = moveNext(); // escaping
-
-        if (cp != '?' && cp != '{' && cp != '}' && cp != '\\') {
-          buf.append('\\');
-        }
-
-      } else if (cp == '?') {
-        cp = moveNext(); // check for opening curly brace
-
-        if (cp == '{') {
-          moveNext();
-          buf.append('?'); // JDBC parameter placeholder
-          break;
-        }
-
-        buf.append('?');
-
-      } else if (cp == '\n' || cp == '\r') {
-        int[] cps = new int[3];
-        int length = 0;
-
-        cps[length++] = '\n';
-
-        do {
-          cp = moveNext();
-        } while (cp == '\r' || cp == '\n');
-
-        cps[length++] = cp; // expecting exclamation mark
-
-        if (cp == '!') {
-          cps[length++] = moveNext(); // expecting opening parenthesis
-        }
-
-        cp = cps[length - 1];
-
-        if (length == 3 && cps[2] == '(') {
-          moveNext();
-          break;
-        }
-
-        // The new line does not begin with "!(", so put the chars into buffer and re-evaluate cp.
-        for (int i = 0; i < length - 1 && cps[i] != -1; i++) {
-          buf.appendCodePoint(cps[i]);
-        }
-        continue;
-      }
+    while (sql.next(cp, this.line, this.column)) {
+      cp = moveNext();
 
       if (cp == -1) {
-        break;
+        fail("Unexpected end of SQL statement block.");
       }
-
-      buf.appendCodePoint(cp);
-      cp = moveNext();
     }
 
-    if (cp == -1) {
-      fail("Unexpected end of SQL statement block.");
-    } else if (cp == '}') {
-      moveNext();
-      trimRightByChar(buf, ' ');
-      trimRightByChar(buf, ';');
-      trimRightByChar(buf, ' ');
-    }
-
+    moveNext();
     return cp;
   }
 
@@ -583,12 +547,6 @@ public final class StreamReader implements Closeable {
       result = Character.isJavaIdentifierPart(cp);
     }
     return result;
-  }
-
-  private void trimRightByChar(StringBuilder buf, int cp) {
-    for (int i = buf.length() - 1; i >= 0 && buf.codePointAt(i) == cp; i--) {
-      buf.deleteCharAt(i);
-    }
   }
 
   private void fail(String reason) {

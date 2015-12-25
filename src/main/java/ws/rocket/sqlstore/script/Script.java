@@ -97,10 +97,8 @@ public final class Script {
    * depending on input parameters. Required.
    * @param params An engine instance taking care of the work related to binding parameters for
    * input and output.
-   * @param hints Optional execution hints for the SQL script, if provided in the SQLS file.
-   * Otherwise may leave it null.
    */
-  public Script(String name, int line, SqlScript sqlScript, ParamsSet params, QueryHints hints) {
+  public Script(String name, int line, SqlScript sqlScript, ParamsSet params) {
     if (name == null || name.isEmpty()) {
       throw new IllegalArgumentException("Query name is undefined");
     } else if (line < 1) {
@@ -112,8 +110,8 @@ public final class Script {
     this.name = name;
     this.line = line;
     this.sqlScript = sqlScript;
-    this.hints = hints;
 
+    this.hints = params.getQueryHints();
     this.inputParams = params.getInputParams();
     this.outputParams = params.getOutputParams();
     this.keysParams = params.getKeysParams();
@@ -122,12 +120,10 @@ public final class Script {
 
     if (this.inputParams.isEmpty()) {
       this.statementType = StatementType.SIMPLE;
+    } else if (this.sqlScript.containsOutParam()) {
+      this.statementType = StatementType.CALL;
     } else {
-      if (this.sqlScript.containsOutParam()) {
-        this.statementType = StatementType.CALL;
-      } else {
-        this.statementType = StatementType.PREPARED;
-      }
+      this.statementType = StatementType.PREPARED;
     }
   }
 
@@ -272,9 +268,9 @@ public final class Script {
       str.append("\n    }");
     }
 
-    str.append("\n{");
+    str.append("\n====\n");
     str.append(this.sqlScript);
-    str.append("}\n");
+    str.append("\n====\n");
 
     return str.toString();
   }
