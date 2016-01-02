@@ -51,6 +51,9 @@ public @interface ResultRow {
   /**
    * Defines the Java types of the row values returned by script execution. These types are
    * validated against the script definition (look for the OUT-parameter).
+   *
+   * @return List of Java types that are expected to be extracted from a result-set row in given
+   * order.
    */
   Class<?>[] value();
 

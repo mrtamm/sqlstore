@@ -330,7 +330,7 @@ public final class EnvSupport {
 
     private final File src;
 
-    public FileDeletingInputStream(File src) throws FileNotFoundException {
+    FileDeletingInputStream(File src) throws FileNotFoundException {
       super(fileInStream(src));
       this.src = src;
     }

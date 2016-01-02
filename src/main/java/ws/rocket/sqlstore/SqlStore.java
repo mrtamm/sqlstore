@@ -208,13 +208,13 @@ public final class SqlStore {
 
   /**
    * Informs whether this instance contains a script with given name and it supports parameter
-   * values of given types. A value type may also be a subtype of the required type (as defined
-   * with the IN-parameters in the scripts file). Note that this method does not check the return
-   * values (OUT-parameters) of the script!
+   * values of given types. A value type may also be a subtype of the required type (as defined with
+   * the IN-parameters in the scripts file). Note that this method does not check the return values
+   * (OUT-parameters) of the script!
    *
    * @param name The exact script name to look for.
-   * @param types The value types that must be supported by the IN-parameters of the script.
-   * Order of the types must match. <code>null</code> is equivalent to an empty array.
+   * @param types The value types that must be supported by the IN-parameters of the script. Order
+   * of the types must match. <code>null</code> is equivalent to an empty array.
    * @return A Boolean true when such script is contained within this instance.
    */
   public boolean hasQuery(String name, Class<?>... types) {
@@ -343,7 +343,7 @@ public final class SqlStore {
 
     private final SqlStore s;
 
-    public ProxyHandler(SqlStore s) {
+    ProxyHandler(SqlStore s) {
       if (s == null) {
         throw new NullPointerException("SqlStore instance is undefined.");
       }

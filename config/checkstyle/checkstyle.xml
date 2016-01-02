@@ -2,7 +2,7 @@
 <!DOCTYPE module PUBLIC
           "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
           "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
-<!-- 
+<!--
   Here are described codign rules which Checkstyle uses for finding violations.
 
   General rules for Java files:
@@ -141,9 +141,6 @@
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
     <module name="MissingSwitchDefault"/>
-    <module name="RedundantThrows">
-      <property name="suppressLoadErrors" value="true" />
-    </module>
     <module name="SimplifyBooleanExpression"/>
     <module name="SimplifyBooleanReturn"/>
 
