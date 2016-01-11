@@ -16,6 +16,6 @@
 
 /**
  * Contains several readers dealing with the script content block. The main reader class is
- * {@Link SqlBlockReader}.
+ * {@link ws.rocket.sqlstore.script.read.block.SqlBlockReader}.
  */
 package ws.rocket.sqlstore.script.read.block;

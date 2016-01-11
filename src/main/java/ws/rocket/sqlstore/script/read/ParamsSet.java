@@ -140,8 +140,7 @@ public final class ParamsSet {
    * @param key When true, the previous parameter is a column name for a generated key to return.
    * Otherwise, a name for the parameter.
    *
-   * @see #setOutFromKeys(boolean)
-   * @see #addOutParamBeanProp(java.lang.String, java.lang.Integer)
+   * @see #addOutParamBeanProp(String, Integer, String)
    */
   public void addOutParam(Class<?> javaType, Integer sqlType, String name, boolean key) {
     if (name == null || name.isEmpty()) {
@@ -287,7 +286,7 @@ public final class ParamsSet {
    *
    * @param beanType The bean type to register.
    *
-   * @see #addOutParamBeanProp(java.lang.String, java.lang.Integer)
+   * @see #addOutParamBeanProp(String, Integer, String)
    * @see #unregisterBean()
    */
   public void registerBean(Class<?> beanType) {
@@ -298,7 +297,7 @@ public final class ParamsSet {
   /**
    * Marks the end of bean properties of previously registered bean.
    *
-   * @see #registerBean(java.lang.Class)
+   * @see #registerBean(Class)
    */
   public void unregisterBean() {
     this.propParamBeanType = null;
