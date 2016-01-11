@@ -1,6 +1,8 @@
 SqlStore Java Library
 =====================
 
+[![Build Status](https://travis-ci.org/mrtamm/sqlstore.svg)](https://travis-ci.org/mrtamm/sqlstore)
+
 SqlStore is a Java library that takes communication with a database over JDBC
 API to the next level by
 
