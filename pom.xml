@@ -169,6 +169,14 @@
     </plugins>
   </build>
 
+  <distributionManagement>
+    <repository>
+      <id>bintray-mrtamm-maven</id>
+      <name>Bintray Repo</name>
+      <url>https://api.bintray.com/maven/mrtamm/maven/sqlstore/;publish=1</url>
+    </repository>
+  </distributionManagement>
+
   <profiles>
     <profile>
       <id>release</id>
