@@ -104,7 +104,7 @@ public final class DataSourceConnectionManager implements ConnectionManager {
     }
 
     try {
-      this.connection.get().rollback();
+      c.rollback();
       LOG.trace("Rolled back current transaction.");
     } catch (SQLException e) {
       throw new ScriptExecuteException(e, "Failed to roll back transaction");
