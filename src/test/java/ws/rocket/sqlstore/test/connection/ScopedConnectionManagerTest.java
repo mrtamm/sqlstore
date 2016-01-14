@@ -79,7 +79,8 @@ public class ScopedConnectionManagerTest {
       verify(con).releaseSavepoint(savepoint);
       verify(con, times(2)).setSavepoint();
     } finally {
-      manager.releaseFinally();
+      manager.release();
+      verify(con, times(2)).releaseSavepoint(savepoint);
     }
   }
 
