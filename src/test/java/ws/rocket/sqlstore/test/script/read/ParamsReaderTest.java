@@ -63,19 +63,44 @@ public class ParamsReaderTest {
 
   public void shouldParseOutParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("OUT(String|VARCHAR)\n====");
+    StreamReader stream = getStream("OUT(String|VARCHAR, Integer)\n====");
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
 
-    assertEquals(params.getResultsParams().length, 1);
+    assertEquals(params.getResultsParams().length, 2);
     assertSame(params.getResultsParams()[0].getJavaType(), String.class);
+    assertSame(params.getResultsParams()[1].getJavaType(), Integer.class);
+
     assertNotSame(params.getOutputParams(), OutputParams.EMPTY);
     assertFalse(params.getOutputParams().isEmpty());
 
     assertSame(params.getInputParams(), InputParams.EMPTY);
     assertEquals(params.getKeysParams().length, 0);
     assertNull(params.getGenerateKeyColumns());
+    assertNull(params.getQueryHints());
+  }
+
+  public void shouldParseKeysOutParam() throws IOException {
+    ParamsSet params = new ParamsSet();
+    StreamReader stream = getStream("OUT(KEYS(COL1 -> String|VARCHAR, COL2 -> Integer))\n====");
+    ParamsReader reader = new ParamsReader(stream, params);
+
+    reader.parseParams();
+
+    assertEquals(params.getKeysParams().length, 2);
+    assertSame(params.getKeysParams()[0].getJavaType(), String.class);
+    assertSame(params.getKeysParams()[1].getJavaType(), Integer.class);
+
+    assertEquals(params.getGenerateKeyColumns().length, 2);
+    assertEquals(params.getGenerateKeyColumns()[0], "COL1");
+    assertEquals(params.getGenerateKeyColumns()[1], "COL2");
+
+    assertNotSame(params.getOutputParams(), OutputParams.EMPTY);
+    assertFalse(params.getOutputParams().isEmpty());
+
+    assertSame(params.getInputParams(), InputParams.EMPTY);
+    assertEquals(params.getResultsParams().length, 0);
     assertNull(params.getQueryHints());
   }
 
@@ -103,6 +128,18 @@ public class ParamsReaderTest {
     assertSame(params.getOutputParams(), OutputParams.EMPTY);
     assertEquals(params.getResultsParams().length, 0);
     assertNull(params.getQueryHints());
+  }
+
+  public void shouldParseHintParam() throws IOException {
+    ParamsSet params = new ParamsSet();
+    StreamReader stream = getStream("HINT(maxRows=3, queryTimeout=60, fetchSize=4, "
+        + "maxFieldSize=1000, readOnly=true, poolable=false, escapeProcessing=false)"
+        + "\n====");
+    ParamsReader reader = new ParamsReader(stream, params);
+
+    reader.parseParams();
+
+    assertNotNull(params.getQueryHints());
   }
 
   private static StreamReader getStream(String input) throws IOException {

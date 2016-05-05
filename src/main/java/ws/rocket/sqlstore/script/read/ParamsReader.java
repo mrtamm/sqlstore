@@ -18,6 +18,7 @@ package ws.rocket.sqlstore.script.read;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
@@ -101,11 +102,8 @@ public final class ParamsReader {
    * temporarily storing parameters of several scripts; reset is done by main reader).
    */
   public ParamsReader(StreamReader reader, ParamsSet params) {
-    if (reader == null) {
-      throw new NullPointerException("StreamReader is undefined.");
-    } else if (params == null) {
-      throw new NullPointerException("ParamsSet is undefined.");
-    }
+    Objects.requireNonNull(reader, "StreamReader is undefined.");
+    Objects.requireNonNull(params, "ParamsSet is undefined.");
 
     this.reader = reader;
     this.params = params;
@@ -188,18 +186,15 @@ public final class ParamsReader {
     boolean evalKeys = true;
     boolean keysMode = false;
     String keysColName = null;
-    Class<?> javaType;
+    Class<?> javaType = null;
 
     do {
-      if (!evalKeys) {
-        javaType = this.reader.parseJavaType();
-      } else {
+      if (evalKeys) {
         javaType = this.reader.parseKeysOrJavaType();
 
         if (javaType == null) {
           evalKeys = false;
           keysMode = true;
-          javaType = this.reader.parseJavaType();
         }
       }
 
@@ -225,20 +220,28 @@ public final class ParamsReader {
       } else {
         if (keysMode) {
           keysColName = this.reader.parseKeyColumnName();
+          javaType = this.reader.parseJavaType();
         }
 
         Integer sqlType = this.reader.parseSqlType();
-        int cp = this.reader.skipWsp();
         String paramName = null;
 
-        if (cp != ',' && cp != ')') {
-          paramName = this.reader.parseParamName();
+        if (keysMode) {
+          paramName = keysColName;
+        } else {
+          int cp = this.reader.skipWsp();
+
+          if (cp != ',' && cp != ')' && cp != -1) {
+            paramName = this.reader.parseParamName();
+          }
         }
 
         this.params.addOutParam(javaType, sqlType, paramName, keysMode);
       }
 
-    } while (this.reader.skipWsp() == ',');
+    } while (this.reader.skipWsp() == ','
+        && this.reader.skipNext() != -1
+        && this.reader.skipWsp() != -1);
 
     if (keysMode && Character.isWhitespace(this.reader.requireNext(')'))) {
       this.reader.skipWsp();
