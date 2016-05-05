@@ -195,6 +195,13 @@ public final class ParamsReader {
         if (javaType == null) {
           evalKeys = false;
           keysMode = true;
+
+          Object typeOrColumn = this.reader.parseKeyColumnNameOrJavaType();
+          if (typeOrColumn instanceof Class) {
+            javaType = (Class<?>) typeOrColumn;
+          } else {
+            keysColName = (String) typeOrColumn;
+          }
         }
       }
 
@@ -219,7 +226,9 @@ public final class ParamsReader {
         this.reader.requireNext(']');
       } else {
         if (keysMode) {
-          keysColName = this.reader.parseKeyColumnName();
+          if (keysColName == null) {
+            keysColName = this.reader.parseKeyColumnName();
+          }
           javaType = this.reader.parseJavaType();
         }
 
@@ -228,6 +237,7 @@ public final class ParamsReader {
 
         if (keysMode) {
           paramName = keysColName;
+          keysColName = null;
         } else {
           int cp = this.reader.skipWsp();
 

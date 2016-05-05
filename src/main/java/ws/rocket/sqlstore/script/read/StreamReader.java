@@ -413,11 +413,11 @@ public final class StreamReader implements Closeable {
    * When the next token is a Java type, this method will also determine the type class. The result
    * will be the resolved class. The method will fail when the class cannot be determined.
    *
-   * @return The resolve Java type or <code>null</code>.
+   * @return The resolved Java type or <code>null</code> (in case of KEYS).
    * @throws IOException When a stream-related exception occurs during reading.
    */
   public Class<?> parseKeysOrJavaType() throws IOException {
-    String name = parseName("'KEYS' or Java type alias");
+    String name = parseClassName();
     Class<?> result = null;
 
     if (isKeys(name)) {
@@ -427,6 +427,29 @@ public final class StreamReader implements Closeable {
     }
 
     return result;
+  }
+
+  /**
+   * Parses the key-column name or a Java type, depending which is next. This is used in a special
+   * case of <code>UPDATE(KEYS(...))</code> parsing where it allows either key-column name or a bean
+   * type to be specified.
+   *
+   * @return The resolve Java type class or the string containing key-column name.
+   * @throws IOException When a stream-related exception occurs during reading.
+   */
+  public Object parseKeyColumnNameOrJavaType() throws IOException {
+    String name = parseClassName();
+
+    if (isNext('[')) {
+      return resolveJavaType(name);
+    }
+
+    skipWsp();
+    requireNext('-');
+    if (Character.isWhitespace(requireNext('>'))) {
+      skipWsp();
+    }
+    return name;
   }
 
   /**

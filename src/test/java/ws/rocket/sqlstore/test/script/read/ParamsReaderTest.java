@@ -81,6 +81,26 @@ public class ParamsReaderTest {
     assertNull(params.getQueryHints());
   }
 
+  public void shouldParseOutBeanParam() throws IOException {
+    ParamsSet params = new ParamsSet();
+    StreamReader stream = getStream("OUT(ws.rocket.sqlstore.test.model.Person[id,name])\n====");
+    ParamsReader reader = new ParamsReader(stream, params);
+
+    reader.parseParams();
+
+    assertEquals(params.getResultsParams().length, 2);
+    assertSame(params.getResultsParams()[0].getJavaType(), Long.class);
+    assertSame(params.getResultsParams()[1].getJavaType(), String.class);
+
+    assertNotSame(params.getOutputParams(), OutputParams.EMPTY);
+    assertFalse(params.getOutputParams().isEmpty());
+
+    assertSame(params.getInputParams(), InputParams.EMPTY);
+    assertEquals(params.getKeysParams().length, 0);
+    assertNull(params.getGenerateKeyColumns());
+    assertNull(params.getQueryHints());
+  }
+
   public void shouldParseKeysOutParam() throws IOException {
     ParamsSet params = new ParamsSet();
     StreamReader stream = getStream("OUT(KEYS(COL1 -> String|VARCHAR, COL2 -> Integer))\n====");
@@ -91,6 +111,30 @@ public class ParamsReaderTest {
     assertEquals(params.getKeysParams().length, 2);
     assertSame(params.getKeysParams()[0].getJavaType(), String.class);
     assertSame(params.getKeysParams()[1].getJavaType(), Integer.class);
+
+    assertEquals(params.getGenerateKeyColumns().length, 2);
+    assertEquals(params.getGenerateKeyColumns()[0], "COL1");
+    assertEquals(params.getGenerateKeyColumns()[1], "COL2");
+
+    assertNotSame(params.getOutputParams(), OutputParams.EMPTY);
+    assertFalse(params.getOutputParams().isEmpty());
+
+    assertSame(params.getInputParams(), InputParams.EMPTY);
+    assertEquals(params.getResultsParams().length, 0);
+    assertNull(params.getQueryHints());
+  }
+
+  public void shouldParseKeysOutBeanParam() throws IOException {
+    ParamsSet params = new ParamsSet();
+    StreamReader stream = getStream("OUT(KEYS(ws.rocket.sqlstore.test.model.Person"
+        + "[COL1 -> id, COL2 -> name]) )\n====");
+    ParamsReader reader = new ParamsReader(stream, params);
+
+    reader.parseParams();
+
+    assertEquals(params.getKeysParams().length, 2);
+    assertSame(params.getKeysParams()[0].getJavaType(), Long.class);
+    assertSame(params.getKeysParams()[1].getJavaType(), String.class);
 
     assertEquals(params.getGenerateKeyColumns().length, 2);
     assertEquals(params.getGenerateKeyColumns()[0], "COL1");
