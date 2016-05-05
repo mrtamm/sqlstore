@@ -132,7 +132,7 @@ public final class TypeNameParam extends Param {
   public String toString() {
     String txt = super.toString() + " " + this.name;
     if (this.resultParamIndex >= 0) {
-      txt += "[" + this.resultParamIndex + "]";
+      txt += "[results row column index: " + this.resultParamIndex + "]";
     }
     return txt;
   }

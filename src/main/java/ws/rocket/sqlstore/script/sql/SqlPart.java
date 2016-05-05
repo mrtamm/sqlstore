@@ -83,17 +83,22 @@ public final class SqlPart implements SqlScript {
     StringBuilder str = new StringBuilder();
 
     if (this.condition != ConditionAlways.INSTANCE) {
-      str.append("-- When: ").append(this.condition).append('\n');
+      str.append("# When: ").append(this.condition).append('\n');
     }
 
     if (this.params.length > 0) {
-      str.append("-- SQL parameters:\n");
+      str.append("# SQL statement parameters {\n");
       for (int i = 0; i < this.params.length; i++) {
-        str.append("--  ").append(i + 1).append(": ").append(this.params[i]).append('\n');
+        str.append("#  ").append(i + 1).append(": ").append(this.params[i]).append('\n');
       }
+      str.append("# }\n");
     }
 
     str.append(this.sql);
+
+    if (this.condition != ConditionAlways.INSTANCE) {
+      str.append("\n# End of when: ").append(this.condition);
+    }
 
     return str.toString();
   }

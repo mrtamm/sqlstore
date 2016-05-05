@@ -242,30 +242,30 @@ public final class Script {
     str.append(this.name).append(' ');
 
     if (!this.inputParams.isEmpty()) {
-      str.append(this.inputParams);
+      str.append("\n    ").append(this.inputParams);
     }
 
     if (!this.outputParams.isEmpty()) {
-      str.append(this.outputParams);
+      str.append("\n    ").append(this.outputParams);
     }
 
     if (this.keysParams.length > 0) {
-      str.append("\n    GeneratedKeys {");
+      str.append("\n# GeneratedKeys {");
       for (int i = 0; i < this.keysParams.length; i++) {
-        str.append("\n      ").append(i + 1).append(": ")
+        str.append("\n#  ").append(i + 1).append(": ")
             .append(this.generatedKeys[i])
             .append(" -> ")
             .append(this.keysParams[i]);
       }
-      str.append("\n    }");
+      str.append("\n# }");
     }
 
     if (this.resultsParams.length > 0) {
-      str.append("\n    ResultSet {");
+      str.append("\n# ResultSet {");
       for (int i = 0; i < this.resultsParams.length; i++) {
-        str.append("\n      ").append(i + 1).append(": ").append(this.resultsParams[i]);
+        str.append("\n#  ").append(i + 1).append(": ").append(this.resultsParams[i]);
       }
-      str.append("\n    }");
+      str.append("\n# }");
     }
 
     str.append("\n====\n");
