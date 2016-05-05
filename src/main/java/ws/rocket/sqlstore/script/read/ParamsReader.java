@@ -120,7 +120,7 @@ public final class ParamsReader {
   public void parseParams() throws IOException {
     Set<ParamsCategory> parsedParamTypes = new HashSet<>();
 
-    while (this.reader.getColumn() != 1 && !this.reader.isNext('=')) {
+    while (this.reader.getColumn() != 1 || !this.reader.isNext('=')) {
       int column = this.reader.getColumn();
       ParamsCategory category = this.reader.parseParamsType();
 

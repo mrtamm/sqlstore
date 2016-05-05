@@ -136,34 +136,38 @@ public final class ParamsSet {
    *
    * @param javaType The Java type of the parameter (required).
    * @param sqlType The SQL type of the parameter (optional).
-   * @param name A name for the parameter or generated key column (required).
+   * @param name A name for the parameter or generated key column (optional).
    * @param key When true, the previous parameter is a column name for a generated key to return.
    * Otherwise, a name for the parameter.
    *
    * @see #addOutParamBeanProp(String, Integer, String)
    */
   public void addOutParam(Class<?> javaType, Integer sqlType, String name, boolean key) {
-    if (name == null || name.isEmpty()) {
-      throw new IllegalArgumentException("The 'name' parameter must not be empty");
+    if (name == null && !this.outVarParams.isEmpty()) {
+      throw new ScriptSetupException("OUT-params with names and without names cannot be mixed");
     }
 
-    if (!key) {
-      if (!this.outTypeParams.isEmpty()) {
-        throw new ScriptSetupException("OUT-params with names and without names cannot be mixed");
-      }
+    if (name != null && !this.outTypeParams.isEmpty()) {
+      throw new ScriptSetupException("OUT-params with names and without names cannot be mixed");
+    }
 
+    if (name != null) {
       checkParamName(name);
+    }
 
-      this.outVarParams.add(new TypeNameParam(javaType, sqlType, name, this.outParamIndex));
+    Param param;
 
+    if (name != null) {
+      param = new TypeNameParam(javaType, sqlType, name, this.outParamIndex);
+      this.outVarParams.add((TypeNameParam) param);
     } else {
-      if (!this.outVarParams.isEmpty()) {
-        throw new ScriptSetupException("OUT-params with names and without names cannot be mixed");
-      }
-
-      TypeParam param = new TypeParam(javaType, getSqlType(javaType, sqlType), this.outParamIndex);
+      param = new TypeParam(javaType, getSqlType(javaType, sqlType), this.outParamIndex);
       this.outTypeParams.add(param);
-      addResultParam(param, true);
+    }
+
+    addResultParam(param, key);
+
+    if (key && name != null) {
       this.keysColumns.add(name);
     }
 
