@@ -22,6 +22,8 @@ import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A parameter or an expression to be used as statement IN/OUT parameter. This class adds the mode
  * information to a named parameter or an expression. The mode specifies whether the value is to be
@@ -45,14 +47,8 @@ public final class QueryParam {
    * @param param The parameter to use.
    */
   public QueryParam(ParamMode mode, TypeNameParam param) {
-    if (mode == null) {
-      throw new NullPointerException("The parameter mode is undefined.");
-    } else if (param == null) {
-      throw new NullPointerException("The named parameter is undefined.");
-    }
-
-    this.mode = mode;
-    this.param = param;
+    this.mode = requireNonNull(mode, "The mode parameter is undefined.");
+    this.param = requireNonNull(param, "The named query parameter is undefined.");
   }
 
   /**
@@ -62,14 +58,8 @@ public final class QueryParam {
    * @param expression The expression to use.
    */
   public QueryParam(ParamMode mode, Expression expression) {
-    if (mode == null) {
-      throw new NullPointerException("The parameter mode is undefined.");
-    } else if (expression == null) {
-      throw new NullPointerException("The expression is undefined.");
-    }
-
-    this.param = expression;
-    this.mode = mode;
+    this.mode = requireNonNull(mode, "The mode parameter is undefined.");
+    this.param = requireNonNull(expression, "The expression is undefined.");
   }
 
   /**

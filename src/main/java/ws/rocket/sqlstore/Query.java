@@ -22,6 +22,8 @@ import ws.rocket.sqlstore.connection.ConnectionManager;
 import ws.rocket.sqlstore.execute.JdbcExecutor;
 import ws.rocket.sqlstore.execute.QueryContext;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Wraps an SQL script context and waits for a command to execute it.
  * <p>
@@ -64,11 +66,8 @@ public final class Query {
    * @param ctx The query context to execute.
    */
   Query(ConnectionManager connectionManager, QueryContext ctx) {
-    if (connectionManager == null || ctx == null) {
-      throw new NullPointerException("Both connection manager and query context must be defined");
-    }
-    this.connectionManager = connectionManager;
-    this.ctx = ctx;
+    this.connectionManager = requireNonNull(connectionManager, "ConnectionManager is undefined.");
+    this.ctx = requireNonNull(ctx, "Query context must be defined.");
   }
 
   /**

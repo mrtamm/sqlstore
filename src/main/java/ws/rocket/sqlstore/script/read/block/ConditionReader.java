@@ -31,6 +31,8 @@ import ws.rocket.sqlstore.script.sql.ParamValueNonEmpty;
 import ws.rocket.sqlstore.script.sql.ParamValueTrue;
 import ws.rocket.sqlstore.script.sql.SqlPartCondition;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Reads the condition of a conditional SQL script part (to evaluate whether that part is to be
  * included in the executed script). The condition is an expression that evaluates to either true or
@@ -88,10 +90,7 @@ public final class ConditionReader {
    * @param reader The reader for current scripts file.
    */
   public ConditionReader(StreamReader reader) {
-    if (reader == null) {
-      throw new NullPointerException("StreamReader is undefined.");
-    }
-    this.reader = reader;
+    this.reader = requireNonNull(reader, "StreamReader is undefined.");
   }
 
   /**

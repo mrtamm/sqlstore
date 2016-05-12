@@ -21,6 +21,8 @@ import java.util.List;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Abstraction for SQL, which may be divided into parts, some of which may be rendered differently
  * depending on input parameters. For each script there is always an SQL part which will be always
@@ -43,17 +45,13 @@ public final class SqlPart implements SqlScript {
    * @param params A parameters array for the query. May be empty bot not null.
    */
   public SqlPart(SqlPartCondition condition, String sql, QueryParam[] params) {
-    if (condition == null) {
-      throw new NullPointerException("Query condition is undefined.");
-    } else if (sql == null || sql.trim().isEmpty()) {
-      throw new IllegalArgumentException("Query SQL must not be empty.");
-    } else if (params == null) {
-      throw new NullPointerException("Query parameters array is undefined.");
-    }
+    this.condition = requireNonNull(condition, "Query condition is undefined.");
+    this.sql = requireNonNull(sql, "Query SQL is undefined.");
+    this.params = requireNonNull(params, "Query parameters array is undefined.");
 
-    this.condition = condition;
-    this.sql = sql;
-    this.params = params;
+    if (sql.trim().isEmpty()) {
+      throw new IllegalArgumentException("Query SQL must not be empty.");
+    }
   }
 
   @Override

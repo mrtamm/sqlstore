@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.rocket.sqlstore.ScriptExecuteException;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A thread-safe connection manager for applications where a data source is used for obtaining
  * connections for communicating with a database.
@@ -48,11 +50,7 @@ public final class DataSourceConnectionManager implements ConnectionManager {
    * @param dataSource A valid data source for obtaining connections to database.
    */
   public DataSourceConnectionManager(DataSource dataSource) {
-    if (dataSource == null) {
-      throw new NullPointerException("DataSource for a database is null");
-    }
-
-    this.dataSource = dataSource;
+    this.dataSource = requireNonNull(dataSource, "DataSource for a database is undefined.");
   }
 
   @Override

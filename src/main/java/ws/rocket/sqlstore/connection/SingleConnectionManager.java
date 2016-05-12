@@ -18,6 +18,7 @@ package ws.rocket.sqlstore.connection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +53,10 @@ public final class SingleConnectionManager implements ConnectionManager {
    * @param connection A valid connection to database.
    */
   public SingleConnectionManager(Connection connection) {
+    Objects.requireNonNull(connection, "Connection to database is null.");
+
     try {
-      if (connection == null) {
-        throw new NullPointerException("Connection to database is null");
-      } else if (connection.isClosed()) {
+      if (connection.isClosed()) {
         throw new IllegalArgumentException("Connection to database is closed");
       }
     } catch (SQLException e) {

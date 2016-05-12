@@ -19,6 +19,8 @@ package ws.rocket.sqlstore.script.sql;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A condition for <code>SqlPart</code> where the provided query parameter must equal to
  * <code>Boolean.TRUE</code> to be included in the actually executed query.
@@ -36,10 +38,7 @@ public final class ParamValueTrue implements SqlPartCondition {
    * @param param The query parameter (value) to check.
    */
   public ParamValueTrue(QueryParam param) {
-    if (param == null) {
-      throw new NullPointerException("The query parameter is undefined.");
-    }
-    this.param = param;
+    this.param = requireNonNull(param, "The query parameter is undefined.");
   }
 
   @Override

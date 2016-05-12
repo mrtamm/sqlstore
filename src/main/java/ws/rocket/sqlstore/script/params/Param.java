@@ -19,6 +19,8 @@ package ws.rocket.sqlstore.script.params;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.BeanUtil;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * The base solution of all kinds of parameters. A parameter must always have a Java type. SQL type
  * is not always required as it can be derived by asking from value converters when needed. However,
@@ -46,11 +48,7 @@ public abstract class Param {
    * @param sqlType SQL type of this parameter value (optional).
    */
   public Param(Class<?> javaType, Integer sqlType) {
-    if (javaType == null) {
-      throw new NullPointerException("The Java type of the parameter is undefined.");
-    }
-
-    this.javaType = javaType;
+    this.javaType = requireNonNull(javaType, "The Java type of the parameter is undefined.");
     this.sqlType = sqlType;
   }
 

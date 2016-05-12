@@ -22,6 +22,8 @@ import java.util.Map;
 import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A collection of parameters that are expected for script input in order to execute it. These are
  * <code>IN(...)</code> category parameters from a script file.
@@ -42,10 +44,7 @@ public final class InputParams {
    * @param params A not null array of validated named parameters.
    */
   public InputParams(TypeNameParam[] params) {
-    if (params == null) {
-      throw new NullPointerException("Named parameters array must not be null");
-    }
-    this.params = params;
+    this.params = requireNonNull(params, "Named parameters array must not be null.");
   }
 
   /**
@@ -69,14 +68,13 @@ public final class InputParams {
   }
 
   /**
-   * Informs whether the IN-parameters of a script supports values of given
-   * types. In particular, the amount of parameters and the order must match.
-   * However, given type may be a subtype of the required parameter type.
+   * Informs whether the IN-parameters of a script supports values of given types. In particular,
+   * the amount of parameters and the order must match. However, given type may be a subtype of the
+   * required parameter type.
    *
-   * @param paramTypes An array of parameter value types that must match the
-   * IN-parameters of a script. <code>null</code> is equivalent to empty array.
-   * @return A boolean true, when the script supports parameter values of given
-   * types.
+   * @param paramTypes An array of parameter value types that must match the IN-parameters of a
+   * script. <code>null</code> is equivalent to empty array.
+   * @return A boolean true, when the script supports parameter values of given types.
    */
   public boolean supportsTypes(Class<?>... paramTypes) {
     int paramsLength = paramTypes != null ? paramTypes.length : 0;

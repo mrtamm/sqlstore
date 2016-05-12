@@ -35,6 +35,8 @@ import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.read.ScriptReader;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Stores SQL scripts loaded from an SQLS file. This is the main class of the library, and holds all
  * loaded scripts of a file, and executes them when needed (with runtime parameters).
@@ -344,10 +346,7 @@ public final class SqlStore {
     private final SqlStore s;
 
     ProxyHandler(SqlStore s) {
-      if (s == null) {
-        throw new NullPointerException("SqlStore instance is undefined.");
-      }
-      this.s = s;
+      this.s = requireNonNull(s, "SqlStore instance is undefined.");
     }
 
     @Override

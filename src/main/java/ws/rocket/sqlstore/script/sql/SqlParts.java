@@ -20,6 +20,8 @@ import java.util.List;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * An SQL script, which is divided into two or more parts. Before evaluating inner parts, the main
  * condition must evaluate to true.
@@ -38,14 +40,12 @@ public final class SqlParts implements SqlScript {
    * @param innerParts At least two inner SQL parts.
    */
   public SqlParts(SqlPartCondition condition, SqlScript[] innerParts) {
-    if (condition == null) {
-      throw new NullPointerException("Query condition is undefined.");
-    } else if (innerParts == null || innerParts.length < 2) {
+    this.condition = requireNonNull(condition, "Query condition is undefined.");
+    this.innerParts = requireNonNull(innerParts, "SQL inner parts are undefined");
+
+    if (innerParts.length < 2) {
       throw new IllegalArgumentException("At least 2 inner parts expected.");
     }
-
-    this.condition = condition;
-    this.innerParts = innerParts;
   }
 
   @Override

@@ -23,6 +23,8 @@ import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.read.StreamReader;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Reads and registers a script parameter expression from SQL script block, which is usually
  * enclosed in <code>?{...}</code>. (This reader evaluates the content of the expression, beginning
@@ -62,10 +64,7 @@ public final class ExpressionReader {
    * @param reader The reader for current scripts file.
    */
   public ExpressionReader(StreamReader reader) {
-    if (reader == null) {
-      throw new NullPointerException("StreamReader is undefined.");
-    }
-    this.reader = reader;
+    this.reader = requireNonNull(reader, "StreamReader is undefined.");
   }
 
   /**

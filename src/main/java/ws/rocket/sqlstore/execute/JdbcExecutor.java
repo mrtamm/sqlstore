@@ -28,6 +28,8 @@ import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.connection.ConnectionManager;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Executes an SQL query via JDBC API. This class contains the main work-flow of a query execution
  * while some details are of the query are delegated to other classes.
@@ -62,10 +64,7 @@ public final class JdbcExecutor {
    * @param connections A manager instance for obtaining connection(s).
    */
   public JdbcExecutor(ConnectionManager connections) {
-    if (connections == null) {
-      throw new NullPointerException("Connection manager is undefined");
-    }
-    this.connections = connections;
+    this.connections = requireNonNull(connections, "ConnectionManager is undefined.");
   }
 
   /**

@@ -19,6 +19,8 @@ package ws.rocket.sqlstore.script.sql;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A condition for <code>SqlPart</code> where the provided query parameter value must be either
  * null, an empty string, an empty array or an empty collection to be included in the actually
@@ -37,10 +39,7 @@ public final class ParamValueEmpty implements SqlPartCondition {
    * @param param The query parameter (value) to check.
    */
   public ParamValueEmpty(QueryParam param) {
-    if (param == null) {
-      throw new NullPointerException("The query parameter is undefined.");
-    }
-    this.param = param;
+    this.param = requireNonNull(param, "The query parameter is undefined.");
   }
 
   @Override

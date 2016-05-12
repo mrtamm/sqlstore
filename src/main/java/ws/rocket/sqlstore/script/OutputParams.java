@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.result.ArrayResultsCollector;
 import ws.rocket.sqlstore.result.ListResultsCollector;
@@ -56,9 +57,7 @@ public final class OutputParams {
    * @param params A not null array of validated out-parameters.
    */
   public OutputParams(Param[] params) {
-    if (params == null) {
-      throw new NullPointerException("OUT-parameters array must not be null");
-    }
+    Objects.requireNonNull(params, "OUT-parameters array is undefined");
     this.description = composeDescription(params);
     this.namedParams = initNamedParams(params);
     this.types = getResultTypes(params);

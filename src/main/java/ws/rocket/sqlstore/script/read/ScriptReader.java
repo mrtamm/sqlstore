@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.rocket.sqlstore.ScriptSetupException;
@@ -130,9 +131,8 @@ public final class ScriptReader implements Closeable {
    * @throws IOException When a stream-related exception occurs during initial reading.
    */
   public ScriptReader(InputStream input) throws IOException {
-    if (input == null) {
-      throw new NullPointerException("No stream to parse for SQL scripts.");
-    }
+    Objects.requireNonNull(input, "No stream was provided for parsing SQL scripts.");
+
     this.reader = new StreamReader(input);
     this.paramsReader = new ParamsReader(this.reader, this.params);
     this.sqlBlockReader = new SqlBlockReader(this.reader, this.params);

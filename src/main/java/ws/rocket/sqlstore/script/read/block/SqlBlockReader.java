@@ -29,6 +29,8 @@ import ws.rocket.sqlstore.script.sql.SqlPartCondition;
 import ws.rocket.sqlstore.script.sql.SqlParts;
 import ws.rocket.sqlstore.script.sql.SqlScript;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Reads and evaluates the entire SQL script block of a script definition. To simplify its work,
  * this class relies on several readers.
@@ -61,14 +63,8 @@ public final class SqlBlockReader {
    * @param params The shared parameters set to be updated on parsing.
    */
   public SqlBlockReader(StreamReader reader, ParamsSet params) {
-    if (reader == null) {
-      throw new NullPointerException("StreamReader is undefined.");
-    } else if (params == null) {
-      throw new NullPointerException("ParamsSet is undefined.");
-    }
-
-    this.reader = reader;
-    this.params = params;
+    this.reader = requireNonNull(reader, "StreamReader is undefined.");
+    this.params = requireNonNull(params, "ParamsSet is undefined.");
     this.condReader = new ConditionReader(reader);
     this.exprReader = new ExpressionReader(reader);
   }

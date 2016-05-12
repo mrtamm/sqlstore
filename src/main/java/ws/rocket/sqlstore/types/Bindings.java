@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Objects;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
@@ -180,9 +181,7 @@ public final class Bindings {
   }
 
   private ValueMapper getHandler(Class<?> type) {
-    if (type == null) {
-      throw new NullPointerException("No Java type was given for ValueMapper lookup.");
-    }
+    Objects.requireNonNull(type, "No Java type was given for ValueMapper lookup.");
 
     ValueMapper result = null;
 

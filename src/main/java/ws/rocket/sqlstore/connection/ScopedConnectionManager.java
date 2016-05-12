@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.rocket.sqlstore.ScriptExecuteException;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A non-thread-safe connection manager for cases when a block of multiple queries is executed
  * within a single transaction. Therefore, it is assumed that this manager is never used by more
@@ -55,11 +57,7 @@ public final class ScopedConnectionManager implements ConnectionManager {
    * @param connectionManager A valid parent connection manger to use.
    */
   public ScopedConnectionManager(ConnectionManager connectionManager) {
-    if (connectionManager == null) {
-      throw new NullPointerException("ConnectionManager is null");
-    }
-
-    this.connectionManager = connectionManager;
+    this.connectionManager = requireNonNull(connectionManager, "ConnectionManager is null.");
   }
 
   /**
