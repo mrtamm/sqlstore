@@ -99,8 +99,8 @@ public final class ArrayResultsCollector implements ResultsCollector {
   }
 
   @Override
-  public Object[] getResult() {
-    return this.result.toArray();
+  public Object[][] getResult() {
+    return this.result.toArray(new Object[this.result.size()][]);
   }
 
 }

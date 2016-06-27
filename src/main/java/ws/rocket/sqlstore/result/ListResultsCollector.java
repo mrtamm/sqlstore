@@ -42,16 +42,15 @@ public final class ListResultsCollector implements ResultsCollector {
 
   @Override
   public void setRowValue(int columnIndex, Object value) {
-    if (columnIndex == 0) {
-      if (this.valueDefined) {
-        throw new IllegalStateException("Attempted to set the list row twice.");
-      }
-      this.valueDefined = true;
-      this.value = value;
-
-    } else {
+    if (columnIndex != 0) {
       throw new IllegalArgumentException("Expected column index 0, got: " + columnIndex);
     }
+    if (this.valueDefined) {
+      throw new IllegalStateException("Attempted to set the list row twice.");
+    }
+
+    this.valueDefined = true;
+    this.value = value;
   }
 
   @Override

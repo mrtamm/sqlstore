@@ -89,14 +89,17 @@ public final class ScriptExecuteException extends RuntimeException {
 
     StringBuilder sb = new StringBuilder();
     sb.append(getClass().getName()).append(": ").append(getMessage()).append('\n');
-    sb.append("SQL state: ").append(cause.getSQLState()).append('\n');
-    sb.append("SQL error code: ").append(cause.getErrorCode());
+
+    if (cause != null) {
+      sb.append("SQL state: ").append(cause.getSQLState()).append('\n');
+      sb.append("SQL error code: ").append(cause.getErrorCode());
+    }
 
     int counter = 1;
     Throwable t = cause;
     while (t != null) {
       sb.append("\nCause ").append(counter++).append(". ");
-      sb.append(cause.toString());
+      sb.append(t.toString());
       t = t.getCause();
     }
     return sb.toString();
