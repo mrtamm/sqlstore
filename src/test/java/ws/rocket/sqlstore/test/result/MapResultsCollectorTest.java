@@ -30,7 +30,7 @@ import static org.testng.Assert.assertTrue;
  * Tests for the {@link MapResultsCollector} class.
  */
 @Test
-public class MapResultsCollectorTest {
+public final class MapResultsCollectorTest {
 
   public void shouldReturnMapType() {
     MapResultsCollector collector = new MapResultsCollector();

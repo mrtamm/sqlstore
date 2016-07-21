@@ -29,7 +29,7 @@ import static org.testng.Assert.assertTrue;
  * Tests for the {@link ListResultsCollector} class.
  */
 @Test
-public class ListResultsCollectorTest {
+public final class ListResultsCollectorTest {
 
   public void shouldReturnObjectArrayType() {
     ListResultsCollector collector = new ListResultsCollector();

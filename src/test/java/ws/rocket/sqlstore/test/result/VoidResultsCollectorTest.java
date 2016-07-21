@@ -28,7 +28,7 @@ import static org.testng.Assert.assertTrue;
  * Tests for the {@link VoidResultsCollector} class.
  */
 @Test
-public class VoidResultsCollectorTest {
+public final class VoidResultsCollectorTest {
 
   public void shouldReturnVoidType() {
     VoidResultsCollector collector = new VoidResultsCollector();
