@@ -177,7 +177,7 @@ public class DatabaseTest {
   }
 
   private static Connection initDbConnection() throws Exception {
-    ResourceBundle bundle = ResourceBundle.getBundle("ws.rocket.sqlstore.test.test");
+    ResourceBundle bundle = ResourceBundle.getBundle("ws.rocket.sqlstore.test.db.test");
 
     String derbyPath = bundle.getString("jdbc.dbPath");
     if (derbyPath != null && !derbyPath.isEmpty()) {
