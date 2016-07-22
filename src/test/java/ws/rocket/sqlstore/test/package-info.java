@@ -17,14 +17,21 @@
 /**
  * Tests for verifying the functionality of SqlStore source code.
  * <p>
- * These are mostly unit tests for specific classes. Except <code>SqlStoreTest</code> which tests
- * the main API and script parsing, and executing scripts against a targeted database.
- * <code>SqlStoreTest</code> also has external resources:
+ * These are mostly unit tests for specific classes. Except the classes under the
+ * <code>ws.rocket.sqlstore.test.db</code> package, which tests the main API, integrity of
+ * components, script parsing, and executes scripts against an actual targeted database.
+ * <p>
+ * Integration test also has external resources:
  * <ul>
- * <li>src/test/resources/ws/rocket/sqlstore/test/SqlStoreTest.sqls &mdash; contains SQL scripts to
+ * <li>src/test/resources/config/<em>dbname</em>/ScriptsFacade.sqls &mdash; contains SQL scripts to
  * be tested;
- * <li>src/test/resources/ws/rocket/sqlstore/test/test.properties &mdash; contains environment
+ * <li>src/test/resources/config/<em>dbname</em>/test.properties &mdash; contains environment
  * dependant parameters for connecting to a database.
  * </ul>
+ * <p>
+ * These resources are copied to package <code>ws.rocket.sqlstore.test.db</code> by build script
+ * (see pom.xml) when parameter <code>-DtestDatabase={oracle|derby|postgresql}</code> is provided.
+ * When the code of integration tests does not see the resources in the package, it skips the tests
+ * with a warning but does not fail.
  */
 package ws.rocket.sqlstore.test;

@@ -22,8 +22,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.script.BeanUtil;
-import ws.rocket.sqlstore.test.model.Organization;
-import ws.rocket.sqlstore.test.model.Person;
+import ws.rocket.sqlstore.test.db.model.Organization;
+import ws.rocket.sqlstore.test.db.model.Person;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;

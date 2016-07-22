@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ws.rocket.sqlstore.test.model;
+package ws.rocket.sqlstore.test.db.model;
 
 import java.util.Date;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ws.rocket.sqlstore.test;
+package ws.rocket.sqlstore.test.db;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.SqlStore;
 import ws.rocket.sqlstore.connection.SharedConnectionManager;
-import ws.rocket.sqlstore.test.model.Person;
+import ws.rocket.sqlstore.test.db.model.Person;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;

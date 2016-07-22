@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package ws.rocket.sqlstore.test.model;
-
 /**
- * This is a sample table model class used when testing. Unlike the Person model object, this object
- * (a data structure) provides data access via public fields.
+ * Auxiliary classes for testing class field or method bindings.
+ * <p>
+ * Expressions enable bean properties mapping to a script parameter. SqlStore must support reading
+ * and/or writing the value through a public getter/setter method and directly to a public class
+ * field (preferred) depending on the given model class.
  */
-public final class Organization {
-
-  public String name;
-
-  public int yearFounded;
-
-  public String description;
-
-  public String website;
-
-  public String email;
-
-}
+package ws.rocket.sqlstore.test.db.model;

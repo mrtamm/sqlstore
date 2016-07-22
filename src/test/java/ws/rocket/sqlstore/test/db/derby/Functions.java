@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ws.rocket.sqlstore.test.derby;
+package ws.rocket.sqlstore.test.db.derby;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

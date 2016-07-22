@@ -119,7 +119,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.testOutputDirectory}/ws/rocket/sqlstore/test/</outputDirectory>
+              <outputDirectory>${project.build.testOutputDirectory}/ws/rocket/sqlstore/test/db/</outputDirectory>
               <resources>
                 <resource>
                   <directory>src/test/resources/config/${testDatabase}/</directory>

@@ -17,4 +17,4 @@
 /**
  * Classes used for Derby database testing.
  */
-package ws.rocket.sqlstore.test.derby;
+package ws.rocket.sqlstore.test.db.derby;

@@ -26,7 +26,7 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.script.read.ParamsReader;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.read.StreamReader;
-import ws.rocket.sqlstore.test.model.Person;
+import ws.rocket.sqlstore.test.db.model.Person;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -83,7 +83,7 @@ public class ParamsReaderTest {
 
   public void shouldParseOutBeanParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("OUT(ws.rocket.sqlstore.test.model.Person[id,name])\n====");
+    StreamReader stream = getStream("OUT(ws.rocket.sqlstore.test.db.model.Person[id,name])\n====");
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -126,7 +126,7 @@ public class ParamsReaderTest {
 
   public void shouldParseKeysOutBeanParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("OUT(KEYS(ws.rocket.sqlstore.test.model.Person"
+    StreamReader stream = getStream("OUT(KEYS(ws.rocket.sqlstore.test.db.model.Person"
         + "[COL1 -> id, COL2 -> name]) )\n====");
     ParamsReader reader = new ParamsReader(stream, params);
 
@@ -150,7 +150,7 @@ public class ParamsReaderTest {
 
   public void shouldParseUpdateParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("IN(ws.rocket.sqlstore.test.model.Person p) "
+    StreamReader stream = getStream("IN(ws.rocket.sqlstore.test.db.model.Person p) "
         + "UPDATE(KEYS(ID -> p.id))"
         + "\n====");
     ParamsReader reader = new ParamsReader(stream, params);

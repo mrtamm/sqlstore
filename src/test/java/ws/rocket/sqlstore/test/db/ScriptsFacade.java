@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package ws.rocket.sqlstore.test;
+package ws.rocket.sqlstore.test.db;
 
 import java.util.Date;
 import java.util.List;
 import ws.rocket.sqlstore.ResultRow;
 import ws.rocket.sqlstore.UpdateCount;
-import ws.rocket.sqlstore.test.model.Person;
+import ws.rocket.sqlstore.test.db.model.Person;
 
 /**
  * This interface acts as a proxy facade for an SqlStore instance. The method names and signatures
