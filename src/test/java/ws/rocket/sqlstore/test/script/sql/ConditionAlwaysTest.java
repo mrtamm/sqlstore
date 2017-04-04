@@ -19,6 +19,7 @@ package ws.rocket.sqlstore.test.script.sql;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.script.sql.ConditionAlways;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -29,6 +30,10 @@ public class ConditionAlwaysTest {
 
   public void shouldAlwaysApply() {
     assertTrue(ConditionAlways.INSTANCE.isApplicable(null));
+  }
+
+  public void shouldProvideCustomToString() {
+    assertEquals(ConditionAlways.INSTANCE.toString(), "always");
   }
 
 }

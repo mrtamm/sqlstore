@@ -51,4 +51,8 @@ public final class ParamValueTrueTest extends AbstractParamConditionTest {
     assertTrue(isApplicable(true));
   }
 
+  public void shouldProvideCustomToString() {
+    expectToStringText(" == true");
+  }
+
 }

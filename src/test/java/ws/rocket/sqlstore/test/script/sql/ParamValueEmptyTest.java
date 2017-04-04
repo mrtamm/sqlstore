@@ -73,4 +73,8 @@ public final class ParamValueEmptyTest extends AbstractParamConditionTest {
     assertTrue(isApplicable(new HashSet<>()));
   }
 
+  public void shouldProvideCustomToString() {
+    expectToStringText(" is null, empty string, empty array, or empty collection");
+  }
+
 }

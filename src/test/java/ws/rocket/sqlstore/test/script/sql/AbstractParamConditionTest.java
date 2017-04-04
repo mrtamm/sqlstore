@@ -22,6 +22,8 @@ import ws.rocket.sqlstore.script.sql.SqlPartCondition;
 import ws.rocket.sqlstore.test.helper.Factory;
 import ws.rocket.sqlstore.test.helper.ScriptBuilder;
 
+import static org.testng.Assert.assertEquals;
+
 /**
  * Contains common code for testing parameter-value-based {@link SqlPartCondition}s.
  */
@@ -42,7 +44,7 @@ abstract class AbstractParamConditionTest {
    * @param value A sample <code>QueryParam</code> value to be passed to the condition object.
    * @return A Boolean that is <code>true</code> when condition was satisfied.
    */
-  protected boolean isApplicable(Object value) {
+  protected final boolean isApplicable(Object value) {
     Class<?> paramType = value != null ? value.getClass() : String.class;
     QueryParam queryParam = Factory.queryParam(paramType, "testParam");
 
@@ -51,6 +53,13 @@ abstract class AbstractParamConditionTest {
         .toQueryContext(value);
 
     return createCondition(queryParam).isApplicable(ctx);
+  }
+
+  protected final void expectToStringText(String text) {
+    QueryParam queryParam = Factory.queryParam(String.class, "testParam");
+    String toString = createCondition(queryParam).toString();
+
+    assertEquals(toString, queryParam + text);
   }
 
 }
