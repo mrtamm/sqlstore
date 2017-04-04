@@ -63,9 +63,45 @@ public final class ParamValueNonEmpty implements SqlPartCondition {
    * @return A boolean true when the value qualifies to an non-empty value.
    */
   protected static boolean isNonEmpty(Object value) {
-    return value != null && !"".equals(value)
-        && (value instanceof Object[] && ((Object[]) value).length > 0
-        || value instanceof Collection && !((Collection) value).isEmpty());
+    if (value instanceof Collection) {
+      return !((Collection) value).isEmpty();
+    }
+    if (value != null && value.getClass().isArray()) {
+      return isNonEmptyArray(value);
+    }
+    return value != null && !"".equals(value);
+  }
+
+  private static boolean isNonEmptyArray(Object value) {
+    if (value instanceof Object[]) {
+      return ((Object[]) value).length > 0;
+    }
+    if (value instanceof long[]) {
+      return ((long[]) value).length > 0;
+    }
+    if (value instanceof int[]) {
+      return ((int[]) value).length > 0;
+    }
+    if (value instanceof short[]) {
+      return ((short[]) value).length > 0;
+    }
+    if (value instanceof byte[]) {
+      return ((byte[]) value).length > 0;
+    }
+    if (value instanceof double[]) {
+      return ((double[]) value).length > 0;
+    }
+    if (value instanceof float[]) {
+      return ((float[]) value).length > 0;
+    }
+    if (value instanceof char[]) {
+      return ((char[]) value).length > 0;
+    }
+    if (value instanceof boolean[]) {
+      return ((boolean[]) value).length > 0;
+    }
+    throw new IllegalArgumentException("Expected an array argument but its type is not covered: "
+        + value.getClass());
   }
 
 }

@@ -136,7 +136,7 @@ public final class SqlBuffer {
   }
 
   /**
-   * Updates the buffer content with the next character from steam.
+   * Updates the buffer content with the next character from stream.
    *
    * @param cp The character code-point.
    * @param line The line number (1-based) where the character is located.

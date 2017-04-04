@@ -238,21 +238,32 @@ public final class ParamsSet {
    * @param sqlType Optional SQL type for the expression when explicitly set next to the expression.
    */
   public void addScriptParam(ParamMode mode, String varName, List<String> fields, Integer sqlType) {
-    TypeNameParam param = this.inputParams.get(varName);
+    TypeNameParam param = null;
 
-    if (param == null) {
-      if (mode == ParamMode.IN || mode == ParamMode.INOUT) {
+    if (mode == null || mode == ParamMode.IN || mode == ParamMode.INOUT) {
+      param = this.inputParams.get(varName);
+
+      if (param != null) {
+        markInParamAsUsed(varName);
+        mode = mode == null ? ParamMode.IN : mode;
+      } else if (mode != null) {
         throw new ScriptSetupException("Expression referring to parameter '%s' was "
             + "specified as %s-parameter but the parameter is not among IN-parameters.",
             varName, mode.name());
       }
+    }
 
+    if (mode == null || mode == ParamMode.OUT) {
       param = this.outputParams.get(varName);
-      mode = ParamMode.OUT;
-      removeParam(this.outVarParams, varName);
-    } else {
-      mode = mode == null ? ParamMode.IN : mode;
-      markInParamAsUsed(varName);
+
+      if (param != null) {
+        removeParam(this.outVarParams, varName);
+        mode = ParamMode.OUT;
+      } else if (mode != null) {
+        throw new ScriptSetupException("Expression referring to parameter '%s' was "
+            + "specified as %s-parameter but the parameter is not among OUT-parameters.",
+            varName, mode.name());
+      }
     }
 
     if (param == null) {

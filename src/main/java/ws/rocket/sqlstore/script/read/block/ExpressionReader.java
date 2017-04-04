@@ -30,7 +30,7 @@ import static java.util.Objects.requireNonNull;
  * enclosed in <code>?{...}</code>. (This reader evaluates the content of the expression, beginning
  * right after the opening curly brace and finishing right after the closing curly brace.)
  * <p>
- * It can have following valid syntaxes:
+ * It can have following valid syntaxes (within the curly braces):
  * <pre>
  * paramName
  * paramName|TYPE

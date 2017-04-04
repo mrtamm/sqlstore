@@ -132,12 +132,13 @@ public final class Bindings {
   public void bindParam(QueryContext ctx, QueryParam param, PreparedStatement stmt, int index)
       throws SQLException {
     ValueMapper handler = getHandler(param.getParam().getJavaType());
+    Integer sqlType = param.getParam().getSqlType();
 
     if (param.isForInput()) {
-      handler.write(stmt, index, param.getValue(ctx), param.getParam().getSqlType());
+      handler.write(stmt, index, param.getValue(ctx), sqlType);
     }
     if (param.isForOutput() && stmt instanceof CallableStatement) {
-      ((CallableStatement) stmt).registerOutParameter(index, param.getParam().getSqlType());
+      ((CallableStatement) stmt).registerOutParameter(index, sqlType);
     }
   }
 

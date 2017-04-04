@@ -78,9 +78,9 @@ public final class StreamReader implements Closeable {
   }
 
   private int moveUntilEndOfLine() throws IOException {
-    do {
+    while (this.nextChar != -1 && this.nextChar != '\n') {
       this.nextChar = readNext();
-    } while (this.nextChar != -1 && this.nextChar != '\n');
+    }
 
     return this.nextChar;
   }

@@ -128,8 +128,8 @@ public final class SqlBlockReader {
 
   private SqlScript finalizeScript(SqlPartCondition condition, List<SqlScript> parts) {
     if (parts.isEmpty()) {
-      throw new ScriptSetupException("Empty script block on line %d and column %d.",
-          this.reader.getLine(), this.reader.getColumn());
+      throw new ScriptSetupException("Empty script block ending right before line %d.",
+          this.reader.getLine());
     }
 
     if (parts.size() == 1) {
