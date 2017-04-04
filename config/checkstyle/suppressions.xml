@@ -6,6 +6,6 @@
   <!-- Methods of test classes are not required to be documented as these methods should be
   self-documenting. -->
   <suppress files=".+\/ws\/rocket\/sqlstore\/test\/.+\.java" checks="JavadocMethod" />
-  <suppress files=".+\/ws\/rocket\/sqlstore\/test\/model\/.+\.java" checks="VisibilityModifier" />
-  <suppress files=".+\/ws\/rocket\/sqlstore\/test\/model\/.+\.java" checks="JavadocVariableCheck" />
+  <suppress files=".+\/ws\/rocket\/sqlstore\/test\/db\/model\/.+\.java" checks="VisibilityModifier" />
+  <suppress files=".+\/ws\/rocket\/sqlstore\/test\/db\/model\/.+\.java" checks="JavadocVariableCheck" />
 </suppressions>

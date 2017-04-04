@@ -16,7 +16,6 @@
 
 package ws.rocket.sqlstore.test.script.read;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Types;
 import org.testng.annotations.Test;
@@ -27,6 +26,7 @@ import ws.rocket.sqlstore.script.read.ParamsReader;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.read.StreamReader;
 import ws.rocket.sqlstore.test.db.model.Person;
+import ws.rocket.sqlstore.test.helper.Factory;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -43,7 +43,7 @@ public class ParamsReaderTest {
 
   public void shouldParseInParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("IN(String|VARCHAR test)\n====");
+    StreamReader stream = Factory.streamOf("IN(String|VARCHAR test)\n====");
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -63,7 +63,7 @@ public class ParamsReaderTest {
 
   public void shouldParseOutParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("OUT(String|VARCHAR, Integer)\n====");
+    StreamReader stream = Factory.streamOf("OUT(String|VARCHAR, Integer)\n====");
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -83,7 +83,8 @@ public class ParamsReaderTest {
 
   public void shouldParseOutBeanParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("OUT(ws.rocket.sqlstore.test.db.model.Person[id,name])\n====");
+    StreamReader stream = Factory.streamOf(
+        "OUT(ws.rocket.sqlstore.test.db.model.Person[id,name])\n====");
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -103,7 +104,8 @@ public class ParamsReaderTest {
 
   public void shouldParseKeysOutParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("OUT(KEYS(COL1 -> String|VARCHAR, COL2 -> Integer))\n====");
+    StreamReader stream = Factory.streamOf(
+        "OUT(KEYS(COL1 -> String|VARCHAR, COL2 -> Integer))\n====");
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -126,7 +128,7 @@ public class ParamsReaderTest {
 
   public void shouldParseKeysOutBeanParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("OUT(KEYS(ws.rocket.sqlstore.test.db.model.Person"
+    StreamReader stream = Factory.streamOf("OUT(KEYS(ws.rocket.sqlstore.test.db.model.Person"
         + "[COL1 -> id, COL2 -> name]) )\n====");
     ParamsReader reader = new ParamsReader(stream, params);
 
@@ -150,7 +152,7 @@ public class ParamsReaderTest {
 
   public void shouldParseUpdateParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("IN(ws.rocket.sqlstore.test.db.model.Person p) "
+    StreamReader stream = Factory.streamOf("IN(ws.rocket.sqlstore.test.db.model.Person p) "
         + "UPDATE(KEYS(ID -> p.id))"
         + "\n====");
     ParamsReader reader = new ParamsReader(stream, params);
@@ -176,7 +178,7 @@ public class ParamsReaderTest {
 
   public void shouldParseHintParam() throws IOException {
     ParamsSet params = new ParamsSet();
-    StreamReader stream = getStream("HINT(maxRows=3, queryTimeout=60, fetchSize=4, "
+    StreamReader stream = Factory.streamOf("HINT(maxRows=3, queryTimeout=60, fetchSize=4, "
         + "maxFieldSize=1000, readOnly=true, poolable=false, escapeProcessing=false)"
         + "\n====");
     ParamsReader reader = new ParamsReader(stream, params);
@@ -184,10 +186,6 @@ public class ParamsReaderTest {
     reader.parseParams();
 
     assertNotNull(params.getQueryHints());
-  }
-
-  private static StreamReader getStream(String input) throws IOException {
-    return new StreamReader(new ByteArrayInputStream(input.getBytes()));
   }
 
 }

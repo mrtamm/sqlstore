@@ -59,7 +59,7 @@ public final class SqlBuffer {
      */
     END_SCRIPT
 
-  };
+  }
 
   /**
    * A mode identifies the internal input character handling mode of this buffer. The SIMPLE mode
@@ -70,7 +70,7 @@ public final class SqlBuffer {
 
     SIMPLE, ESCAPE, EXPRESSION, CONDITION, END
 
-  };
+  }
 
   private ParseMode mode = ParseMode.SIMPLE;
 

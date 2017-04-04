@@ -26,6 +26,7 @@ import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.types.Bindings;
+import ws.rocket.sqlstore.types.ValueMapper;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,10 +39,27 @@ import static org.testng.Assert.assertSame;
 @Test
 public class BindingsTest {
 
+  @Test(groups = "bindings-init", expectedExceptions = IllegalArgumentException.class)
+  public void shouldRejectNullArrayInput() {
+    Bindings.register((ValueMapper[]) null);
+  }
+
+  @Test(groups = "bindings-init", expectedExceptions = IllegalArgumentException.class)
+  public void shouldRejectEmptyArrayInput() {
+    Bindings.register(new ValueMapper[0]);
+  }
+
+  @Test(groups = "bindings-init", expectedExceptions = IllegalArgumentException.class)
+  public void shouldRejectNullHandlerInput() {
+    Bindings.register((ValueMapper) null);
+  }
+
+  @Test(dependsOnGroups = "bindings-init")
   public void shouldUseSameInstance() {
     assertSame(Bindings.getInstance(), Bindings.getInstance());
   }
 
+  @Test(dependsOnGroups = "bindings-init")
   public void shouldSupportBuiltInTypes() {
     assertEquals(Bindings.getInstance().confirmTypes(String.class, null), Types.VARCHAR);
 
@@ -57,6 +75,7 @@ public class BindingsTest {
     assertEquals(Bindings.getInstance().confirmTypes(BigDecimal.class, null), Types.NUMERIC);
   }
 
+  @Test(dependsOnGroups = "bindings-init")
   public void shouldRegisterOutParameter() throws SQLException {
     TypeNameParam var = new TypeNameParam(String.class, Types.VARCHAR, "name");
     QueryParam param = new QueryParam(ParamMode.OUT, var);
@@ -65,6 +84,18 @@ public class BindingsTest {
     Bindings.getInstance().bindParam(null, param, stmt, 1);
 
     verify(stmt).registerOutParameter(1, Types.VARCHAR);
+  }
+
+  @Test(dependsOnGroups = "bindings-init", enabled = false)
+  public void shouldReadStatementOutParameter() throws SQLException {
+    TypeNameParam var = new TypeNameParam(String.class, Types.VARCHAR, "name");
+    QueryParam param = new QueryParam(ParamMode.INOUT, var);
+    CallableStatement stmt = mock(CallableStatement.class);
+
+    Bindings.getInstance().readParam(null, param, stmt, 1);
+
+    verify(stmt).getString(1);
+    verify(stmt).getString(1);
   }
 
 }
