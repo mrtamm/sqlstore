@@ -338,7 +338,7 @@ public final class StreamReader implements Closeable {
 
     ParamsCategory result = null;
     if (this.buffer.length() > 0) {
-      result = ParamsCategory.valueOf(this.buffer.toString());
+      result = ParamsCategory.get(this.buffer.toString());
     }
 
     if (result == null) {
