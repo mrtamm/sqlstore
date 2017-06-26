@@ -24,6 +24,7 @@ import java.sql.Types;
 import java.util.Date;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.types.DateMapper;
 
 import static org.mockito.Mockito.mock;
@@ -37,11 +38,9 @@ import static org.testng.Assert.assertTrue;
  * Tests for the {@link DateMapper} class.
  */
 @Test
-public class DateMappingTest {
+public final class DateMappingTest {
 
   private static final int TIMESTAMP = 1417819819;
-
-  private static final Date UTIL_DATE = new Date(TIMESTAMP);
 
   private final DateMapper mapper = new DateMapper();
 
@@ -52,6 +51,12 @@ public class DateMappingTest {
   @Test(dataProvider = "getDateTimeSqlTypes")
   public void shouldAcceptDateTimeSqlTypes(int sqlType) {
     assertEquals(this.mapper.confirmSqlType(sqlType), sqlType);
+  }
+
+  @Test(expectedExceptions = ScriptSetupException.class, expectedExceptionsMessageRegExp
+      = "Cannot use SQL type #12 with java\\.util\\.Date\\.")
+  public void shouldRejectOtherTypes() {
+    mapper.confirmSqlType(Types.VARCHAR);
   }
 
   public void shouldDefaultToTimestamp() {

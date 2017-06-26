@@ -19,6 +19,7 @@ package ws.rocket.sqlstore.test.script.read;
 import java.io.IOException;
 import java.sql.Types;
 import org.testng.annotations.Test;
+import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.InputParams;
 import ws.rocket.sqlstore.script.OutputParams;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
@@ -34,16 +35,17 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link ParamsReader} class.
  */
 @Test
-public class ParamsReaderTest {
+public final class ParamsReaderTest {
 
   public void shouldParseInParam() throws IOException {
-    ParamsSet params = new ParamsSet();
     StreamReader stream = Factory.streamOf("IN(String|VARCHAR test)\n====");
+    ParamsSet params = new ParamsSet();
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -61,9 +63,35 @@ public class ParamsReaderTest {
     assertNull(params.getQueryHints());
   }
 
-  public void shouldParseOutParam() throws IOException {
+  public void shouldParseInParams() throws IOException {
+    StreamReader stream = Factory.streamOf("IN(String|VARCHAR test, Long num)\n====");
     ParamsSet params = new ParamsSet();
+    ParamsReader reader = new ParamsReader(stream, params);
+
+    reader.parseParams();
+
+    assertNotSame(params.getInputParams(), InputParams.EMPTY);
+
+    TypeNameParam param = params.getInputParams().get("test");
+    assertNotNull(param, "Expecting first parameter 'test'");
+    assertSame(param.getJavaType(), String.class);
+    assertEquals(param.getSqlType(), Integer.valueOf(Types.VARCHAR));
+
+    param = params.getInputParams().get("num");
+    assertNotNull(param, "Expecting second parameter 'num'");
+    assertSame(param.getJavaType(), Long.class);
+    assertNull(param.getSqlType());
+
+    assertEquals(params.getKeysParams().length, 0);
+    assertEquals(params.getResultsParams().length, 0);
+    assertSame(params.getOutputParams(), OutputParams.EMPTY);
+    assertNull(params.getGenerateKeyColumns());
+    assertNull(params.getQueryHints());
+  }
+
+  public void shouldParseOutParam() throws IOException {
     StreamReader stream = Factory.streamOf("OUT(String|VARCHAR, Integer)\n====");
+    ParamsSet params = new ParamsSet();
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -81,10 +109,33 @@ public class ParamsReaderTest {
     assertNull(params.getQueryHints());
   }
 
-  public void shouldParseOutBeanParam() throws IOException {
+  public void shouldParseNamedOutParam() throws IOException {
+    StreamReader stream = Factory.streamOf("OUT(String|VARCHAR param1, Integer param2)\n====");
     ParamsSet params = new ParamsSet();
+    ParamsReader reader = new ParamsReader(stream, params);
+
+    reader.parseParams();
+
+    assertEquals(params.getResultsParams().length, 2);
+    assertSame(params.getResultsParams()[0].getJavaType(), String.class);
+    assertSame(params.getResultsParams()[1].getJavaType(), Integer.class);
+
+    assertTrue(params.getResultsParams()[0] instanceof TypeNameParam);
+    assertTrue(params.getResultsParams()[1] instanceof TypeNameParam);
+
+    assertNotSame(params.getOutputParams(), OutputParams.EMPTY);
+    assertFalse(params.getOutputParams().isEmpty());
+
+    assertSame(params.getInputParams(), InputParams.EMPTY);
+    assertEquals(params.getKeysParams().length, 0);
+    assertNull(params.getGenerateKeyColumns());
+    assertNull(params.getQueryHints());
+  }
+
+  public void shouldParseOutBeanParam() throws IOException {
     StreamReader stream = Factory.streamOf(
         "OUT(ws.rocket.sqlstore.test.db.model.Person[id,name])\n====");
+    ParamsSet params = new ParamsSet();
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -103,9 +154,9 @@ public class ParamsReaderTest {
   }
 
   public void shouldParseKeysOutParam() throws IOException {
-    ParamsSet params = new ParamsSet();
     StreamReader stream = Factory.streamOf(
         "OUT(KEYS(COL1 -> String|VARCHAR, COL2 -> Integer))\n====");
+    ParamsSet params = new ParamsSet();
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -127,9 +178,9 @@ public class ParamsReaderTest {
   }
 
   public void shouldParseKeysOutBeanParam() throws IOException {
-    ParamsSet params = new ParamsSet();
     StreamReader stream = Factory.streamOf("OUT(KEYS(ws.rocket.sqlstore.test.db.model.Person"
         + "[COL1 -> id, COL2 -> name]) )\n====");
+    ParamsSet params = new ParamsSet();
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -151,10 +202,10 @@ public class ParamsReaderTest {
   }
 
   public void shouldParseUpdateParam() throws IOException {
-    ParamsSet params = new ParamsSet();
     StreamReader stream = Factory.streamOf("IN(ws.rocket.sqlstore.test.db.model.Person p) "
         + "UPDATE(KEYS(ID -> p.id))"
         + "\n====");
+    ParamsSet params = new ParamsSet();
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
@@ -177,15 +228,22 @@ public class ParamsReaderTest {
   }
 
   public void shouldParseHintParam() throws IOException {
-    ParamsSet params = new ParamsSet();
     StreamReader stream = Factory.streamOf("HINT(maxRows=3, queryTimeout=60, fetchSize=4, "
         + "maxFieldSize=1000, readOnly=true, poolable=false, escapeProcessing=false)"
         + "\n====");
+    ParamsSet params = new ParamsSet();
     ParamsReader reader = new ParamsReader(stream, params);
 
     reader.parseParams();
 
     assertNotNull(params.getQueryHints());
+  }
+
+  @Test(expectedExceptions = ScriptSetupException.class,
+      expectedExceptionsMessageRegExp = "Duplicate parameters category on line 1 and column 13\\.")
+  public void shouldFailOnDuplicateParamsCategory() throws IOException {
+    StreamReader stream = Factory.streamOf("IN(Long id) IN(");
+    new ParamsReader(stream, new ParamsSet()).parseParams();
   }
 
 }

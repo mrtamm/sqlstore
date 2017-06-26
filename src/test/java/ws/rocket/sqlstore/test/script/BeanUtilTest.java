@@ -17,10 +17,13 @@
 package ws.rocket.sqlstore.test.script;
 
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import org.testng.annotations.Test;
+import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.BeanUtil;
 import ws.rocket.sqlstore.test.db.model.Organization;
 import ws.rocket.sqlstore.test.db.model.Person;
@@ -91,6 +94,58 @@ public final class BeanUtilTest {
     Object valueRead = BeanUtil.read(obj, field);
 
     assertEquals(valueRead, value);
+  }
+
+  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp
+      = "Failed to create an instance of class ws\\.rocket\\.sqlstore\\.test\\.script\\."
+      + "BeanUtilTest\\$BlockingClass by invoking default constructor\\.")
+  public void shouldFailToCreateNewInstance() {
+    BeanUtil.newInstance(BlockingClass.class);
+  }
+
+  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp
+      = "Could not find method \\[public void getProperty\\(\\)] nor a public "
+      + "non-static and non-final field \\[property] in class "
+      + "ws\\.rocket\\.sqlstore\\.test\\.script\\.BeanUtilTest\\$BlockingClass for writing "
+      + "property \\[property]")
+  public void shouldFailToFindPropertyReader() {
+    BeanUtil.requireReader(BlockingClass.class, "property");
+  }
+
+  @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp
+      = "Could not find a method \\[public void setProperty\\(AnyType arg\\)] nor a public "
+      + "non-static and non-final field \\[property] in class "
+      + "ws\\.rocket\\.sqlstore\\.test\\.script\\.BeanUtilTest\\$BlockingClass "
+      + "for writing property \\[property]")
+  public void shouldFailToFindPropertyWriter() {
+    BeanUtil.requireWriter(BlockingClass.class, "property");
+  }
+
+  @Test(expectedExceptions = ScriptSetupException.class, expectedExceptionsMessageRegExp
+      = "Failed to call \\[null] on \\[some value].")
+  public void shouldFailToReadProperty() {
+    BeanUtil.read("some value", null);
+  }
+
+  @Test(expectedExceptions = ScriptSetupException.class, expectedExceptionsMessageRegExp
+      = "Failed to call \\[null] on \\[some value] for storing value \\[new value]\\.")
+  public void shouldFailToWriteProperty() {
+    BeanUtil.write("some value", null, "new value");
+  }
+
+  @Test(expectedExceptions = InvocationTargetException.class)
+  public void shouldFailOnInstantiation() throws Exception {
+    Constructor<BeanUtil> constructor = BeanUtil.class.getDeclaredConstructor();
+    constructor.setAccessible(true);
+    constructor.newInstance();
+  }
+
+  private class BlockingClass {
+
+    BlockingClass() {
+      throw new RuntimeException("Cannot create instance of me");
+    }
+
   }
 
 }

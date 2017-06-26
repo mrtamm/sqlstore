@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.types.BooleanMapper;
 
 import static org.mockito.Mockito.mock;
@@ -35,13 +36,19 @@ import static org.testng.Assert.assertTrue;
  * Tests for the {@link BooleanMapper} class.
  */
 @Test
-public class BooleanMappingTest {
+public final class BooleanMappingTest {
 
   private final BooleanMapper mapper = new BooleanMapper();
 
   public void shouldAcceptBoolean() {
     assertTrue(this.mapper.supports(boolean.class));
     assertTrue(this.mapper.supports(Boolean.class));
+  }
+
+  @Test(expectedExceptions = ScriptSetupException.class, expectedExceptionsMessageRegExp
+      = "Boolean value binding for SQL type #6 is not supported\\.")
+  public void shouldRejectOtherTypes() {
+    mapper.confirmSqlType(Types.FLOAT);
   }
 
   public void shouldDefaultToBoolean() {

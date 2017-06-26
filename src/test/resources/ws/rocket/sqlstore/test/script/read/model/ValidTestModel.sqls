@@ -1,0 +1,4 @@
+testScript
+====
+SELECT COUNT(*) FROM person
+====

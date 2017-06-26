@@ -1,0 +1,6 @@
+!Person=ws.rocket.sqlstore.test.db.model.Person
+
+sampleQuery1 IN(Long id) OUT(Person[id,name,dateOfBirth,active])
+=====================================
+SELECT * FROM person WHERE id = ?{id}
+=====================================

@@ -1,0 +1,11 @@
+testScript
+====
+SELECT COUNT(*) FROM person
+====
+
+#Contains duplicate script with the same name:
+
+testScript
+====
+SELECT COUNT(*) FROM role
+====

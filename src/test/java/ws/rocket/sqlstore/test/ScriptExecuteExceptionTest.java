@@ -36,7 +36,6 @@ import static org.testng.Assert.assertSame;
 @Test
 public final class ScriptExecuteExceptionTest {
 
-  @Test
   public void testSimpleMessage() {
     ScriptExecuteException target = new ScriptExecuteException("%Sample message %.");
 
@@ -47,7 +46,6 @@ public final class ScriptExecuteExceptionTest {
         "ws.rocket.sqlstore.ScriptExecuteException: %Sample message %.\n");
   }
 
-  @Test
   public void testNoMessage() {
     ScriptExecuteException target = new ScriptExecuteException(null);
 
@@ -58,7 +56,6 @@ public final class ScriptExecuteExceptionTest {
         "ws.rocket.sqlstore.ScriptExecuteException: [no error description was given]\n");
   }
 
-  @Test
   public void testMessageWithParams() {
     ScriptExecuteException target = new ScriptExecuteException("%s with %d.", "Message", 123);
 
@@ -69,7 +66,6 @@ public final class ScriptExecuteExceptionTest {
         "ws.rocket.sqlstore.ScriptExecuteException: Message with 123.\n");
   }
 
-  @Test
   public void testMessageWithParamsAndParentCause() {
     SQLException other = new SQLException("Other exception", "SQL state info", 1024);
     ScriptExecuteException target = new ScriptExecuteException(other, "%s with %d.", "Message", 12);
@@ -83,7 +79,6 @@ public final class ScriptExecuteExceptionTest {
         + "Cause 1. java.sql.SQLException: Other exception");
   }
 
-  @Test
   public void testMessageWithParentCause() {
     SQLException other = new SQLException("Other exception", "SQL state info", 1024);
     ScriptExecuteException target = new ScriptExecuteException(other, "Sample Message.");
@@ -97,7 +92,6 @@ public final class ScriptExecuteExceptionTest {
         + "Cause 1. java.sql.SQLException: Other exception");
   }
 
-  @Test
   public void testMessageWithQueryContext() {
     QueryContext context = createQueryContext();
     ScriptExecuteException target = new ScriptExecuteException(context, "Sample Message.");
@@ -109,7 +103,6 @@ public final class ScriptExecuteExceptionTest {
         "ws.rocket.sqlstore.ScriptExecuteException: Sample Message.\n");
   }
 
-  @Test
   public void testWithParentCause() {
     SQLException other = new SQLException("Other exception", "SQL state info", 1024);
     ScriptExecuteException target = new ScriptExecuteException(other, (QueryContext) null);
@@ -123,7 +116,6 @@ public final class ScriptExecuteExceptionTest {
         + "Cause 1. java.sql.SQLException: Other exception");
   }
 
-  @Test
   public void testWithQueryContext() {
     QueryContext context = createQueryContext();
     ScriptExecuteException target = new ScriptExecuteException(null, context);

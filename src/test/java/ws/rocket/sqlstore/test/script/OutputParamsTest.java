@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.testng.annotations.Test;
+import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.result.ArrayResultsCollector;
 import ws.rocket.sqlstore.result.ListResultsCollector;
 import ws.rocket.sqlstore.result.MapResultsCollector;
@@ -29,15 +30,56 @@ import ws.rocket.sqlstore.result.VoidResultsCollector;
 import ws.rocket.sqlstore.script.OutputParams;
 import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.params.TypeParam;
+import ws.rocket.sqlstore.script.params.TypePropParam;
+import ws.rocket.sqlstore.test.db.model.Person;
+import ws.rocket.sqlstore.test.helper.Factory;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 /**
- *
- * @author martti
+ * Tests the {@link OutputParams} class.
  */
 @Test
-public class OutputParamsTest {
+public final class OutputParamsTest {
+
+  public void shouldBeEmpty() {
+    assertTrue(OutputParams.EMPTY.isEmpty());
+  }
+
+  public void shouldNotBeEmpty() {
+    OutputParams params = new OutputParams(new Param[] { Factory.stringParam("param") });
+    assertFalse(params.isEmpty());
+  }
+
+  public void shouldGetParamByName() {
+    Param param = Factory.stringParam("param");
+    OutputParams params = new OutputParams(new Param[] { param });
+
+    assertSame(params.get("param"), param);
+  }
+
+  public void shouldGetNullParam() {
+    Param param = Factory.stringParam("param");
+    OutputParams params = new OutputParams(new Param[] { param });
+
+    assertNull(params.get("paramElse"));
+  }
+
+  public void shouldReturnEmptyToString() {
+    assertEquals(OutputParams.EMPTY.toString(), "");
+  }
+
+  public void shouldReturnParamsInToString() {
+    Param param = new TypeParam(Long.class, 2, 0);
+    OutputParams params = new OutputParams(new Param[] { param });
+
+    assertEquals(params.toString(), "OUT(Long|2)");
+  }
 
   public void shouldSupportVoid() {
     ResultsCollector collector = OutputParams.EMPTY.createResultsCollector(Void.class);
@@ -81,6 +123,28 @@ public class OutputParamsTest {
 
     assertTrue(collector instanceof ArrayResultsCollector,
         "Expected ArrayResultsCollector but got: " + collector);
+  }
+
+  @Test(expectedExceptions = ScriptExecuteException.class, expectedExceptionsMessageRegExp
+      = "Query does not support return type java.util.List "
+      + "with column types \\[class java.lang.Long\\]")
+  public void shouldFailWhenParamsDoNotMatch() {
+    Param[] params = new Param[] { new TypeParam(String.class, Types.VARCHAR, 0), };
+    OutputParams output = new OutputParams(params);
+    output.createResultsCollector(List.class, Long.class);
+  }
+
+  public void shouldSupportBeanPropParams() {
+    Param[] params = new Param[] {
+      new TypeParam(Long.class, Types.NUMERIC, 0),
+      TypePropParam.create(Person.class, "id", null, 1),
+      TypePropParam.create(Person.class, "name", null, 1),
+      TypePropParam.create(Person.class, "dateOfBirth", null, 1)
+    };
+
+    OutputParams output = new OutputParams(params);
+
+    assertNotNull(output.createResultsCollector(Map.class, Long.class, Person.class));
   }
 
 }

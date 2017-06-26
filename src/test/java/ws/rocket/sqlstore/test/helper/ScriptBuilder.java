@@ -19,14 +19,17 @@ package ws.rocket.sqlstore.test.helper;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
-import org.mockito.Mockito;
 import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.sql.SqlScript;
 import ws.rocket.sqlstore.test.db.model.Person;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Helper class for constructing {@link Script} and {@link ParamsSet} objects for testing purpose.
@@ -75,13 +78,37 @@ public final class ScriptBuilder {
     return addOutParam(Long.class, Types.NUMERIC, varName);
   }
 
-  public ScriptBuilder addScriptParam(String name) {
+  public ScriptBuilder addKeysOutParam(Class<?> paramType, Integer sqlType, String name) {
+    params.addOutParam(paramType, sqlType, name, true);
+    return this;
+  }
+
+  public ScriptBuilder addKeysOutStringParam(String varName) {
+    return addKeysOutParam(String.class, Types.VARCHAR, varName);
+  }
+
+  public ScriptBuilder addPersonOutParam(String beanPropName) {
+    params.registerBean(Person.class);
+    params.addOutParamBeanProp(beanPropName, null, null);
+    params.unregisterBean();
+    return this;
+  }
+
+  public ScriptBuilder addScriptInParam(String name) {
+    return addScriptParam(ParamMode.IN, name);
+  }
+
+  public ScriptBuilder addScriptOutParam(String name) {
+    return addScriptParam(ParamMode.OUT, name);
+  }
+
+  private ScriptBuilder addScriptParam(ParamMode mode, String name) {
     if (!this.paramsInitiated) {
       initParams();
     }
 
     List<String> emptyList = Collections.emptyList();
-    params.addScriptParam(ParamMode.IN, name, emptyList, null);
+    params.addScriptParam(mode, name, emptyList, null);
     return this;
   }
 
@@ -93,8 +120,21 @@ public final class ScriptBuilder {
     return this.params;
   }
 
+  private boolean containsScriptOutParam() {
+    QueryParam[] queryParams = this.params.resetQueryParams();
+    for (QueryParam queryParam : queryParams) {
+      if (queryParam.isForOutput()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public Script toScript() {
-    return new Script("testScript", 1, Mockito.mock(SqlScript.class), initParams());
+    SqlScript sqlScript = mock(SqlScript.class);
+    when(sqlScript.containsOutParam()).thenReturn(containsScriptOutParam());
+
+    return new Script("testScript", 1, sqlScript, initParams());
   }
 
   public QueryContext toQueryContext(Object... args) {
