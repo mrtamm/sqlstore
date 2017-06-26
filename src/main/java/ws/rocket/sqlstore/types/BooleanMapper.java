@@ -53,7 +53,7 @@ public final class BooleanMapper implements ValueMapper {
     } else if (providedType != Types.VARCHAR && providedType != Types.CHAR
         && providedType != Types.DECIMAL && providedType != Types.NUMERIC
         && providedType != Types.INTEGER && providedType != Types.SMALLINT
-        && providedType != Types.TINYINT) {
+        && providedType != Types.TINYINT && providedType != Types.BIT) {
       throw new ScriptSetupException("Boolean value binding for SQL type #%d is not supported.",
           providedType);
     }
@@ -74,7 +74,7 @@ public final class BooleanMapper implements ValueMapper {
     } else if (sqlType == Types.VARCHAR || sqlType == Types.CHAR) {
       ps.setString(index, b ? "Y" : "N");
     } else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC || sqlType == Types.INTEGER
-        || sqlType == Types.SMALLINT || sqlType == Types.TINYINT) {
+        || sqlType == Types.SMALLINT || sqlType == Types.TINYINT || sqlType == Types.BIT) {
       ps.setInt(index, b ? 1 : 0);
     }
   }
@@ -92,7 +92,7 @@ public final class BooleanMapper implements ValueMapper {
       b = rs.wasNull() ? null : b;
 
     } else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC || sqlType == Types.INTEGER
-        || sqlType == Types.SMALLINT || sqlType == Types.TINYINT) {
+        || sqlType == Types.SMALLINT || sqlType == Types.TINYINT || sqlType == Types.BIT) {
       int value = rs.getInt(index);
       b = rs.wasNull() ? null : (value > 0);
     }
@@ -112,7 +112,7 @@ public final class BooleanMapper implements ValueMapper {
       b = "Y".equals(stmt.getString(index));
 
     } else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC || sqlType == Types.INTEGER
-        || sqlType == Types.SMALLINT || sqlType == Types.TINYINT) {
+        || sqlType == Types.SMALLINT || sqlType == Types.TINYINT || sqlType == Types.BIT) {
       int value = stmt.getInt(index);
       b = stmt.wasNull() ? null : (value > 0);
     }

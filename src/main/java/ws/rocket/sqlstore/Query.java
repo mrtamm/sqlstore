@@ -91,8 +91,7 @@ public final class Query {
    * @return The first extracted value, or null.
    */
   public <V> V forValue(Class<V> valueType) {
-    executeWithResults(List.class, valueType);
-    return extractValue(valueType);
+    return executeWithResults(List.class, valueType);
   }
 
   /**
@@ -108,8 +107,7 @@ public final class Query {
    * @return A list with extracted values.
    */
   public <V> List<V> forValues(Class<V> valueType) {
-    executeWithResults(List.class, valueType);
-    return extractList(valueType);
+    return executeWithResults(List.class, valueType);
   }
 
   /**
@@ -124,8 +122,7 @@ public final class Query {
    * @return The first extracted row as an object array of column values, or null.
    */
   public Object[] forRow(Class<?>... columnTypes) {
-    executeWithResults(Object[][].class, columnTypes);
-    return extractRow();
+    return executeWithResults(Object[][].class, columnTypes);
   }
 
   /**
@@ -140,8 +137,7 @@ public final class Query {
    * @return An object array with extracted rows and columns.
    */
   public Object[][] forRows(Class<?>... columnTypes) {
-    executeWithResults(Object[][].class, columnTypes);
-    return extractRows();
+    return executeWithResults(Object[][].class, columnTypes);
   }
 
   /**
@@ -161,8 +157,7 @@ public final class Query {
    * @return A map with extracted values with an entry per row.
    */
   public <K, V> Map<K, V> forMap(Class<K> value1Type, Class<V> value2Type) {
-    executeWithResults(Map.class, value1Type, value2Type);
-    return extractMap(value1Type, value2Type);
+    return executeWithResults(Map.class, value1Type, value2Type);
   }
 
   /**
@@ -176,7 +171,8 @@ public final class Query {
     return this.ctx.getUpdateCount();
   }
 
-  private void executeWithResults(Class<?> resultsContainerType, Class<?>... columnTypes) {
+  @SuppressWarnings("unchecked")
+  private <T> T executeWithResults(Class<?> resultsContainerType, Class<?>... columnTypes) {
     if (this.executed) {
       throw new ScriptExecuteException(this.ctx, "Query has been executed and the object "
           + "cannot be reused");
@@ -185,32 +181,12 @@ public final class Query {
     this.executed = true;
     this.ctx.initResultsContainer(resultsContainerType, columnTypes);
     new JdbcExecutor(this.connectionManager).execute(this.ctx);
-  }
 
-  @SuppressWarnings("unchecked")
-  private <T> Object[] extractRow() {
-    Object[][] values = extractRows();
-    return values.length == 0 ? null : values[0];
-  }
+    if (resultsContainerType == Void.class) {
+      return null;
+    }
 
-  @SuppressWarnings("unchecked")
-  private <T> Object[][] extractRows() {
-    return (Object[][]) this.ctx.getResultsCollector().getResult();
-  }
-
-  private <T> T extractValue(Class<T> valueType) {
-    List<T> values = extractList(valueType);
-    return values.isEmpty() ? null : values.get(0);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> List<T> extractList(Class<T> valueType) {
-    return (List<T>) this.ctx.getResultsCollector().getResult();
-  }
-
-  @SuppressWarnings("unchecked")
-  private <K, V> Map<K, V> extractMap(Class<K> keyType, Class<V> valueType) {
-    return (Map<K, V>) this.ctx.getResultsCollector().getResult();
+    return (T) this.ctx.getResultsCollector().getResult();
   }
 
 }

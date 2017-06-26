@@ -160,8 +160,8 @@ public final class BeanUtil {
 
     if (reader == null) {
       throw new RuntimeException(String.format("Could not find method "
-          + "[public void %s(AnyType arg)] in %s for writing property [%s]",
-          methodNameGet, clazz, property));
+          + "[public void %s()] nor a public non-static and non-final field [%s] in "
+          + "%s for writing property [%s]", methodNameGet, property, clazz, property));
     }
 
     return reader;

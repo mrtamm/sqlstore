@@ -82,7 +82,7 @@ public final class InputParams {
 
     if (supports) {
       for (int i = 0; i < paramsLength; i++) {
-        if (this.params[i].supports(paramTypes[i])) {
+        if (!this.params[i].supports(paramTypes[i])) {
           supports = false;
           break;
         }
@@ -167,7 +167,7 @@ public final class InputParams {
       first = false;
     }
 
-    return sb.append(") ").toString();
+    return sb.append(')').toString();
   }
 
 }

@@ -118,7 +118,7 @@ public final class ParamsReader {
   public void parseParams() throws IOException {
     Set<ParamsCategory> parsedParamTypes = new HashSet<>();
 
-    while (this.reader.getColumn() != 1 || !this.reader.isNext('=')) {
+    while (!(this.reader.getColumn() == 1 && this.reader.isNext('='))) {
       int column = this.reader.getColumn();
       ParamsCategory category = this.reader.parseParamsType();
 
@@ -173,7 +173,7 @@ public final class ParamsReader {
       String paramName = this.reader.parseParamName();
 
       this.params.addInParam(new TypeNameParam(javaType, sqlType, paramName));
-    } while (this.reader.skipWsp() == ',');
+    } while (this.reader.skipIfNext(',') && this.reader.skipWsp() != -1);
   }
 
   /*
@@ -249,9 +249,7 @@ public final class ParamsReader {
         this.params.addOutParam(javaType, sqlType, paramName, keysMode);
       }
 
-    } while (this.reader.skipWsp() == ','
-        && this.reader.skipNext() != -1
-        && this.reader.skipWsp() != -1);
+    } while (this.reader.skipIfNext(',') && this.reader.skipWsp() != -1);
 
     if (keysMode && Character.isWhitespace(this.reader.requireNext(')'))) {
       this.reader.skipWsp();

@@ -200,6 +200,7 @@ public final class SqlStore {
 
   @SuppressWarnings("unchecked")
   private static <P> P createProxy(Class<P> c, SqlStore s) {
+    s.validateMethods(c);
     return (P) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c }, s.proxyHandler());
   }
 
@@ -265,7 +266,7 @@ public final class SqlStore {
    */
   public void execBlock(Block block, int transactionIsolation) {
     if (block != null) {
-      ScopedConnectionManager scopedManager = new ScopedConnectionManager(this.connectionManager);
+      ScopedConnectionManager scopedManager = new ScopedConnectionManager(getConnectionManager());
       try {
         block.execute(new SqlStore(scopedManager, this.scripts));
       } finally {
@@ -314,20 +315,20 @@ public final class SqlStore {
     }
 
     QueryContext ctx = new QueryContext(script, args);
+    ConnectionManager cm = getConnectionManager();
+    return new Query(cm, ctx);
+  }
+
+  private ConnectionManager getConnectionManager() {
     ConnectionManager cm = this.connectionManager;
     if (cm == null) {
       cm = SharedConnectionManager.getInstance();
     }
-    return new Query(cm, ctx);
+    return cm;
   }
 
   private void validateMethods(Class<?> target) {
     for (Method m : target.getMethods()) {
-      if (m.getDeclaringClass() == Object.class
-          || !Modifier.isAbstract(m.getModifiers())) {
-        continue;
-      }
-
       hasQuery(m.getName(), m.getParameterTypes());
     }
   }

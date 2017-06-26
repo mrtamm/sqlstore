@@ -74,7 +74,7 @@ public class InputStreamMapper implements ValueMapper {
   }
 
   @Override
-  public Object read(CallableStatement stmt, int index, int sqlType) throws SQLException {
+  public InputStream read(CallableStatement stmt, int index, int sqlType) throws SQLException {
     InputStream result = null;
 
     if (sqlType == Types.BLOB) {
@@ -89,7 +89,7 @@ public class InputStreamMapper implements ValueMapper {
   }
 
   @Override
-  public Object read(ResultSet rs, int index, int sqlType) throws SQLException {
+  public InputStream read(ResultSet rs, int index, int sqlType) throws SQLException {
     InputStream result = null;
 
     if (sqlType == Types.BLOB) {

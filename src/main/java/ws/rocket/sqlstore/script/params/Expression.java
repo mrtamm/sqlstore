@@ -81,7 +81,7 @@ public final class Expression extends Param {
     } else {
       StringBuilder exprBuilder = new StringBuilder().append(namedParam.getName());
       Class<?> currentType = namedParam.getJavaType();
-      readers = new Method[properties.size()];
+      readers = new AccessibleObject[properties.size()];
 
       for (int i = 0; i < properties.size(); i++) {
         String prop = properties.get(i);

@@ -73,7 +73,7 @@ public final class ByteArrayMapper implements ValueMapper {
 
     byte[] b = (byte[]) value;
 
-    if (b == null) {
+    if (b == null || b.length == 0) {
       ps.setNull(index, sqlType);
     } else if (sqlType == Types.BLOB) {
       ps.setBlob(index, new SerialBlob(b));

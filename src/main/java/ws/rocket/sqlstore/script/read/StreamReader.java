@@ -383,7 +383,7 @@ public final class StreamReader implements Closeable {
 
   /**
    * Parses and returns a column name that is used for retrieving the value of the generated key.
-   * The expected expression is "COLUMN_NAME -> " (case-insensitive).
+   * The expected expression is "COLUMN_NAME -&amp; " (case-insensitive).
    *
    * @return The parsed column name.
    * @throws IOException When a stream-related exception occurs during reading.

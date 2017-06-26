@@ -135,7 +135,7 @@ public final class ConditionReader {
    * @return The created condition object.
    */
   public SqlPartCondition build() {
-    SqlPartCondition result;
+    SqlPartCondition result = null;
 
     if (this.func == null) {
       result = new ParamValueNonEmpty(this.param);
@@ -143,8 +143,6 @@ public final class ConditionReader {
       result = new ParamValueEmpty(this.param);
     } else if (COND_FUNC_TRUE.equals(this.func)) {
       result = new ParamValueTrue(this.param);
-    } else {
-      throw new ScriptSetupException("Unsupported query part condition function: '%s'", this.func);
     }
 
     return result;

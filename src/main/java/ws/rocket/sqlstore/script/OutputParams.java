@@ -57,7 +57,7 @@ public final class OutputParams {
    * @param params A not null array of validated out-parameters.
    */
   public OutputParams(Param[] params) {
-    Objects.requireNonNull(params, "OUT-parameters array is undefined");
+    Objects.requireNonNull(params, "OUT-parameters array OutputParams.EMPTYis undefined");
     this.description = composeDescription(params);
     this.namedParams = initNamedParams(params);
     this.types = getResultTypes(params);
@@ -184,7 +184,7 @@ public final class OutputParams {
       first = false;
     }
 
-    return sb.append(") ").toString();
+    return sb.append(')').toString();
   }
 
   private static Map<String, TypeNameParam> initNamedParams(Param[] params) {
@@ -210,8 +210,8 @@ public final class OutputParams {
     if (this.types.length == colTypesLength) {
       supports = true;
 
-      for (Class<?> type : this.types) {
-        if (type != null && !type.isAssignableFrom(type)) {
+      for (int i = 0; i < colTypesLength; i++) {
+        if (columnTypes[i] == null || !columnTypes[i].isAssignableFrom(this.types[i])) {
           supports = false;
           break;
         }

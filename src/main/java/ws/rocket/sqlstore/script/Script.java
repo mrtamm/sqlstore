@@ -118,10 +118,10 @@ public final class Script {
     this.resultsParams = params.getResultsParams();
     this.generatedKeys = params.getGenerateKeyColumns();
 
-    if (this.inputParams.isEmpty()) {
-      this.statementType = StatementType.SIMPLE;
-    } else if (this.sqlScript.containsOutParam()) {
+    if (this.sqlScript.containsOutParam()) {
       this.statementType = StatementType.CALL;
+    } else if (this.inputParams.isEmpty()) {
+      this.statementType = StatementType.SIMPLE;
     } else {
       this.statementType = StatementType.PREPARED;
     }
@@ -239,7 +239,7 @@ public final class Script {
   @Override
   public String toString() {
     StringBuilder str = new StringBuilder();
-    str.append(this.name).append(' ');
+    str.append(this.name);
 
     if (!this.inputParams.isEmpty()) {
       str.append("\n    ").append(this.inputParams);
