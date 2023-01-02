@@ -26,7 +26,7 @@ import java.sql.Connection;
  * <p>
  * This interface and implementing classes are only used by SqlStore itself, and users of the
  * library can't customize it.
- * <h3>Usage</h3>
+ * <h2>Usage</h2>
  * <p>
  * When a connection is obtained by calling {@link #obtain(boolean)}, it must always be released by
  * calling {@link #release()} after executing scripts. The <code>release()</code> must be called

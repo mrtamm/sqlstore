@@ -26,9 +26,9 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
 /**
  * Reads and evaluates IN, UPDATE, OUT, HINT parameters of a script definition. An instance of the
  * reader may be used several times within the scope of the same scripts file (bound to one stream
- * reader instance). This reader should be called right after the script name has bean read.
+ * reader instance). This reader should be called right after the script name has been read.
  * <p>
- * Each parameters group begins with keyword "IN", "OUT', "UPDATE", or "HINT" directly followed by
+ * Each parameters-group begins with keyword "IN", "OUT", "UPDATE", or "HINT" directly followed by
  * an opening parenthesis (no whitespace between). Each group has its own rules for specifying
  * parameters. All groups end with closing parenthesis. The order of these groups is not defined.
  * Each group can be specified only once per script definition.
@@ -38,7 +38,7 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
  * resulting script unit info object (by the main script reader). Otherwise, this reader does not
  * maintain any state.
  *
- * <h3>IN parameters</h3>
+ * <h2>IN parameters</h2>
  * <p>
  * These are comma-separated IN-parameters (enclosed in <code>IN(...)</code>) defining what
  * parameters are expected for query input (including their order and corresponding types):
@@ -52,7 +52,7 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
  * UPDATE-parameters group to define the IN-parameter properties to be updated after query
  * execution.
  *
- * <h3>UPDATE parameters</h3>
+ * <h2>UPDATE parameters</h2>
  * <p>
  * These are comma-separated UPDATE-parameters that need to be updated with values from result-set,
  * usually enclosed in <code>UPDATE(...)</code>:
@@ -61,7 +61,7 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
  * KEYS(IN_Param.nested.prop, IN_Param.nested.prop2)
  * </pre>
  *
- * <h3>OUT parameters</h3>
+ * <h2>OUT parameters</h2>
  * <p>
  * These are comma-separated OUT-parameters (enclosed in <code>OUT(...)</code>) defining what needs
  * to be extracted from result-set:
@@ -78,7 +78,7 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
  * Expressions may be wrapped by <code>KEYS(...)</code> so that it would extract data from generated
  * keys result-set.
  *
- * <h3>HINT parameters</h3>
+ * <h2>HINT parameters</h2>
  * <p>
  * Hints are comma-separated name-value pairs within <code>HINT(...)</code>:
  * <pre>

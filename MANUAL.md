@@ -12,30 +12,30 @@ pass the required parameters.
 Tabel of Contents
 -----------------
 
-1. [Why SqlStore?](#why-sqlstore)
-2. [How Does It Work?](#how-does-it-work)
-3. [The Java API of SqlStore](#the-java-api-of-sqlstore)
-  1. [Working With SqlStore Instance](#working-with-sqlstore-instance)
-  2. [Working With SqlStore Through Proxy Interface](#working-with-sqlstore-through-proxy-interface)
-  3. [Statement Parameter Value Binding](#statement-parameter-value-binding)
-  4. [Exception Handling](#exception-handling)
-  5. [Inspection](#inspection)
-4. [The SQL Scripts File](#the-sql-scripts-file)
-5. [Java Type Aliases](#java-type-aliases)
-6. [SQL Script Declaration](#sql-script-declaration)
-7. [SQL Script Parameters](#sql-script-parameters)
-  1. [Script Input Parameters](#script-input-parameters)
-  2. [Script Output Parameters](#script-output-parameters)
-  3. [Updated Script Input Parameters](#updated-script-input-parameters)
-  4. [Specifying Result-Set Type](#specifying-result-set-type)
-  5. [Statement Hints](#statement-hints)
-10. [SQL statement](#sql-statement)
-  1. [Dynamically Included SQL Statement Parts](#dynamically-included-sql-statement-parts)
-  2. [Binding for Script Parameters](#binding-for-script-parameters)
-  3. [Support for Stored Procedures](#support-for-stored-procedures)
-  4. [Escaping Special Characters](#escaping-special-characters)
-11. [Logging](#logging)
-12. [Additional Information](#additional-information)
+ 1. [Why SqlStore?](#why-sqlstore)
+ 2. [How Does It Work?](#how-does-it-work)
+ 3. [The Java API of SqlStore](#the-java-api-of-sqlstore)
+    1. [Working With SqlStore Instance](#working-with-sqlstore-instance)
+    2. [Working With SqlStore Through Proxy Interface](#working-with-sqlstore-through-proxy-interface)
+    3. [Statement Parameter Value Binding](#statement-parameter-value-binding)
+    4. [Exception Handling](#exception-handling)
+    5. [Inspection](#inspection)
+ 4. [The SQL Scripts File](#the-sql-scripts-file)
+ 5. [Java Type Aliases](#java-type-aliases)
+ 6. [SQL Script Declaration](#sql-script-declaration)
+ 7. [SQL Script Parameters](#sql-script-parameters)
+    1. [Script Input Parameters](#script-input-parameters)
+    2. [Script Output Parameters](#script-output-parameters)
+    3. [Updated Script Input Parameters](#updated-script-input-parameters)
+    4. [Specifying Result-Set Type](#specifying-result-set-type)
+    5. [Statement Hints](#statement-hints)
+ 8. [SQL statement](#sql-statement)
+    1. [Dynamically Included SQL Statement Parts](#dynamically-included-sql-statement-parts)
+    2. [Binding for Script Parameters](#binding-for-script-parameters)
+    3. [Support for Stored Procedures](#support-for-stored-procedures)
+    4. [Escaping Special Characters](#escaping-special-characters)
+ 9. [Logging](#logging)
+10. [Additional Information](#additional-information)
 
 
 Why SqlStore?
@@ -151,14 +151,10 @@ SqlStore also supports transactions as long as the block of statements is
 defined together:
 
 ```java
-sqlStore.block(new Block() {
-
-  public void execute(SqlStore sql) {
+sqlStore.atomic((SqlStore sql) -> {
     Integer v = sql.query("queryName1", param1).forValue(Integer.class);
-    sql.query("queryName2", v).execute();
-  }
-
-});
+    return sql.query("queryName2", v).execute();
+  });
 ```
 
 The SqlStore object commits the transaction when the block completes without any
@@ -200,7 +196,7 @@ instances, that have no explicit connection reference, will default to that
 _shared_ one instead:
 
 ```java
-import ws.​rocket.​sqlstore.​connection.SharedConnectionManager;
+import ws.rocket.sqlstore.connection.SharedConnectionManager;
 
 // ...
 
@@ -323,19 +319,19 @@ Like the `Bindings` class, all default mapper classes are located in the
 `ws.rocket.sqlstore.types` package.
 
 
-| Mapper            | Handles Java Types | Default SQL type | Other SQL types  |
-| ----------------- | ------------------ | ---------------- | ---------------- |
-| BooleanMapper     | Boolean, boolean   | BOOLEAN          | VARCHAR, CHAR, TINYINT, SMALLINT, INT, DECIMAL, NUMERIC. |
-| StringMapper      | String             | VARCHAR          | CLOB and NCLOB.  |
-| LongMapper        | Long, long         | NUMERIC          | *                |
-| IntMapper         | Integer, int       | NUMERIC          | *                |
-| ShortMapper       | Short, short       | NUMERIC          | *                |
-| DoubleMapper      | Double, double     | NUMERIC          | *                |
-| BigDecimalMapper  | BigDecimal         | NUMERIC          | *                |
-| DateMapper        | java.util.Date and subtypes | TIMESTAMP | DATE, TIME.    |
-| ByteArrayMapper   | byte[]             | BLOB             | CLOB, NCLOB, BINARY, VARBINARY, LONGVARBINARY. |
-| FileMapper        | java.io.File       | BLOB             | CLOB, NCLOB.     |
-| InputStreamMapper | InputStream        | BLOB             | CLOB, NCLOB.     |
+| Mapper            | Handles Java Types          | Default SQL type | Other SQL types                                          |
+|-------------------|-----------------------------|------------------|----------------------------------------------------------|
+| BooleanMapper     | Boolean, boolean            | BOOLEAN          | VARCHAR, CHAR, TINYINT, SMALLINT, INT, DECIMAL, NUMERIC. |
+| StringMapper      | String                      | VARCHAR          | CLOB and NCLOB.                                          |
+| LongMapper        | Long, long                  | NUMERIC          | *                                                        |
+| IntMapper         | Integer, int                | NUMERIC          | *                                                        |
+| ShortMapper       | Short, short                | NUMERIC          | *                                                        |
+| DoubleMapper      | Double, double              | NUMERIC          | *                                                        |
+| BigDecimalMapper  | BigDecimal                  | NUMERIC          | *                                                        |
+| DateMapper        | java.util.Date and subtypes | TIMESTAMP        | DATE, TIME.                                              |
+| ByteArrayMapper   | byte[]                      | BLOB             | CLOB, NCLOB, BINARY, VARBINARY, LONGVARBINARY.           |
+| FileMapper        | java.io.File                | BLOB             | CLOB, NCLOB.                                             |
+| InputStreamMapper | InputStream                 | BLOB             | CLOB, NCLOB.                                             |
 
 ### Exception Handling
 

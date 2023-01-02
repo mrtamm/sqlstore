@@ -229,7 +229,7 @@ public final class SqlStore {
   /**
    * Performs a contained query lookup by name, and validates the passed script arguments.
    * <p>
-   * When the any of the activities should fail, a runtime exception will be raised.
+   * When any of the activities should fail, a runtime exception will be raised.
    *
    * @param name The query name (case-sensitive).
    * @param args Arguments to the query to be executed.
@@ -249,6 +249,7 @@ public final class SqlStore {
    * The transaction isolation with this method is <code>read-committed</code>.
    *
    * @param block The block to be executed. When null, this process will be skipped.
+   * @param <R> The custom return-value type of the block-function.
    * @return A value from the provided block-function, or null.
    */
   public <R> R atomic(Function<SqlStore, R> block) {
@@ -264,6 +265,7 @@ public final class SqlStore {
    * @param block The block to be executed. When null, this process will be skipped.
    * @param transactionIsolation A custom transaction isolation option from the {@link Connection}
    * class.
+   * @param <R> The custom return-value type of the block-function.
    * @return A value from the provided block-function, or null.
    * @see ScopedConnectionManager
    */
