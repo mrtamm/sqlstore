@@ -17,4 +17,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish code coverage report to Coveralls
-        run: mvn -B jacoco:report coveralls:report -D repoToken=${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: mvn -B test jacoco:report coveralls:report -D repoToken=${{ secrets.COVERALLS_REPO_TOKEN }}
