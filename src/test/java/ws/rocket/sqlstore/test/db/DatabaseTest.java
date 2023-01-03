@@ -38,11 +38,11 @@ import ws.rocket.sqlstore.test.db.model.Person;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Integration tests for checking the overall functionality through SqlStore class.
  */
+@Test
 public class DatabaseTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(DatabaseTest.class);
@@ -50,11 +50,18 @@ public class DatabaseTest {
   private ScriptsFacade scripts;
 
   @Test
-  public void executeQueries() throws SQLException {
-    Connection con;
+  public void executeQueries() {
+    final String testDatabase = System.getProperty("testDatabase");
 
+    if (testDatabase == null) {
+      LOG.info("Database testing was skipped since system property 'testDatabase' is "
+          + "undefined (expected value: 'derby', 'oracle', or 'postgresql').");
+      return;
+    }
+
+    Connection con;
     try {
-      con = initDbConnection();
+      con = initDbConnection(testDatabase);
       SharedConnectionManager.register(con);
 
     } catch (Exception e) {
@@ -63,9 +70,10 @@ public class DatabaseTest {
     }
 
     try {
+      System.setProperty("sqlstore.path.suffix", "_" + testDatabase + ".sqls");
       this.scripts = SqlStore.proxy(ScriptsFacade.class, con);
 
-      assertTrue(this.scripts.equals(this.scripts), "The proxy must equal to itself.");
+      assertEquals(this.scripts, this.scripts, "The proxy must equal to itself.");
 
       if (LOG.isDebugEnabled()) {
         LOG.debug("HashCode for the proxy: {}", this.scripts.hashCode());
@@ -90,6 +98,7 @@ public class DatabaseTest {
       }
 
     } finally {
+      System.clearProperty("sqlstore.path.suffix");
       SharedConnectionManager.unregister();
 
       try {
@@ -176,11 +185,11 @@ public class DatabaseTest {
     this.scripts.dropSampleFunction();
   }
 
-  private static Connection initDbConnection() throws Exception {
-    ResourceBundle bundle = ResourceBundle.getBundle("ws.rocket.sqlstore.test.db.test");
+  private static Connection initDbConnection(String dbMode) throws Exception {
+    ResourceBundle bundle = ResourceBundle.getBundle("ws.rocket.sqlstore.test.db.test_" + dbMode);
 
     String derbyPath = bundle.getString("jdbc.dbPath");
-    if (derbyPath != null && !derbyPath.isEmpty()) {
+    if (!derbyPath.isEmpty()) {
       initDerbyDbPath(derbyPath);
     }
 
@@ -201,7 +210,7 @@ public class DatabaseTest {
     removeObjectIfExists(con, schema, testTable, "TABLE");
     removeObjectIfExists(con, schema, testSequence, "SEQUENCE");
 
-    if (testSequence != null && !testSequence.isEmpty()) {
+    if (!testSequence.isEmpty()) {
       execStmt(con, "CREATE SEQUENCE " + testSequence);
       LOG.info("OK: Sequence '{}' was explicitly created.", schema);
     }
@@ -243,7 +252,7 @@ public class DatabaseTest {
       String objType) throws SQLException {
 
     if (objName == null || objName.isEmpty() || objName.contains(" ")) {
-      LOG.info("Skipping: remove object if exists.");
+      LOG.info("Skipping: remove {} {}, if exists.", objType, objName);
       return;
     }
 

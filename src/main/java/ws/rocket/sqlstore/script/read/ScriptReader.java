@@ -55,6 +55,19 @@ public final class ScriptReader implements Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(ScriptReader.class);
 
+  private static final String PATH_PREFIX;
+
+  private static final String PATH_SUFFIX;
+
+  static {
+    PATH_PREFIX = System.getProperty("sqlstore.path.prefix", "");
+    PATH_SUFFIX = System.getProperty("sqlstore.path.suffix", ".sqls");
+  }
+
+  private static String getResourcePath(Class<?> clazz) {
+    return PATH_PREFIX + clazz.getSimpleName() + PATH_SUFFIX;
+  }
+
   /**
    * Loads scripts from an SQLS resource of given class.
    * <p>
@@ -79,7 +92,7 @@ public final class ScriptReader implements Closeable {
   public static Map<String, Script> load(Class<?> clazz) throws IOException {
     Map<String, Script> results = new HashMap<>();
     long time = System.currentTimeMillis();
-    String resourceName = clazz.getSimpleName() + ".sqls";
+    String resourceName = getResourcePath(clazz);
     InputStream input = clazz.getResourceAsStream(resourceName);
 
     if (input != null) {

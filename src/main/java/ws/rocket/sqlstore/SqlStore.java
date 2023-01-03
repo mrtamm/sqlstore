@@ -25,6 +25,7 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import javax.sql.DataSource;
 import ws.rocket.sqlstore.connection.ConnectionManager;
 import ws.rocket.sqlstore.connection.DataSourceConnectionManager;
@@ -228,7 +229,7 @@ public final class SqlStore {
   /**
    * Performs a contained query lookup by name, and validates the passed script arguments.
    * <p>
-   * When the any of the activities should fail, a runtime exception will be raised.
+   * When any of the activities should fail, a runtime exception will be raised.
    *
    * @param name The query name (case-sensitive).
    * @param args Arguments to the query to be executed.
@@ -248,9 +249,11 @@ public final class SqlStore {
    * The transaction isolation with this method is <code>read-committed</code>.
    *
    * @param block The block to be executed. When null, this process will be skipped.
+   * @param <R> The custom return-value type of the block-function.
+   * @return A value from the provided block-function, or null.
    */
-  public void execBlock(Block block) {
-    execBlock(block, Connection.TRANSACTION_READ_COMMITTED);
+  public <R> R atomic(Function<SqlStore, R> block) {
+    return atomic(block, Connection.TRANSACTION_READ_COMMITTED);
   }
 
   /**
@@ -262,17 +265,20 @@ public final class SqlStore {
    * @param block The block to be executed. When null, this process will be skipped.
    * @param transactionIsolation A custom transaction isolation option from the {@link Connection}
    * class.
+   * @param <R> The custom return-value type of the block-function.
+   * @return A value from the provided block-function, or null.
    * @see ScopedConnectionManager
    */
-  public void execBlock(Block block, int transactionIsolation) {
+  public <R> R atomic(Function<SqlStore, R> block, int transactionIsolation) {
     if (block != null) {
       ScopedConnectionManager scopedManager = new ScopedConnectionManager(getConnectionManager());
       try {
-        block.execute(new SqlStore(scopedManager, this.scripts));
+        return block.apply(new SqlStore(scopedManager, this.scripts));
       } finally {
         scopedManager.releaseFinally();
       }
     }
+    return null;
   }
 
   /**
@@ -342,7 +348,7 @@ public final class SqlStore {
    * SqlStore script invocations. To debug the SqlStore instance behind the proxy, use the
    * <code>toString()</code> method.
    */
-  private class ProxyHandler implements InvocationHandler {
+  private static class ProxyHandler implements InvocationHandler {
 
     private final SqlStore s;
 
@@ -392,24 +398,15 @@ public final class SqlStore {
     }
 
     private Object handleObjectMethods(Object proxy, Method method, Object[] args) {
-      Object result;
-
-      switch (method.getName()) {
-        case "toString":
+      return switch (method.getName()) {
+        case "toString" -> {
           String className = proxy.getClass().getInterfaces()[0].getName();
-          result = "SqlStore proxy for " + className + ":\n" + this.s;
-          break;
-        case "equals":
-          result = proxy == args[0];
-          break;
-        case "hashCode":
-          result = System.identityHashCode(proxy);
-          break;
-        default:
-          result = null;
-      }
-
-      return result;
+          yield "SqlStore proxy for " + className + ":\n" + this.s;
+        }
+        case "equals" -> proxy == args[0];
+        case "hashCode" -> System.identityHashCode(proxy);
+        default -> null;
+      };
     }
 
     private Class<?> getRowType(Method method) {

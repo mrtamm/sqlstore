@@ -17,9 +17,8 @@
  * The main classes that users of <em>SqlStore</em> library interact with.
  * <p>
  * Class {@link ws.rocket.sqlstore.SqlStore} and its minor companions
- * {@link ws.rocket.sqlstore.Query} and {@link ws.rocket.sqlstore.Block} are used for executing
- * pre-loaded SQL queries via JDBC API over a (<code>DataSource</code>-pooled or direct) database
- * connection.
+ * {@link ws.rocket.sqlstore.Query} is used for executing preloaded SQL queries via JDBC API over a
+ * (<code>DataSource</code>-pooled or direct) database connection.
  * <p>
  * To categorize failure scenarios, {@link ws.rocket.sqlstore.ScriptSetupException} and
  * {@link ws.rocket.sqlstore.ScriptExecuteException} are used to wrap errors at scripts loading time

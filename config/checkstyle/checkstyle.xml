@@ -33,6 +33,10 @@
   <!-- See http://checkstyle.sf.net/config_sizes.html -->
   <module name="FileLength"/>
 
+  <module name="LineLength">
+    <property name="max" value="100" />
+  </module>
+
   <!-- Checks whitespace for no TAB characters             -->
   <!-- See http://checkstyle.sf.net/config_whitespace.html -->
   <module name="FileTabCharacter"/>
@@ -58,8 +62,7 @@
     <!-- Checks for Javadoc comments.                     -->
     <!-- See http://checkstyle.sf.net/config_javadoc.html -->
     <module name="JavadocMethod">
-      <property name="scope" value="protected" />
-      <property name="allowUndeclaredRTE" value="true" />
+      <property name="accessModifiers" value="public, protected" />
     </module>
     <module name="JavadocType">
       <property name="scope" value="protected" />
@@ -93,9 +96,6 @@
 
     <!-- Checks for Size Violations.                    -->
     <!-- See http://checkstyle.sf.net/config_sizes.html -->
-    <module name="LineLength">
-      <property name="max" value="100" />
-    </module>
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>
 

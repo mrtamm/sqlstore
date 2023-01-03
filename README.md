@@ -1,7 +1,7 @@
 SqlStore Java Library
 =====================
 
-[![Build Status](https://travis-ci.org/mrtamm/sqlstore.svg)](https://travis-ci.org/mrtamm/sqlstore)
+![Build Status](https://github.com/mrtamm/sqlstore/actions/workflows/main.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/mrtamm/sqlstore/badge.svg?branch=master&service=github)](https://coveralls.io/github/mrtamm/sqlstore?branch=master)
 
 SqlStore is a Java library that takes communication with a database over JDBC
@@ -118,12 +118,12 @@ following databases:
 * Oracle 11g: `mvn test -DtestDatabase=oracle clean test`
 
 Some guidelines on how to prepare the environment for executing these tests on
-an actual database are outlined in
-`src/test/resources/config/_dbname_/README.md`
+an actual database are outlined in [database setup
+README](src/test/resources/ws/rocket/sqlstore/test/db/README.md).
 
 (Without database-specific configuration in test classpath, and just running
 command `mvn test`, the database tests in
-`ws.rocket.sqlstore.test.DatabaseTest` will silently skip.)
+`ws.rocket.sqlstore.test.DatabaseTest` will be skipped.)
 
 
 Additional Information

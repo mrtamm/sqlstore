@@ -102,8 +102,9 @@ public final class BeanUtil {
    */
   public static Object newInstance(Class<?> clazz) {
     try {
-      return clazz.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
+      return clazz.getConstructor().newInstance();
+    } catch (InstantiationException | InvocationTargetException
+             | IllegalAccessException | NoSuchMethodException e) {
       throw new RuntimeException(String.format("Failed to create an instance of %s by invoking "
           + "default constructor.", clazz), e);
     }

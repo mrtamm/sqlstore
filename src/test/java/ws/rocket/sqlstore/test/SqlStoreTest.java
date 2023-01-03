@@ -19,9 +19,9 @@ package ws.rocket.sqlstore.test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Connection;
+import java.util.function.Function;
 import javax.sql.DataSource;
 import org.testng.annotations.Test;
-import ws.rocket.sqlstore.Block;
 import ws.rocket.sqlstore.SqlStore;
 import ws.rocket.sqlstore.connection.SharedConnectionManager;
 import ws.rocket.sqlstore.test.script.read.model.ValidTestModel;
@@ -90,37 +90,41 @@ public final class SqlStoreTest {
     store.query("noTestScript");
   }
 
+  @SuppressWarnings("unchecked")
   public void shouldExecBlock() {
     SqlStore store = SqlStore.load(ValidTestModel.class);
     SharedConnectionManager.register(mock(Connection.class));
 
-    Block block = mock(Block.class);
-    store.execBlock(block);
+    Function<SqlStore, Void> block = mock(Function.class);
+    store.atomic(block);
 
     SharedConnectionManager.unregister();
-    verify(block).execute(isA(SqlStore.class));
+    verify(block).apply(isA(SqlStore.class));
   }
 
+  @SuppressWarnings("unchecked")
   public void shouldExecBlockWithTransactionIsolation() {
     SqlStore store = SqlStore.load(ValidTestModel.class);
     SharedConnectionManager.register(mock(Connection.class));
 
-    Block block = mock(Block.class);
-    store.execBlock(block, Connection.TRANSACTION_NONE);
+    Function<SqlStore, Void> block = mock(Function.class);
+    store.atomic(block, Connection.TRANSACTION_NONE);
 
     SharedConnectionManager.unregister();
-    verify(block).execute(isA(SqlStore.class));
+    verify(block).apply(isA(SqlStore.class));
   }
 
   public void shouldProvideInfoInToString() {
     SqlStore store = SqlStore.load(ValidTestModel.class);
 
-    assertEquals(store.toString(), "SqlStore (1 scripts):\n"
-        + "testScript\n"
-        + "====\n"
-        + "SELECT COUNT(*) FROM person\n"
-        + "====\n"
-        + "\n");
+    assertEquals(store.toString(), """
+            SqlStore (1 scripts):
+            testScript
+            ====
+            SELECT COUNT(*) FROM person
+            ====
+
+            """);
   }
 
   public void shouldPrintState() {
@@ -130,11 +134,13 @@ public final class SqlStoreTest {
 
     store.printState(out);
 
-    assertEquals(bytes.toString(), "testScript\n"
-        + "====\n"
-        + "SELECT COUNT(*) FROM person\n"
-        + "====\n"
-        + "\n");
+    assertEquals(bytes.toString(), """
+            testScript
+            ====
+            SELECT COUNT(*) FROM person
+            ====
+
+            """);
   }
 
 }
