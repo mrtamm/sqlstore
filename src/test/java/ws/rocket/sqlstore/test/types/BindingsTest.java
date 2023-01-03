@@ -34,33 +34,38 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
 /**
- * Tests for the {@link IntMapper} class.
+ * Tests for the {@link Bindings} class.
  */
 @Test
 public class BindingsTest {
 
-  @Test(groups = "bindings-init", expectedExceptions = IllegalArgumentException.class)
+  @Test(expectedExceptions = IllegalArgumentException.class)
   public void shouldRejectNullArrayInput() {
+    Bindings.reset();
     Bindings.register((ValueMapper[]) null);
   }
 
-  @Test(groups = "bindings-init", expectedExceptions = IllegalArgumentException.class)
+  @Test(expectedExceptions = IllegalArgumentException.class)
   public void shouldRejectEmptyArrayInput() {
-    Bindings.register(new ValueMapper[0]);
+    Bindings.reset();
+    Bindings.register();
   }
 
-  @Test(groups = "bindings-init", expectedExceptions = IllegalArgumentException.class)
+  @Test(expectedExceptions = IllegalArgumentException.class)
   public void shouldRejectNullHandlerInput() {
+    Bindings.reset();
     Bindings.register((ValueMapper) null);
   }
 
-  @Test(dependsOnGroups = "bindings-init")
+  @Test
   public void shouldUseSameInstance() {
+    Bindings.reset();
     assertSame(Bindings.getInstance(), Bindings.getInstance());
   }
 
-  @Test(dependsOnGroups = "bindings-init")
+  @Test
   public void shouldSupportBuiltInTypes() {
+    Bindings.reset();
     assertEquals(Bindings.getInstance().confirmTypes(String.class, null), Types.VARCHAR);
 
     assertEquals(Bindings.getInstance().confirmTypes(Date.class, null), Types.TIMESTAMP);
@@ -75,23 +80,25 @@ public class BindingsTest {
     assertEquals(Bindings.getInstance().confirmTypes(BigDecimal.class, null), Types.NUMERIC);
   }
 
-  @Test(dependsOnGroups = "bindings-init")
+  @Test
   public void shouldRegisterOutParameter() throws SQLException {
     TypeNameParam var = new TypeNameParam(String.class, Types.VARCHAR, "name");
     QueryParam param = new QueryParam(ParamMode.OUT, var);
     CallableStatement stmt = mock(CallableStatement.class);
 
+    Bindings.reset();
     Bindings.getInstance().bindParam(null, param, stmt, 1);
 
     verify(stmt).registerOutParameter(1, Types.VARCHAR);
   }
 
-  @Test(dependsOnGroups = "bindings-init", enabled = false)
+  @Test(enabled = false)
   public void shouldReadStatementOutParameter() throws SQLException {
     TypeNameParam var = new TypeNameParam(String.class, Types.VARCHAR, "name");
     QueryParam param = new QueryParam(ParamMode.INOUT, var);
     CallableStatement stmt = mock(CallableStatement.class);
 
+    Bindings.reset();
     Bindings.getInstance().readParam(null, param, stmt, 1);
 
     verify(stmt).getString(1);

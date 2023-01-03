@@ -59,10 +59,18 @@ public final class Bindings {
   private static Bindings instance;
 
   /**
+   * Discards the current set of value bindings.
+   * Currently used only for testing.
+   */
+  public static void reset() {
+    instance = null;
+  }
+
+  /**
    * Creates a new registry based on given value handlers. The registry can be created only once.
    * When it already exists, this method will not alter the existing registry.
    *
-   * @param handlers A non empty array of value handlers.
+   * @param handlers A non-empty array of value handlers.
    * @return The effective registry instance.
    */
   public static Bindings register(ValueMapper... handlers) {
