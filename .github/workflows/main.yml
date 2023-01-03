@@ -12,9 +12,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
-      - name: Build with Maven and publish to GitHub Packages
-        run: mvn -B clean deploy
+      - name: Build with Maven and publish to GitHub Packages and Coveralls
+        run: mvn -B clean deploy coveralls:report -D repoToken=${{ secrets.COVERALLS_REPO_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish code coverage report to Coveralls
-        run: mvn -B coveralls:report -D repoToken=${{ secrets.COVERALLS_REPO_TOKEN }}
