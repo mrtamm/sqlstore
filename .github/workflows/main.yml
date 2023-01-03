@@ -14,5 +14,7 @@ jobs:
           cache: 'maven'
       - name: Build with Maven and publish to GitHub Packages
         run: mvn -B clean deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish code coverage report to Coveralls
         run: mvn -B coveralls:report -D repoToken=${{ secrets.COVERALLS_API_TOKEN }}
