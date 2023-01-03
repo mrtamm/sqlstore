@@ -45,6 +45,14 @@
     <windowtitle>${doctitle} (version ${project.version})</windowtitle>
   </properties>
 
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub mrtamm Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/mrtamm/sqlstore</url>
+    </repository>
+  </distributionManagement>
+
   <dependencies>
 
     <dependency>
