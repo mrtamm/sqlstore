@@ -16,6 +16,9 @@
 
 package ws.rocket.sqlstore.test.types;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,9 +32,6 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.SQLException;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Helper class for mapping tests that need to work with {@link InputStream}, {@link File},
@@ -66,7 +66,7 @@ final class ConversionHelper {
     return result;
   }
 
-  static NClob makeNClob(String content) throws SQLException {
+  static NClob makeNclob(String content) throws SQLException {
     NClob result = mock(NClob.class);
     when(result.length()).thenReturn(content != null ? (long) content.length() : 0);
     if (content != null && !content.isEmpty()) {
@@ -75,7 +75,7 @@ final class ConversionHelper {
     return result;
   }
 
-  static String asString(byte[] bytes) throws IOException {
+  static String asString(byte[] bytes) {
     if (bytes == null || bytes.length == 0) {
       return null;
     }

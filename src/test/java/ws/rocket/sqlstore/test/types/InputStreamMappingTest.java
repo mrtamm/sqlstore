@@ -16,6 +16,18 @@
 
 package ws.rocket.sqlstore.test.types;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.asString;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.makeBlob;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.makeClob;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.makeNclob;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,18 +43,6 @@ import java.sql.Types;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.types.InputStreamMapper;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.asString;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.makeBlob;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.makeClob;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.makeNClob;
 
 /**
  * Tests for the {@link InputStreamMapper} class.
@@ -95,7 +95,7 @@ public final class InputStreamMappingTest {
     verify(ps).setClob(eq(1), isA(InputStreamReader.class));
   }
 
-  public void shouldWriteNClobInputStream() throws SQLException {
+  public void shouldWriteNclobInputStream() throws SQLException {
     PreparedStatement ps = mock(PreparedStatement.class);
 
     mapper.write(ps, 1, mock(InputStream.class), Types.NCLOB);
@@ -107,7 +107,7 @@ public final class InputStreamMappingTest {
     CallableStatement ps = mock(CallableStatement.class);
     Blob blob = makeBlob("");
     Clob clob = makeClob("");
-    NClob nclob = makeNClob("");
+    NClob nclob = makeNclob("");
 
     when(ps.getBlob(1)).thenReturn(blob);
     when(ps.getClob(2)).thenReturn(clob);
@@ -122,7 +122,7 @@ public final class InputStreamMappingTest {
     CallableStatement ps = mock(CallableStatement.class);
     Blob blob = makeBlob("blob value");
     Clob clob = makeClob("clob value");
-    NClob nclob = makeNClob("nclob value");
+    NClob nclob = makeNclob("nclob value");
 
     when(ps.getBlob(1)).thenReturn(blob);
     when(ps.getClob(2)).thenReturn(clob);
@@ -137,7 +137,7 @@ public final class InputStreamMappingTest {
     ResultSet rs = mock(ResultSet.class);
     Blob blob = makeBlob("");
     Clob clob = makeClob("");
-    NClob nclob = makeNClob("");
+    NClob nclob = makeNclob("");
 
     when(rs.getBlob(1)).thenReturn(blob);
     when(rs.getClob(2)).thenReturn(clob);
@@ -152,7 +152,7 @@ public final class InputStreamMappingTest {
     ResultSet rs = mock(ResultSet.class);
     Blob blob = makeBlob("blob value");
     Clob clob = makeClob("clob value");
-    NClob nclob = makeNClob("nclob value");
+    NClob nclob = makeNclob("nclob value");
 
     when(rs.getBlob(1)).thenReturn(blob);
     when(rs.getClob(2)).thenReturn(clob);

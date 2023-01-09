@@ -134,18 +134,18 @@ public final class StreamReader implements Closeable {
    * where these alias declarations are expected, however, preceding whitespace and comments will be
    * skipped. If the following character is not '!' (exclamation mark), alias declarations will be
    * skipped.
-   * <p>
-   * Alias declarations are expected to look like following:
+   *
+   * <p>Alias declarations are expected to look like following:
+   *
    * <pre>!aliasName=java.type.Name
    * !another=java.type.Another
-   * !lastOne=java.type.LastOne
-   * </pre>
-   * <p>
-   * When later a Java type is expected but alias name (without exclamation mark) is encountered,
+   * !lastOne=java.type.LastOne</pre>
+   *
+   * <p>When later a Java type is expected but alias name (without exclamation mark) is encountered,
    * this reader will return the type associated with the name.
-   * <p>
-   * Alias name must be a valid Java identifier, and all aliases must be unique within the scripts
-   * file.
+   *
+   * <p>Alias name must be a valid Java identifier, and all aliases must be unique within the
+   * scripts file.
    *
    * @throws IOException When a stream-related exception occurs during reading.
    */
@@ -404,14 +404,14 @@ public final class StreamReader implements Closeable {
   }
 
   /**
-   * Parses the <code>KEYS</code> identifier or a Java type, depending which is next.
-   * <p>
-   * When the next token is "KEYS", this method also moves the reading position right after the
+   * Parses the <code>KEYS</code> identifier or a Java type, depending on which is next.
+   *
+   * <p>When the next token is "KEYS", this method also moves the reading position right after the
    * identifier, an opening parenthesis, and optional whitespace. The result will be
    * <code>null</code>.
-   * <p>
-   * When the next token is a Java type, this method will also determine the type class. The result
-   * will be the resolved class. The method will fail when the class cannot be determined.
+   *
+   * <p>When the next token is a Java type, this method will also determine the type class. The
+   * result will be the resolved class. The method will fail when the class cannot be determined.
    *
    * @return The resolved Java type or <code>null</code> (in case of KEYS).
    * @throws IOException When a stream-related exception occurs during reading.
@@ -430,9 +430,9 @@ public final class StreamReader implements Closeable {
   }
 
   /**
-   * Parses the key-column name or a Java type, depending which is next. This is used in a special
-   * case of <code>UPDATE(KEYS(...))</code> parsing where it allows either key-column name or a bean
-   * type to be specified.
+   * Parses the key-column name or a Java type, depending on which is next. This is used in a
+   * special case of <code>UPDATE(KEYS(...))</code> parsing where it allows either key-column name
+   * or a bean type to be specified.
    *
    * @return The resolve Java type class or the string containing key-column name.
    * @throws IOException When a stream-related exception occurs during reading.
@@ -453,9 +453,9 @@ public final class StreamReader implements Closeable {
   }
 
   /**
-   * Parses the <code>KEYS</code> identifier or a parameter name, depending which is next.
-   * <p>
-   * When the next token is "KEYS", this method also moves the reading position right after the
+   * Parses the <code>KEYS</code> identifier or a parameter name, depending on which is next.
+   *
+   * <p>When the next token is "KEYS", this method also moves the reading position right after the
    * identifier, an opening parenthesis, and optional whitespace. The result will be
    * <code>null</code>.
    *
@@ -550,7 +550,7 @@ public final class StreamReader implements Closeable {
   public int parseSql(SqlBuffer sql) throws IOException {
     int cp = this.nextChar;
 
-    while (sql.next(cp, this.line, this.column)) {
+    while (sql.next(cp, this.column)) {
       cp = moveNext();
 
       if (cp == -1) {

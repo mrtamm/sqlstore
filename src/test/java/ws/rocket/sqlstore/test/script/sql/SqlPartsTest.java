@@ -16,6 +16,10 @@
 
 package ws.rocket.sqlstore.test.script.sql;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +33,6 @@ import ws.rocket.sqlstore.script.sql.ParamValueTrue;
 import ws.rocket.sqlstore.script.sql.SqlPart;
 import ws.rocket.sqlstore.script.sql.SqlParts;
 import ws.rocket.sqlstore.test.helper.Factory;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link SqlParts} class.
@@ -68,8 +68,8 @@ public final class SqlPartsTest {
 
     QueryParam param = Factory.queryParam(boolean.class, "test");
     SqlPart[] innerParts = {
-      new SqlPart(ConditionAlways.INSTANCE, "[primary SQL]", QueryParam.NO_PARAMS),
-      new SqlPart(ConditionAlways.INSTANCE, "[secondary SQL]", QueryParam.NO_PARAMS)
+        new SqlPart(ConditionAlways.INSTANCE, "[primary SQL]", QueryParam.NO_PARAMS),
+        new SqlPart(ConditionAlways.INSTANCE, "[secondary SQL]", QueryParam.NO_PARAMS)
     };
 
     SqlParts sqlParts = new SqlParts(new ParamValueTrue(param), innerParts);
@@ -79,23 +79,23 @@ public final class SqlPartsTest {
     assertTrue(paramsResult.isEmpty(), "Expecting no QueryParams from SqlParts");
   }
 
-  public void shouldProvideSqlInToString() throws IOException {
+  public void shouldProvideSqlInToString() {
     SqlParts sqlParts = createSqlParts();
 
-    assertEquals(sqlParts.toString(),
-        "# SQL statement parameters {\n"
-        + "#  1: IN String|12 param1\n"
-        + "# }\n"
-        + "[primary SQL]\n"
-        + "# When: INOUT String|12 param2 == true\n"
-        + "# SQL statement parameters {\n"
-        + "#  1: INOUT String|12 param2\n"
-        + "# }\n"
-        + "[secondary SQL]\n"
-        + "# End of when: INOUT String|12 param2 == true");
+    assertEquals(sqlParts.toString(), """
+        # SQL statement parameters {
+        #  1: IN String|12 param1
+        # }
+        [primary SQL]
+        # When: INOUT String|12 param2 == true
+        # SQL statement parameters {
+        #  1: INOUT String|12 param2
+        # }
+        [secondary SQL]
+        # End of when: INOUT String|12 param2 == true""");
   }
 
-  public void shouldContainOutParam() throws IOException {
+  public void shouldContainOutParam() {
     SqlParts parts = createSqlParts();
 
     boolean containsOutParam = parts.containsOutParam();
@@ -103,11 +103,11 @@ public final class SqlPartsTest {
     assertTrue(containsOutParam);
   }
 
-  public void shouldNotContainOutParam() throws IOException {
+  public void shouldNotContainOutParam() {
     QueryParam[] allParams = { Factory.queryParam(Boolean.class, "testParam") };
     SqlPart[] innerParts = {
-      new SqlPart(ConditionAlways.INSTANCE, "primary SQL", allParams),
-      new SqlPart(ConditionAlways.INSTANCE, "secondary SQL", allParams)
+        new SqlPart(ConditionAlways.INSTANCE, "primary SQL", allParams),
+        new SqlPart(ConditionAlways.INSTANCE, "secondary SQL", allParams)
     };
     SqlParts parts = new SqlParts(ConditionAlways.INSTANCE, innerParts);
 
@@ -118,28 +118,30 @@ public final class SqlPartsTest {
 
   @Test(expectedExceptions = IllegalArgumentException.class,
       expectedExceptionsMessageRegExp = "At least 2 inner parts expected\\.")
-  public void shouldFailWhenLessThanTwoInnerScripts() throws IOException {
+  public void shouldFailWhenLessThanTwoInnerScripts() {
     SqlPart[] innerParts = {
-      new SqlPart(ConditionAlways.INSTANCE, "primary SQL", QueryParam.NO_PARAMS)
+        new SqlPart(ConditionAlways.INSTANCE, "primary SQL", QueryParam.NO_PARAMS)
     };
     new SqlParts(ConditionAlways.INSTANCE, innerParts).toString();
   }
 
-  private static SqlParts createSqlParts() throws IOException {
+  private static SqlParts createSqlParts() {
     QueryParam[] params1 = { Factory.queryStringParam("param1") };
     QueryParam[] params2 = { Factory.queryInOutStringParam("param2") };
     SqlPart[] innerParts = {
-      new SqlPart(ConditionAlways.INSTANCE, "[primary SQL]", params1),
-      new SqlPart(new ParamValueTrue(params2[0]), "[secondary SQL]", params2)
+        new SqlPart(ConditionAlways.INSTANCE, "[primary SQL]", params1),
+        new SqlPart(new ParamValueTrue(params2[0]), "[secondary SQL]", params2)
     };
     return new SqlParts(ConditionAlways.INSTANCE, innerParts);
   }
 
   private static QueryContext createQueryContext(boolean paramValue) throws IOException {
-    String scriptText = "testScript IN(Boolean param1, Boolean param2)\n"
-        + "====\n"
-        + "some SQL with param ?{param1} and ?{param2}\n"
-        + "====\n";
+    String scriptText = """
+        testScript IN(Boolean param1, Boolean param2)
+        ====
+        some SQL with param ?{param1} and ?{param2}
+        ====
+        """;
 
     Script script = new ScriptReader(Factory.inputStreamOf(scriptText))
         .parseName()

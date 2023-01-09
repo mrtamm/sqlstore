@@ -16,6 +16,10 @@
 
 package ws.rocket.sqlstore.test.script.sql;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +32,6 @@ import ws.rocket.sqlstore.script.sql.ConditionAlways;
 import ws.rocket.sqlstore.script.sql.ParamValueTrue;
 import ws.rocket.sqlstore.script.sql.SqlPart;
 import ws.rocket.sqlstore.test.helper.Factory;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link SqlPart} class.
@@ -75,19 +75,19 @@ public final class SqlPartTest {
     assertTrue(paramsResult.isEmpty(), "Expecting no params");
   }
 
-  public void shouldProvideSqlInToString() throws IOException {
+  public void shouldProvideSqlInToString() {
     SqlPart sqlPart = createSqlPartWithBooleanParam();
 
-    assertEquals(sqlPart.toString(),
-        "# When: IN Boolean testParam == true\n"
-        + "# SQL statement parameters {\n"
-        + "#  1: IN Boolean testParam\n"
-        + "# }\n"
-        + "some SQL\n"
-        + "# End of when: IN Boolean testParam == true");
+    assertEquals(sqlPart.toString(), """
+        # When: IN Boolean testParam == true
+        # SQL statement parameters {
+        #  1: IN Boolean testParam
+        # }
+        some SQL
+        # End of when: IN Boolean testParam == true""");
   }
 
-  public void shouldContainOutParam() throws IOException {
+  public void shouldContainOutParam() {
     QueryParam[] params = new QueryParam[] { Factory.queryInOutStringParam("testParam") };
     SqlPart sqlPart = new SqlPart(ConditionAlways.INSTANCE, "some SQL", params);
 
@@ -96,7 +96,7 @@ public final class SqlPartTest {
     assertTrue(containsOutParam);
   }
 
-  public void shouldNotContainOutParam() throws IOException {
+  public void shouldNotContainOutParam() {
     QueryParam[] params = new QueryParam[] { Factory.queryStringParam("testParam") };
     SqlPart sqlPart = new SqlPart(ConditionAlways.INSTANCE, "some SQL", params);
 
@@ -107,22 +107,24 @@ public final class SqlPartTest {
 
   @Test(expectedExceptions = IllegalArgumentException.class,
       expectedExceptionsMessageRegExp = "Query SQL must not be empty\\.")
-  public void shouldFailWhenSqlIsBlank() throws IOException {
+  public void shouldFailWhenSqlIsBlank() {
     QueryParam[] params = new QueryParam[] { Factory.queryStringParam("testParam") };
     new SqlPart(ConditionAlways.INSTANCE, " ", params).toString();
   }
 
-  private static SqlPart createSqlPartWithBooleanParam() throws IOException {
+  private static SqlPart createSqlPartWithBooleanParam() {
     QueryParam queryParam = Factory.queryParam(Boolean.class, "testParam");
     QueryParam[] allParams = { queryParam };
     return new SqlPart(new ParamValueTrue(queryParam), "some SQL", allParams);
   }
 
   private static QueryContext createQueryContext(boolean paramValue) throws IOException {
-    String scriptText = "testScript IN(boolean testParam)\n"
-        + "====\n"
-        + "some SQL with param ?{testParam}\n"
-        + "====\n";
+    String scriptText = """
+        testScript IN(boolean testParam)
+        ====
+        some SQL with param ?{testParam}
+        ====
+        """;
 
     Script script = new ScriptReader(Factory.inputStreamOf(scriptText))
         .parseName()

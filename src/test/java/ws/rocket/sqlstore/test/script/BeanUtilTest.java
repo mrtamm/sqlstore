@@ -16,6 +16,10 @@
 
 package ws.rocket.sqlstore.test.script;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -27,10 +31,6 @@ import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.BeanUtil;
 import ws.rocket.sqlstore.test.db.model.Organization;
 import ws.rocket.sqlstore.test.db.model.Person;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertSame;
 
 /**
  * Tests the {@link BeanUtil} class.
@@ -140,7 +140,7 @@ public final class BeanUtilTest {
     constructor.newInstance();
   }
 
-  private class BlockingClass {
+  private static class BlockingClass {
 
     BlockingClass() {
       throw new RuntimeException("Cannot create instance of me");

@@ -16,6 +16,14 @@
 
 package ws.rocket.sqlstore.test;
 
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Connection;
@@ -25,14 +33,6 @@ import org.testng.annotations.Test;
 import ws.rocket.sqlstore.SqlStore;
 import ws.rocket.sqlstore.connection.SharedConnectionManager;
 import ws.rocket.sqlstore.test.script.read.model.ValidTestModel;
-
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for {@link SqlStore} class.

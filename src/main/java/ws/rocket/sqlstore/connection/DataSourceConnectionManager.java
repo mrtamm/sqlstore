@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore.connection;
 
+import static java.util.Objects.requireNonNull;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
@@ -23,15 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.rocket.sqlstore.ScriptExecuteException;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * A thread-safe connection manager for applications where a data source is used for obtaining
  * connections for communicating with a database.
- * <p>
- * This manager is used when <code>SqlStore</code> is given a data source instance during
+ *
+ * <p>This manager is used when <code>SqlStore</code> is given a data source instance during
  * initialization. In such cases, <code>SqlStore</code> assumes that the application is often
- * multi-threaded and, therefore, maintains a database connection per thread (multiple open
+ * multithreaded and, therefore, maintains a database connection per thread (multiple open
  * connections per application at a time instance is assumed normal).
  */
 public final class DataSourceConnectionManager implements ConnectionManager {
@@ -44,8 +44,8 @@ public final class DataSourceConnectionManager implements ConnectionManager {
 
   /**
    * Creates a new manager for given database data source.
-   * <p>
-   * The provided data source must not be null or it will cause a runtime exception.
+   *
+   * <p>The provided data source must not be null, or it will cause a runtime exception.
    *
    * @param dataSource A valid data source for obtaining connections to database.
    */

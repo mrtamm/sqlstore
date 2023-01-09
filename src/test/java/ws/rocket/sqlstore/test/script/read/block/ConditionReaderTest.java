@@ -16,6 +16,9 @@
 
 package ws.rocket.sqlstore.test.script.read.block;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptSetupException;
@@ -27,9 +30,6 @@ import ws.rocket.sqlstore.script.sql.ParamValueTrue;
 import ws.rocket.sqlstore.script.sql.SqlPartCondition;
 import ws.rocket.sqlstore.test.helper.Factory;
 import ws.rocket.sqlstore.test.helper.ScriptBuilder;
-
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link ConditionReader} class.

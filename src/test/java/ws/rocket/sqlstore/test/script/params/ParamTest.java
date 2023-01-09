@@ -16,9 +16,9 @@
 
 package ws.rocket.sqlstore.test.script.params;
 
-import ws.rocket.sqlstore.script.params.Param;
-
 import static org.testng.Assert.assertEquals;
+
+import ws.rocket.sqlstore.script.params.Param;
 
 /**
  * Common code for verifying the properties of abstract class {@link Param}.

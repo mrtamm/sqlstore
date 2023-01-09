@@ -16,17 +16,17 @@
 
 package ws.rocket.sqlstore.test.connection;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.connection.DataSourceConnectionManager;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.connection.DataSourceConnectionManager;
 
 /**
  * Tests for {@link DataSourceConnectionManager} class.
@@ -95,7 +95,7 @@ public final class DataSourceConnectionManagerTest {
   }
 
   @Test(expectedExceptions = IllegalStateException.class)
-  public void shouldFailCommitWithoutObtain() throws SQLException {
+  public void shouldFailCommitWithoutObtain() {
     DataSource ds = mock(DataSource.class);
     DataSourceConnectionManager manager = new DataSourceConnectionManager(ds);
 
@@ -103,7 +103,7 @@ public final class DataSourceConnectionManagerTest {
   }
 
   @Test(expectedExceptions = IllegalStateException.class)
-  public void shouldFailRollbackWithoutObtain() throws SQLException {
+  public void shouldFailRollbackWithoutObtain() {
     DataSource ds = mock(DataSource.class);
     DataSourceConnectionManager manager = new DataSourceConnectionManager(ds);
 

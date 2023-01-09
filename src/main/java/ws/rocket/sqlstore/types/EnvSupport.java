@@ -39,8 +39,9 @@ import org.slf4j.LoggerFactory;
  * A helping class that provides support for handling LOBs: copying the data to an array, stream or
  * file. The instance is created on first use and it stores a couple of settings, which can be tuned
  * using JVM system properties.
- * <p>
- * There are two non-mandatory system properties that this class relies on:
+ *
+ * <p>There are two non-mandatory system properties that this class relies on:
+ *
  * <ul>
  * <li><code>sqlstore.lob.tempDir</code> -- directory path where LOB files may be temporarily stored
  * (defaults to <em>tmp.dir</em>);
@@ -75,6 +76,7 @@ public final class EnvSupport {
    *
    * @param f The file where data is streamed from.
    * @return The buffering file stream to use.
+   *
    * @throws FileNotFoundException Raised by <code>FileInputStream</code>.
    */
   public static InputStream fileInStream(File f) throws FileNotFoundException {
@@ -87,6 +89,7 @@ public final class EnvSupport {
    *
    * @param f The file where data is read from.
    * @return The buffering file reader to use.
+   *
    * @throws FileNotFoundException Raised by <code>FileReader</code>.
    */
   public static Reader fileReader(File f) throws FileNotFoundException {
@@ -154,8 +157,8 @@ public final class EnvSupport {
   /**
    * Provides an integer specifying how much LOB data should be read into memory (as byte array or
    * string). This method returns -1 when the LOB data is basically null (empty).
-   * <p>
-   * The return value depends on the internally configured upper limit, which defaults to 500 MB,
+   *
+   * <p>The return value depends on the internally configured upper limit, which defaults to 500 MB,
    * but can also be configured using system property <code>sqlstore.lob.valueMaxLength</code>. When
    * the actual LOB size exceeds the upper limit, the return value will be the upper limit.
    * Otherwise, it will be the actual LOB size.
@@ -234,7 +237,7 @@ public final class EnvSupport {
    * @param src The LOB data source.
    * @param length The expected length of LOB data source.
    * @return The stream for reading the LOB content from a temporary file, or null when the file
-   * cannot be created.
+   *     cannot be created.
    */
   public InputStream copyToFileForStream(InputStream src, long length) {
     try {
@@ -254,7 +257,7 @@ public final class EnvSupport {
    * @param src The LOB data source.
    * @param length The expected length of LOB data source.
    * @return The reader for reading the LOB content from a temporary file, or null when the file
-   * cannot be created.
+   *     cannot be created.
    */
   public InputStream copyToFileForStream(Reader src, long length) {
     try {
@@ -274,13 +277,7 @@ public final class EnvSupport {
     }
 
     long freeSpace = this.tempDir.getFreeSpace();
-    if (freeSpace <= size) {
-      return false;
-    } else if (size * 2 > 0 && freeSpace <= size * 2) {
-      return false;
-    }
-
-    return true;
+    return freeSpace > size && (size * 2 <= 0 || freeSpace > size * 2);
   }
 
   private File createFile() {

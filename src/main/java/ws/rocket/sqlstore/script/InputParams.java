@@ -16,13 +16,13 @@
 
 package ws.rocket.sqlstore.script;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A collection of parameters that are expected for script input in order to execute it. These are
@@ -73,7 +73,7 @@ public final class InputParams {
    * required parameter type.
    *
    * @param paramTypes An array of parameter value types that must match the IN-parameters of a
-   * script. <code>null</code> is equivalent to empty array.
+   *     script. <code>null</code> is equivalent to empty array.
    * @return A boolean true, when the script supports parameter values of given types.
    */
   public boolean supportsTypes(Class<?>... paramTypes) {
@@ -95,14 +95,15 @@ public final class InputParams {
   /**
    * Creates a map where given values can be looked up by corresponding parameter names. The map is
    * used in the query context to maintain values accessible to expressions.
-   * <p>
-   * This method also validates the input values:
+   *
+   * <p>This method also validates the input values:
+   *
    * <ol>
    * <li>the amount of defined parameters and provided values must match;
    * <li>the Java types of parameters and provided values must match.
    * </ol>
-   * <p>
-   * A validation error produces an <code>ScriptExecuteException</code>.
+   *
+   * <p>A validation error produces an <code>ScriptExecuteException</code>.
    *
    * @param args The values provided to the script being executed. The array must not be null.
    * @return A map where the values can be looked up by their parameter names.
@@ -142,9 +143,9 @@ public final class InputParams {
 
   /**
    * Provides a textual representation of current input parameters.
-   * <p>
-   * When there are no input parameters, this method will return an empty string. Otherwise, it will
-   * return a comma-separated list of input parameters wrapped in <code>IN(...)</code>.
+   *
+   * <p>When there are no input parameters, this method will return an empty string. Otherwise, it
+   * will return a comma-separated list of input parameters wrapped in <code>IN(...)</code>.
    *
    * @return A textual representation of current input parameters.
    */

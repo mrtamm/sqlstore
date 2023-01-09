@@ -18,10 +18,10 @@
  * Strategies for managing database connections and transactions in different scenarios (single
  * connection, data source connections, scoped connection). Since <code>SqlStore</code> instances
  * need to be thread-safe, connection managers also need to comply with that.
- * <p>
- * Note: connection managers are determined and used by <code>SqlStore</code> internally and cannot
- * be customized directly by the users of the library. In addition, connection managers log their
- * activity but only at the TRACE level. Exceptions are not logged as they are handled by a JDBC
- * executor.
+ *
+ * <p>Note: connection managers are determined and used by <code>SqlStore</code> internally and
+ * cannot be customized directly by the users of the library. In addition, connection managers log
+ * their activity but only at the TRACE level. Exceptions are not logged as they are handled by a
+ * JDBC executor.
  */
 package ws.rocket.sqlstore.connection;

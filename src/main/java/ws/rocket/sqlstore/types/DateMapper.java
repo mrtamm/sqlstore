@@ -27,15 +27,16 @@ import ws.rocket.sqlstore.ScriptSetupException;
 /**
  * Default value mapper for <code>java.util.Date</code> and its subclasses in <code>javax.sql</code>
  * package. This mapper does not support other date-related classes, e.g. Calendar.
- * <p>
- * This mapper allows only following SQL types:
+ *
+ * <p>This mapper allows only following SQL types:
+ *
  * <ol>
  * <li><code>TIMESTAMP (default)</code>;
  * <li><code>DATE</code>;
  * <li><code>TIME</code>.
  * </ol>
- * <p>
- * Unmentioned SQL types will raise an {@link ScriptSetupException} when encountered.
+ *
+ * <p>Unmentioned SQL types will raise an {@link ScriptSetupException} when encountered.
  */
 public final class DateMapper implements ValueMapper {
 

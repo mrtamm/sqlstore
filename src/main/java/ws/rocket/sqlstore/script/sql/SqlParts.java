@@ -16,11 +16,11 @@
 
 package ws.rocket.sqlstore.script.sql;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * An SQL script, which is divided into two or more parts. Before evaluating inner parts, the main

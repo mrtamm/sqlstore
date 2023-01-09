@@ -16,7 +16,16 @@
 
 package ws.rocket.sqlstore.test.types;
 
-import java.io.IOException;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.asString;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.makeBlobBytes;
+
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -27,16 +36,6 @@ import javax.sql.rowset.serial.SerialBlob;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.types.ByteArrayMapper;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.asString;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.makeBlobBytes;
 
 /**
  * Tests for the {@link ByteArrayMapper} class.
@@ -97,7 +96,7 @@ public final class ByteArrayMappingTest {
     assertNull(mapper.read(ps, 2, Types.BINARY));
   }
 
-  public void shouldReadBytesFromCallableStatement() throws SQLException, IOException {
+  public void shouldReadBytesFromCallableStatement() throws SQLException {
     CallableStatement ps = mock(CallableStatement.class);
     Blob blob = makeBlobBytes("blob value");
 
@@ -117,7 +116,7 @@ public final class ByteArrayMappingTest {
     assertNull(mapper.read(rs, 2, Types.BINARY));
   }
 
-  public void shouldReadStreamValuesFromResultSet() throws SQLException, IOException {
+  public void shouldReadStreamValuesFromResultSet() throws SQLException {
     ResultSet rs = mock(ResultSet.class);
     Blob blob = makeBlobBytes("blob value");
 

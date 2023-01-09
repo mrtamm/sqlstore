@@ -16,14 +16,14 @@
 
 package ws.rocket.sqlstore.test.result;
 
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.result.ArrayResultsCollector;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.result.ArrayResultsCollector;
 
 /**
  * Tests for the {@link ArrayResultsCollector} class.

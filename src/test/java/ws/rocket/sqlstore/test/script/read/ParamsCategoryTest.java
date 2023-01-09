@@ -16,11 +16,11 @@
 
 package ws.rocket.sqlstore.test.script.read;
 
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.script.read.ParamsCategory;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.script.read.ParamsCategory;
 
 /**
  * Tests the {@link ParamsCategory} class.

@@ -28,10 +28,10 @@ import ws.rocket.sqlstore.types.Bindings;
  * for storing a result-set value. This kind of parameter is used to bind values from a query
  * result-set to bean properties (the order of columns and property names define the mapping). This
  * parameter does not support nested properties, i.e. properties of a property.
- * <p>
- * The SQL type can be defined with the property name. If omitted, SQL value converters are asked to
- * provide default SQL type based on the Java type of the property. The Java type cannot be defined
- * explicitly as it is determined by the type of the property.
+ *
+ * <p>The SQL type can be defined with the property name. If omitted, SQL value converters are asked
+ * to provide default SQL type based on the Java type of the property. The Java type cannot be
+ * defined explicitly as it is determined by the type of the property.
  */
 public final class TypePropParam extends Param {
 
@@ -46,10 +46,10 @@ public final class TypePropParam extends Param {
    *
    * @param beanType The bean type that the property belongs to (required).
    * @param property The property name of the bean where the value will be stored. Also determines
-   * Java type of this parameter.
+   *     Java type of this parameter.
    * @param sqlType Optional SQL type for this property to override default.
    * @param initParamIndex The zero-based index value of the results (OUT) parameter where the value
-   * will be stored in a property.
+   *     will be stored in a property.
    * @return A new parameter instance.
    */
   public static TypePropParam create(Class<?> beanType, String property, Integer sqlType,
@@ -121,12 +121,12 @@ public final class TypePropParam extends Param {
   }
 
   /**
-   * Provides textual representation of this parameter. The returned value has following format:
-   * <p>
-   * "&lt;simple class name of bean&gt;.&lt;property write-method/field name&gt;(&lt;simple class
-   * name&gt;|&lt;SQL type int value&gt;)"
-   * <p>
-   * For example: <code>Employee.setBirthDate(Date|93)</code>.
+   * Provides textual representation of this parameter. The returned value has the following format:
+   *
+   * <p><code>&lt;simple class name of bean&gt;.&lt;property write-method/field name&gt;(&lt;simple
+   * class name&gt;|&lt;SQL type int value&gt;)</code>
+   *
+   * <p>For example: <code>Employee.setBirthDate(Date|93)</code>.
    *
    * @return Textual representation of this parameter instance.
    */

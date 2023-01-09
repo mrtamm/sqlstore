@@ -27,8 +27,8 @@ import ws.rocket.sqlstore.ScriptSetupException;
 
 /**
  * Default value mapper for <code>byte[]</code>.
- * <p>
- * This mapper makes restrictions on SQL types:
+ *
+ * <p>This mapper makes restrictions on SQL types:
  * <ol>
  * <li><code>BLOB</code> (default) &ndash; the upper limit of how much data is read from database is
  * restricted (all data might not fit into a byte array), however all the byte array content can be
@@ -38,9 +38,9 @@ import ws.rocket.sqlstore.ScriptSetupException;
  * <li><code>null</code> for <code>byte[]</code> values will always be read and stored as NULL;
  * <li>unmentioned SQL types will raise an {@link ScriptSetupException} when encountered.
  * </ol>
- * <p>
- * When data size increases above the limits of the byte array, alternatives for this type could be
- * <code>java.io.InputStream</code> and <code>java.io.File</code>.
+ *
+ * <p>When data size increases above the limits of the byte array, alternatives for this type could
+ * be <code>java.io.InputStream</code> and <code>java.io.File</code>.
  *
  * @see EnvSupport#getLobSizeForArray(long)
  * @see InputStreamMapper

@@ -16,6 +16,13 @@
 
 package ws.rocket.sqlstore.test.script;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
 import java.math.BigDecimal;
 import java.sql.Types;
 import org.testng.annotations.Test;
@@ -32,13 +39,6 @@ import ws.rocket.sqlstore.script.sql.ConditionAlways;
 import ws.rocket.sqlstore.script.sql.SqlPart;
 import ws.rocket.sqlstore.script.sql.SqlScript;
 import ws.rocket.sqlstore.test.helper.Factory;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link Script} class.
@@ -192,10 +192,12 @@ public final class ScriptTest {
   public void shouldProvideSimpleToString() {
     Script script = new Script("script1", 1, simpleSql(), params());
 
-    assertEquals(script.toString(), "script1\n"
-        + "====\n"
-        + "SELECT 1\n"
-        + "====\n");
+    assertEquals(script.toString(), """
+        script1
+        ====
+        SELECT 1
+        ====
+        """);
   }
 
   public void shouldProvideFullToString() {
@@ -210,18 +212,20 @@ public final class ScriptTest {
 
     Script script = new Script("script2", 2, sql, params);
 
-    assertEquals(script.toString(), "script2\n"
-        + "    IN(String|12 scriptParam)\n"
-        + "    OUT(BigDecimal|2 result[results row column index: 0])\n"
-        + "# ResultSet {\n"
-        + "#  1: BigDecimal|2 result[results row column index: 0]\n"
-        + "# }\n"
-        + "====\n"
-        + "# SQL statement parameters {\n"
-        + "#  1: IN String|12 scriptParam\n"
-        + "# }\n"
-        + "SELECT 1\n"
-        + "====\n");
+    assertEquals(script.toString(), """
+        script2
+            IN(String|12 scriptParam)
+            OUT(BigDecimal|2 result[results row column index: 0])
+        # ResultSet {
+        #  1: BigDecimal|2 result[results row column index: 0]
+        # }
+        ====
+        # SQL statement parameters {
+        #  1: IN String|12 scriptParam
+        # }
+        SELECT 1
+        ====
+        """);
   }
 
   public void shouldProvideFullToStringWithKeys() {
@@ -236,18 +240,20 @@ public final class ScriptTest {
 
     Script script = new Script("script3", 3, sql, params);
 
-    assertEquals(script.toString(), "script3\n"
-        + "    IN(String|12 scriptParam)\n"
-        + "    OUT(BigDecimal|2 result[results row column index: 0])\n"
-        + "# GeneratedKeys {\n"
-        + "#  1: result -> BigDecimal|2 result[results row column index: 0]\n"
-        + "# }\n"
-        + "====\n"
-        + "# SQL statement parameters {\n"
-        + "#  1: IN String|12 scriptParam\n"
-        + "# }\n"
-        + "SELECT 1\n"
-        + "====\n");
+    assertEquals(script.toString(), """
+        script3
+            IN(String|12 scriptParam)
+            OUT(BigDecimal|2 result[results row column index: 0])
+        # GeneratedKeys {
+        #  1: result -> BigDecimal|2 result[results row column index: 0]
+        # }
+        ====
+        # SQL statement parameters {
+        #  1: IN String|12 scriptParam
+        # }
+        SELECT 1
+        ====
+        """);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp

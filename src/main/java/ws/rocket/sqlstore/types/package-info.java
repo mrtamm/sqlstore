@@ -15,13 +15,13 @@
  */
 /**
  * Classes for handling Java and SQL value conversions before and after statement execution.
- * <p>
- * All handlers must implement {@link ws.rocket.sqlstore.types.ValueMapper} interface, and must be
- * registered at {@link ws.rocket.sqlstore.types.Bindings} registry to be effective.
- * <p>
- * The registry is initialized by registering custom value mappers via
+ *
+ * <p>All handlers must implement {@link ws.rocket.sqlstore.types.ValueMapper} interface, and must
+ * be registered at {@link ws.rocket.sqlstore.types.Bindings} registry to be effective.
+ *
+ * <p>The registry is initialized by registering custom value mappers via
  * {@link ws.rocket.sqlstore.types.Bindings#register(ws.rocket.sqlstore.types.ValueMapper...)} or on
  * first call to {@link ws.rocket.sqlstore.types.Bindings#getInstance()}. Initialization can happen
- * only once and it will remain effective until JVM terminates.
+ * only once, and it will remain effective until JVM terminates.
  */
 package ws.rocket.sqlstore.types;

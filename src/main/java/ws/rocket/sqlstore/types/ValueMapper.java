@@ -24,11 +24,12 @@ import java.sql.SQLException;
 /**
  * Contract methods for value mappers, classes that handle setting and reading JDBC statement
  * parameters and results for a specific Java type.
- * <p>
- * Value mappers must be thread-safe and only one instance of a mapper is usually used while the JVM
- * is running.
- * <p>
- * The methods of a value mapper are called in the following order (in a thread scope):
+ *
+ * <p>Value mappers must be thread-safe and only one instance of a mapper is usually used while the
+ * JVM is running.
+ *
+ * <p>The methods of a value mapper are called in the following order (in a thread scope):
+ *
  * <ol>
  * <li>{@link #supports(java.lang.Class)} &ndash; whenever the registry is asked to find a value
  * mapper for a Java type of a value;
@@ -46,8 +47,8 @@ public interface ValueMapper {
 
   /**
    * Informs whether the value mapper supports SQL parameters of given Java type.
-   * <p>
-   * When a mapper supports a type, it must be capable of setting a statement parameter or read a
+   *
+   * <p>When a mapper supports a type, it must be capable of setting a statement parameter or read a
    * result-set value of that type in corresponding methods of this class.
    *
    * @param type A Java class to be checked against.
@@ -57,12 +58,12 @@ public interface ValueMapper {
 
   /**
    * Confirms the SQL type is supported or provides a default SQL type.
-   * <p>
-   * The decision to raise an exception or just override it with default type when unsupported SQL
-   * type is given is left to implementations. However, runtime exceptions are preferred to avoid
-   * unexpected conditions in a JDBC statement and database.
-   * <p>
-   * This method is called only at script parsing (from an SQLS file) phase.
+   *
+   * <p>The decision to raise an exception or just override it with default type when unsupported
+   * SQL type is given is left to implementations. However, runtime exceptions are preferred to
+   * avoid unexpected conditions in a JDBC statement and database.
+   *
+   * <p>This method is called only at script parsing (from an SQLS file) phase.
    *
    * @param providedType An optional SQL type from a Script to verify, or null.
    * @return The SQL type to use.

@@ -1,6 +1,8 @@
 build/
 target/
 .gradle/
+/.idea/
+/nbproject/
 .nb-*
 nb-configuration.xml
-/nbproject/
+*.iml

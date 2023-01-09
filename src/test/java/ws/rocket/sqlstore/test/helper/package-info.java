@@ -16,7 +16,7 @@
 
 /**
  * Contains classes designed for creating SqlStore data constructs to be used at testing.
- * <p>
- * Code, that can be re-used in several classes, should go here, but not tests.
+ *
+ * <p>Code, that can be re-used in several classes, should go here, but not tests.
  */
 package ws.rocket.sqlstore.test.helper;

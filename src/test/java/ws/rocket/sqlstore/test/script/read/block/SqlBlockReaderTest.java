@@ -16,6 +16,10 @@
 
 package ws.rocket.sqlstore.test.script.read.block;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptSetupException;
@@ -27,10 +31,6 @@ import ws.rocket.sqlstore.script.sql.SqlParts;
 import ws.rocket.sqlstore.script.sql.SqlScript;
 import ws.rocket.sqlstore.test.helper.Factory;
 import ws.rocket.sqlstore.test.helper.ScriptBuilder;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link SqlBlockReader} class.
@@ -59,14 +59,15 @@ public final class SqlBlockReaderTest {
 
   public void shouldParseConditionalSqlWithExpression() throws IOException {
     ParamsSet params = new ScriptBuilder().addInStringParam("paramName").initParams();
-    StreamReader text = Factory.streamOf(
-        "====\n"
-        + "SELECT sample\n"
-        + "FROM test_data\n"
-        + "!(paramName){\n"
-        + "WHERE paramCode = ?{paramName}\n"
-        + "}\n"
-        + "====\n");
+    StreamReader text = Factory.streamOf("""
+            ====
+            SELECT sample
+            FROM test_data
+            !(paramName){
+            WHERE paramCode = ?{paramName}
+            }
+            ====
+            """);
 
     SqlScript script = new SqlBlockReader(text, params).parseSql();
 

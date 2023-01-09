@@ -16,18 +16,18 @@
 
 package ws.rocket.sqlstore.test.script;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
 import java.util.Map;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.script.InputParams;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.test.helper.Factory;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link InputParams} class.
@@ -96,7 +96,7 @@ public final class InputParamsTest {
   }
 
   @Test(expectedExceptions = ScriptExecuteException.class, expectedExceptionsMessageRegExp
-      = "Script input arguments amount mismatch\\: expected 2, got 1")
+      = "Script input arguments amount mismatch: expected 2, got 1")
   public void shouldFailToBindWhenValuesCountDoesNotMatch() {
     final TypeNameParam[] typeParams = {
       Factory.stringParam("param1"),

@@ -16,6 +16,11 @@
 
 package ws.rocket.sqlstore.test.script.read;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptSetupException;
@@ -24,23 +29,18 @@ import ws.rocket.sqlstore.script.read.StreamReader;
 import ws.rocket.sqlstore.script.read.block.SqlBuffer;
 import ws.rocket.sqlstore.test.helper.Factory;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
 /**
  * Tests the {@link StreamReader} class.
  */
 @Test
 public final class StreamReaderTest {
 
-  public void shouldBeEmpty() throws IOException {
+  public void shouldBeEmpty() {
     StreamReader reader = Factory.streamOf("");
     assertTrue(reader.isEndOfStream());
   }
 
-  public void shouldBeEmptyWithComment() throws IOException {
+  public void shouldBeEmptyWithComment() {
     StreamReader reader = Factory.streamOf("# This comment should be immediately skipped");
     assertTrue(reader.isEndOfStream());
   }
@@ -57,9 +57,10 @@ public final class StreamReaderTest {
   }
 
   public void shouldParseJavaTypeAliases() throws IOException {
-    StreamReader reader = Factory.streamOf("# This comment should be immediately skipped\n"
-        + "!alias1=java.util.Date#Type1\n"
-        + "!alias2=java.math.BigInteger#Type2");
+    StreamReader reader = Factory.streamOf("""
+        # This comment should be immediately skipped
+        !alias1=java.util.Date#Type1
+        !alias2=java.math.BigInteger#Type2""");
     assertFalse(reader.isEndOfStream());
 
     reader.parseJavaTypeAliases();
@@ -215,8 +216,10 @@ public final class StreamReaderTest {
   }
 
   public void shouldParseSqlWithParams() throws IOException {
-    StreamReader reader = Factory.streamOf("UPDATE people SET name=?{}, birthday=?{} WHERE ID=?{} "
-        + "\n====\n");
+    StreamReader reader = Factory.streamOf("""
+        UPDATE people SET name=?{}, birthday=?{} WHERE ID=?{}\s
+        ====
+        """);
     SqlBuffer sql = new SqlBuffer();
 
     assertEquals(reader.parseSql(sql), '{');
@@ -260,8 +263,10 @@ public final class StreamReaderTest {
   }
 
   public void shouldParseConditional() throws IOException {
-    StreamReader reader = Factory.streamOf("SELECT name FROM user\r\n"
-        + "!(condition){ WHERE id = ${}}\n");
+    StreamReader reader = Factory.streamOf("""
+        SELECT name FROM user\r
+        !(condition){ WHERE id = ${}}
+        """);
     SqlBuffer sql = new SqlBuffer();
 
     int lastChar = reader.parseSql(sql);
@@ -273,8 +278,12 @@ public final class StreamReaderTest {
   }
 
   public void shouldNotParseConditional() throws IOException {
-    StreamReader reader = Factory.streamOf("SELECT name FROM user!(c1){a} \n !(c2){b}\n! (c3){c} "
-        + "\n===========\n");
+    StreamReader reader = Factory.streamOf("""
+        SELECT name FROM user!(c1){a}\s
+         !(c2){b}
+        ! (c3){c}\s
+        ===========
+        """);
     SqlBuffer sql = new SqlBuffer();
 
     int lastChar = reader.parseSql(sql);

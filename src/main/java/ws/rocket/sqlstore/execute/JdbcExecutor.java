@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore.execute;
 
+import static java.util.Objects.requireNonNull;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,14 +30,13 @@ import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.connection.ConnectionManager;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Executes an SQL query via JDBC API. This class contains the main work-flow of a query execution
  * while some details are of the query are delegated to other classes.
- * <p>
- * Being a central place for query execution, this class also provides several logging features.
- * Here the are listed by logger name:
+ *
+ * <p>Being a central place for query execution, this class also provides several logging features.
+ * Here they are listed by logger name:
+ *
  * <ol>
  * <li><code>ws.rocket.sqlstore.timer.EXEC</code> at TRACE level &ndash; the time it took to
  * prepare, execute, and handle results of a query;
@@ -44,8 +45,8 @@ import static java.util.Objects.requireNonNull;
  * <li><code>ws.rocket.sqlstore.execute.JdbcExecutor</code> at DEBUG level &ndash; logs the steps
  * taken for preparing, executing, and handling the results of a script.
  * </ol>
- * <p>
- * An instance of this class should be just to execute a script with arguments once, and is not
+ *
+ * <p>An instance of this class should be just to execute a script with arguments once, and is not
  * currently meant to be reused for multiple executes.
  */
 public final class JdbcExecutor {
@@ -105,7 +106,7 @@ public final class JdbcExecutor {
       ctx.setParameters(stmt);
 
       long time = System.currentTimeMillis();
-      boolean hasData = stmt.execute();
+      final boolean hasData = stmt.execute();
 
       time = System.currentTimeMillis() - time;
       if (TIME_DB.isTraceEnabled()) {

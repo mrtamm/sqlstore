@@ -16,8 +16,9 @@
 
 package ws.rocket.sqlstore.test.script.params;
 
+import static org.testng.Assert.assertEquals;
+
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.List;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.execute.QueryContext;
@@ -25,8 +26,6 @@ import ws.rocket.sqlstore.script.params.Expression;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.test.db.model.Person;
 import ws.rocket.sqlstore.test.helper.ScriptBuilder;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * Tests the {@link Expression} class.
@@ -43,7 +42,7 @@ public final class ExpressionTest extends ParamTest {
 
   public void shouldStoreBeanPropExpressionProperties() {
     TypeNameParam param = new TypeNameParam(Person.class, null, "paramName");
-    Expression expr = Expression.create(param, Arrays.asList("name"), null);
+    Expression expr = Expression.create(param, List.of("name"), null);
 
     checkTypes(expr, String.class, Types.VARCHAR);
   }
@@ -68,7 +67,7 @@ public final class ExpressionTest extends ParamTest {
         .toQueryContext(value);
 
     TypeNameParam param = new TypeNameParam(Person.class, null, "paramName");
-    Expression expr = Expression.create(param, Arrays.asList("name"), null);
+    Expression expr = Expression.create(param, List.of("name"), null);
 
     assertEquals(expr.read(queryCtx), "person name");
   }
@@ -94,7 +93,7 @@ public final class ExpressionTest extends ParamTest {
     queryCtx.initResultsContainer(List.class, Person.class);
 
     TypeNameParam param = new TypeNameParam(Person.class, null, "paramName", 0);
-    Expression expr = Expression.create(param, Arrays.asList("name"), null);
+    Expression expr = Expression.create(param, List.of("name"), null);
 
     expr.write(queryCtx, "person name");
 

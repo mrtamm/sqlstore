@@ -36,8 +36,8 @@ import ws.rocket.sqlstore.types.Bindings;
 
 /**
  * Helper class for evaluating different sets of parameters as they are parsed from an SQLS file.
- * <p>
- * This class is designed to be reused script-after-script by calling
+ *
+ * <p>This class is designed to be reused script-after-script by calling
  * {@link #cleanup(ws.rocket.sqlstore.script.Script)} after the parameters have been read by the
  * <code>Script</code> constructor. After that, the instance will be ready to evaluate all the
  * parameters of the next script.
@@ -76,8 +76,9 @@ public final class ParamsSet {
    * script.
    *
    * @param script The script instance for which the current parameters set instance/state was just
-   * used for providing the parameters. (Script is used for providing better error messages.) It is
-   * valid to leave it null (e.g. on parse error) in which case parameters usage check is skipped.
+   *     used for providing the parameters. (Script is used for providing better error messages.)
+   *     It is valid to leave it null (e.g. on parse error) in which case parameters usage check is
+   *     skipped.
    */
   public void cleanup(Script script) {
     if (script != null && !this.inVarParams.isEmpty()) {
@@ -116,16 +117,18 @@ public final class ParamsSet {
 
   /**
    * Registers a new OUT-parameter.
-   * <p>
-   * This method also
+   *
+   * <p>This method also
+   *
    * <ol>
    * <li>checks that the name of the parameter, if present, is not already used;
    * <li>resolves the SQL type when necessary;
    * <li>validates that OUT-parameters set would remain correct.
    * </ol>
-   * <p>
-   * There are a bit complex rules but here's a list of what kind of OUT-parameters list is not
-   * allowed:
+   *
+   * <p>There are a bit of complex rules but here's a list of what kind of OUT-parameters list is
+   * notallowed:
+   *
    * <ol>
    * <li>named parameters within <code>KEYS(...)</code> clause (the clause is for result-set, named
    * parameters are registered in statement);
@@ -138,8 +141,7 @@ public final class ParamsSet {
    * @param sqlType The SQL type of the parameter (optional).
    * @param name A name for the parameter or generated key column (optional).
    * @param key When true, the previous parameter is a column name for a generated key to return.
-   * Otherwise, a name for the parameter.
-   *
+   *     Otherwise, a name for the parameter.
    * @see #addOutParamBeanProp(String, Integer, String)
    */
   public void addOutParam(Class<?> javaType, Integer sqlType, String name, boolean key) {
@@ -231,10 +233,10 @@ public final class ParamsSet {
    * {@link #initInOutUpdateParams()} is called before adding SQL script parameters.
    *
    * @param mode The script parameter mode as defined in the expression in SQLS. Null when not
-   * defined.
+   *     defined.
    * @param varName The IN/OUT parameter name being referred.
    * @param fields The properties of the referred parameter to traverse for reading/writing the
-   * value.
+   *     value.
    * @param sqlType Optional SQL type for the expression when explicitly set next to the expression.
    */
   public void addScriptParam(ParamMode mode, String varName, List<String> fields, Integer sqlType) {
@@ -300,7 +302,6 @@ public final class ParamsSet {
    * the bean type after the properties have been registered.
    *
    * @param beanType The bean type to register.
-   *
    * @see #addOutParamBeanProp(String, Integer, String)
    * @see #unregisterBean()
    */
@@ -334,7 +335,7 @@ public final class ParamsSet {
     this.outputParams = OutputParams.EMPTY;
 
     if (!this.inVarParams.isEmpty()) {
-      TypeNameParam[] params = this.inVarParams.toArray(new TypeNameParam[this.inVarParams.size()]);
+      TypeNameParam[] params = this.inVarParams.toArray(new TypeNameParam[0]);
       this.inputParams = new InputParams(params);
     }
 
@@ -365,6 +366,7 @@ public final class ParamsSet {
    * Provides the validated input parameters set.
    *
    * @return The input parameters for current script.
+   *
    * @see #initInOutUpdateParams()
    */
   public InputParams getInputParams() {
@@ -375,6 +377,7 @@ public final class ParamsSet {
    * Provides the validated output parameters set.
    *
    * @return The output parameters for current script.
+   *
    * @see #initInOutUpdateParams()
    */
   public OutputParams getOutputParams() {
@@ -452,8 +455,8 @@ public final class ParamsSet {
    * Marks an IN-parameter by name as used so that this parameter would not trigger unused parameter
    * exception. It is safe to call this method multiple times with the same name, i.e. does not
    * cause unknown parameter exception after it has already been removed.
-   * <p>
-   * This method is intended to be called when handling the SQL part of the script definition to
+   *
+   * <p>This method is intended to be called when handling the SQL part of the script definition to
    * notify a parameter usage once it is detected in the script. The script parameters are copied
    * into their own structures by that moment.
    *
@@ -490,7 +493,7 @@ public final class ParamsSet {
   }
 
   private void removeParam(List<TypeNameParam> params, String varName) {
-    for (Iterator<TypeNameParam> it = params.iterator(); it.hasNext();) {
+    for (Iterator<TypeNameParam> it = params.iterator(); it.hasNext(); ) {
       if (it.next().getName().equals(varName)) {
         it.remove();
         break;

@@ -25,8 +25,9 @@ import ws.rocket.sqlstore.test.db.model.Person;
 /**
  * This interface acts as a proxy facade for an SqlStore instance. The method names and signatures
  * correspond to scripts in the scripts file in the same package but under resources.
- * <p>
- * This facade will be used to load the scripts: <code>SqlStore.proxy(ScriptsFacade.class)</code>.
+ *
+ * <p>This facade will be used for loading the scripts:
+ * <code>SqlStore.proxy(ScriptsFacade.class)</code>.
  * Existence of corresponding scripts in the file will be checked during the load time.
  */
 public interface ScriptsFacade {

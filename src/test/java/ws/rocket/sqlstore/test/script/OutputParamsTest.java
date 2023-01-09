@@ -16,6 +16,13 @@
 
 package ws.rocket.sqlstore.test.script;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
 import java.sql.Types;
 import java.util.Date;
 import java.util.List;
@@ -33,13 +40,6 @@ import ws.rocket.sqlstore.script.params.TypeParam;
 import ws.rocket.sqlstore.script.params.TypePropParam;
 import ws.rocket.sqlstore.test.db.model.Person;
 import ws.rocket.sqlstore.test.helper.Factory;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link OutputParams} class.
@@ -127,7 +127,7 @@ public final class OutputParamsTest {
 
   @Test(expectedExceptions = ScriptExecuteException.class, expectedExceptionsMessageRegExp
       = "Query does not support return type java.util.List "
-      + "with column types \\[class java.lang.Long\\]")
+      + "with column types \\[class java.lang.Long]")
   public void shouldFailWhenParamsDoNotMatch() {
     Param[] params = new Param[] { new TypeParam(String.class, Types.VARCHAR, 0), };
     OutputParams output = new OutputParams(params);

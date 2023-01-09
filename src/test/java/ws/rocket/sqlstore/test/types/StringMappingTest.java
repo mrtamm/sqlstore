@@ -16,6 +16,15 @@
 
 package ws.rocket.sqlstore.test.types;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.NClob;
@@ -25,15 +34,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.types.StringMapper;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for the {@link StringMapper} class.
@@ -101,7 +101,7 @@ public final class StringMappingTest {
     assertEquals(this.mapper.read(stmt, 1, Types.CLOB), "expected value");
   }
 
-  public void shouldReadNClobFromStatement() throws SQLException {
+  public void shouldReadNclobFromStatement() throws SQLException {
     CallableStatement stmt = mock(CallableStatement.class);
     NClob clob = mockClob(NClob.class, "expected value");
     when(stmt.getNClob(1)).thenReturn(clob);
@@ -139,7 +139,7 @@ public final class StringMappingTest {
     assertEquals(this.mapper.read(rs, 1, Types.CLOB), "expected value");
   }
 
-  public void shouldReadNClobFromResultSet() throws SQLException {
+  public void shouldReadNclobFromResultSet() throws SQLException {
     ResultSet rs = mock(ResultSet.class);
     NClob clob = mockClob(NClob.class, "expected value");
     when(rs.getNClob(1)).thenReturn(clob);

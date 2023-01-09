@@ -16,13 +16,13 @@
 
 package ws.rocket.sqlstore.test.result;
 
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.ScriptExecuteException;
-import ws.rocket.sqlstore.result.VoidResultsCollector;
-
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.ScriptExecuteException;
+import ws.rocket.sqlstore.result.VoidResultsCollector;
 
 /**
  * Tests for the {@link VoidResultsCollector} class.

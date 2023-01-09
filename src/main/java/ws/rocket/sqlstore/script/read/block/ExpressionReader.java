@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore.script.read.block;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,22 +25,22 @@ import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.read.StreamReader;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Reads and registers a script parameter expression from SQL script block, which is usually
  * enclosed in <code>?{...}</code>. (This reader evaluates the content of the expression, beginning
  * right after the opening curly brace and finishing right after the closing curly brace.)
- * <p>
- * It can have following valid syntaxes (within the curly braces):
+ *
+ * <p>It can have following valid syntaxes (within the curly braces):
+ *
  * <pre>
  * paramName
  * paramName|TYPE
  * IN(paramName), OUT(paramName), INOUT(paramName)
  * IN(paramName|TYPE), OUT(paramName|TYPE), INOUT(paramName|TYPE)
  * </pre>
- * <p>
- * Example of how to use this class:
+ *
+ * <p>Example of how to use this class:
+ *
  * <pre>expressionReader
  *     .parseExpression()
  *     .register(paramsSet);</pre>
@@ -69,8 +71,8 @@ public final class ExpressionReader {
 
   /**
    * Reads and evaluates the expression within <code>${...}</code>.
-   * <p>
-   * The next step is to register the extracted expression as a query parameter.
+   *
+   * <p>The next step is to register the extracted expression as a query parameter.
    *
    * @return The current reader instance.
    * @throws IOException When a stream-related exception occurs during reading.

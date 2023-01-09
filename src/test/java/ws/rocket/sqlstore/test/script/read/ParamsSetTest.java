@@ -16,10 +16,18 @@
 
 package ws.rocket.sqlstore.test.script.read;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.testng.annotations.Test;
@@ -39,17 +47,8 @@ import ws.rocket.sqlstore.test.db.model.Organization;
 import ws.rocket.sqlstore.test.db.model.Person;
 import ws.rocket.sqlstore.test.helper.Factory;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
-
 /**
- * Tests the {@link ParamsReader} class.
+ * Tests the {@link ParamsSet} class.
  */
 @Test
 public final class ParamsSetTest {
@@ -194,7 +193,7 @@ public final class ParamsSetTest {
 
     assertEquals(keys.length, 1, "Expecting 1 keys-param");
     assertTrue(keys[0] instanceof Expression, "Expecting Expression-param.");
-    assertSame(((Expression) keys[0]).getJavaType(), int.class);
+    assertSame(keys[0].getJavaType(), int.class);
 
     assertEquals(params.getGenerateKeyColumns(), new String[] { "YEAR_FOUNDED" });
   }
@@ -251,7 +250,7 @@ public final class ParamsSetTest {
     ParamsSet params = new ParamsSet();
     params.addInParam(stringParam);
     params.initInOutUpdateParams();
-    List<String> fields = Arrays.asList("name");
+    List<String> fields = List.of("name");
 
     params.addScriptParam(null, "testParam", fields, null);
 
@@ -272,7 +271,7 @@ public final class ParamsSetTest {
     ParamsSet params = new ParamsSet();
     params.addOutParam(Person.class, null, "testParam", false);
     params.initInOutUpdateParams();
-    List<String> fields = Arrays.asList("name");
+    List<String> fields = List.of("name");
 
     params.addScriptParam(null, "testParam", fields, null);
 
@@ -378,8 +377,8 @@ public final class ParamsSetTest {
   }
 
   @Test(expectedExceptions = ScriptSetupException.class, expectedExceptionsMessageRegExp
-      = "Script \\[testScript\\] \\(line 101\\)\\: following IN-parameters were not used\\: "
-      + "\\[String\\|12 testParam\\]")
+      = "Script \\[testScript] \\(line 101\\): following IN-parameters were not used: "
+      + "\\[String\\|12 testParam]")
   public void shouldFailCleanupDueToUnusedInParam() {
     ParamsSet params = new ParamsSet();
     params.addInParam(Factory.stringParam("testParam"));
@@ -391,8 +390,8 @@ public final class ParamsSetTest {
   }
 
   @Test(expectedExceptions = ScriptSetupException.class, expectedExceptionsMessageRegExp
-      = "Script \\[testScript\\] \\(line 102\\)\\: following OUT-parameters were not used\\: "
-      + "\\[Long outParam\\[results row column index\\: 0\\]\\]")
+      = "Script \\[testScript] \\(line 102\\): following OUT-parameters were not used: "
+      + "\\[Long outParam\\[results row column index: 0]]")
   public void shouldFailCleanupDueToUnusedOutParam() {
     ParamsSet params = new ParamsSet();
     params.addOutParam(Long.class, null, "outParam", false);

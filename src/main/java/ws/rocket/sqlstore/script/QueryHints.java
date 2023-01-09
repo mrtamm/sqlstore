@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package ws.rocket.sqlstore.script;
 
 import java.sql.SQLException;
@@ -23,11 +24,12 @@ import ws.rocket.sqlstore.ScriptSetupException;
  * Non-SQL custom hints regarding on what conditions an SQL script must be executed. When present,
  * these hints usually override defaults on per-script basis. SqlStore, by default, does not specify
  * any hints itself.
- * <p>
- * A hint and its value is specified via method
+ *
+ * <p>A hint and its value is specified via method
  * {@link #setHint(java.lang.String, java.lang.String)}, later the hints are set on a statement
  * instance via {@link #setHints(java.sql.Statement)}. The following hints are supported (names are
  * case-sensitive):
+ *
  * <ol>
  * <li><code>queryTimeout</code> in seconds (zero or a positive number);
  * <li><code>fetchSize</code> (zero or a positive number);
@@ -37,9 +39,9 @@ import ws.rocket.sqlstore.ScriptSetupException;
  * <li><code>escapeProcessing</code> (true or false);
  * <li><code>readOnly</code> (true or false);
  * </ol>
- * <p>
- * These hints correspond to the writable properties of {@link Statement}. When a property is not as
- * a hint, the property will remain as it is (not modified by this object).
+ *
+ * <p>These hints correspond to the writable properties of {@link Statement}. When a property is not
+ * as a hint, the property will remain as it is (not modified by this object).
  */
 public final class QueryHints {
 
@@ -66,36 +68,25 @@ public final class QueryHints {
    */
   public void setHint(String name, String value) {
     switch (name) {
-      case "maxRows":
-        this.maxRows = checkInt(value, "maxRows (JDBC hint) cannot be negative.");
-        break;
-      case "queryTimeout":
-        this.queryTimeout = checkInt(value, "queryTimeout (JDBC hint) cannot be negative.");
-        break;
-      case "fetchSize":
-        this.fetchSize = checkInt(value, "fetchSize (JDBC hint) cannot be negative.");
-        break;
-      case "maxFieldSize":
-        this.maxFieldSize = checkInt(value, "maxFieldSize (JDBC hint) cannot be negative.");
-        break;
-      case "readOnly":
-        this.readOnly = Boolean.parseBoolean(value);
-        break;
-      case "poolable":
-        this.poolable = Boolean.valueOf(value);
-        break;
-      case "escapeProcessing":
-        this.escapeProcessing = Boolean.valueOf(value);
-        break;
-      default:
-        throw new ScriptSetupException("Hint name is not supported.");
+      case "maxRows" ->
+          this.maxRows = checkInt(value, "maxRows (JDBC hint) cannot be negative.");
+      case "queryTimeout" ->
+          this.queryTimeout = checkInt(value, "queryTimeout (JDBC hint) cannot be negative.");
+      case "fetchSize" ->
+          this.fetchSize = checkInt(value, "fetchSize (JDBC hint) cannot be negative.");
+      case "maxFieldSize" ->
+          this.maxFieldSize = checkInt(value, "maxFieldSize (JDBC hint) cannot be negative.");
+      case "readOnly" -> this.readOnly = Boolean.parseBoolean(value);
+      case "poolable" -> this.poolable = Boolean.valueOf(value);
+      case "escapeProcessing" -> this.escapeProcessing = Boolean.valueOf(value);
+      default -> throw new ScriptSetupException("Hint name is not supported.");
     }
   }
 
   /**
    * Informs whether the script is read-only. By default, it is not read-only.
-   * <p>
-   * This property is explicitly exposed because it must be set on connection.
+   *
+   * <p>This property is explicitly exposed because it must be set on connection.
    *
    * @return A Boolean that is true when the SQL script must be executed in read-only mode.
    */
@@ -131,7 +122,7 @@ public final class QueryHints {
   }
 
   private int checkInt(String value, String errorMsg) {
-    int num = Integer.valueOf(value);
+    int num = Integer.parseInt(value);
     if (num < 0) {
       throw new IllegalArgumentException(errorMsg);
     }

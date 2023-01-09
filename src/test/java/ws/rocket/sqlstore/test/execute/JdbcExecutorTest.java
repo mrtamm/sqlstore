@@ -16,6 +16,15 @@
 
 package ws.rocket.sqlstore.test.execute;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertTrue;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,17 +41,8 @@ import ws.rocket.sqlstore.execute.JdbcExecutor;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.test.helper.ScriptBuilder;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertTrue;
-
 /**
- * Tests for {@link Query} class.
+ * Tests for {@link QueryContext} class.
  */
 @Test
 public final class JdbcExecutorTest {

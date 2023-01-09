@@ -16,9 +16,9 @@
 
 /**
  * Auxiliary classes for testing class field or method bindings.
- * <p>
- * Expressions enable bean properties mapping to a script parameter. SqlStore must support reading
- * and/or writing the value through a public getter/setter method and directly to a public class
- * field (preferred) depending on the given model class.
+ *
+ * <p>Expressions enable bean properties mapping to a script parameter. SqlStore must support
+ * reading and/or writing the value through a public getter/setter method and directly to a public
+ * class field (preferred) depending on the given model class.
  */
 package ws.rocket.sqlstore.test.db.model;

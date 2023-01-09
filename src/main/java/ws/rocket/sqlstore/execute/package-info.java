@@ -16,12 +16,11 @@
 
 /**
  * Classes for executing a <code>Script</code> (with runtime parameter values).
- * <p>
- * The smallest example for executing a script is following:
- * <pre>
- * QueryContext ctx = new QueryContext(script, args);
+ *
+ * <p>The smallest example for executing a script is following:
+ *
+ * <pre>QueryContext ctx = new QueryContext(script, args);
  * new JdbcExecutor(connectionManager).execute(ctx);
- * return ctx.getResult();
- * </pre>
+ * return ctx.getResult();</pre>
  */
 package ws.rocket.sqlstore.execute;
