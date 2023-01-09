@@ -27,8 +27,8 @@ import javax.sql.DataSource;
  * reference to a connection manager that can also be updated during the life-time of an application
  * without needing to reload all scripts. In contrast, this is not possible without reloading
  * scripts when a connection manager is explicit on an <code>SqlStore</code> instance at load time.
- * <p>
- * The methods of this class use locking to regulate updates and reads. It is safe to update and
+ *
+ * <p>The methods of this class use locking to regulate updates and reads. It is safe to update and
  * read connection managers in multi-thread scenarios.
  */
 public final class SharedConnectionManager {

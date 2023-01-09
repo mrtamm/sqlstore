@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore.connection;
 
+import static java.util.Objects.requireNonNull;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -23,19 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.rocket.sqlstore.ScriptExecuteException;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * A non-thread-safe connection manager for cases when a block of multiple queries is executed
  * within a single transaction. Therefore, it is assumed that this manager is never used by more
  * than one thread.
- * <p>
- * This manager wraps previous connection manager and creates a save-point when a "transaction" is
- * started in {@link #obtain(boolean)} method. The save-point is released in the {@link #release()}
- * method. Theand {@link #rollback()} methods, although the latter also reverts changes.
- * <p>
- * The {@link #release()} method is does not anything to support executing scripts in a block as in
- * a single transaction. The connection can be released properly by calling
+ *
+ * <p>This manager wraps previous connection manager and creates a save-point when a "transaction"
+ * is started in {@link #obtain(boolean)} method. The save-point is released in the
+ * {@link #release()} method. Theand {@link #rollback()} methods, although the latter also reverts
+ * changes.
+ *
+ * <p>The {@link #release()} method is does not anything to support executing scripts in a block as
+ * in a single transaction. The connection can be released properly by calling
  * {@link #releaseFinally()}. This should be done in the code block that creates an instance of this
  * manager.
  */
@@ -51,8 +52,8 @@ public final class ScopedConnectionManager implements ConnectionManager {
 
   /**
    * Creates a new scoped manager using the provided connection manager under the hood.
-   * <p>
-   * The provided manager must not be null or it will cause a runtime exception.
+   *
+   * <p>The provided manager must not be null, or it will cause a runtime exception.
    *
    * @param connectionManager A valid parent connection manger to use.
    */
@@ -62,8 +63,8 @@ public final class ScopedConnectionManager implements ConnectionManager {
 
   /**
    * {@inheritDoc}
-   * <p>
-   * <strong>This implementation obtains the connection from parent connection manager when the
+   *
+   * <p><strong>This implementation obtains the connection from parent connection manager when the
    * connection does not already exist. The auto-commit property is explicitly set to false once the
    * connection is obtained. In addition, a save-point is created when one does not exist yet in
    * this manager.</strong>
@@ -94,8 +95,8 @@ public final class ScopedConnectionManager implements ConnectionManager {
 
   /**
    * {@inheritDoc}
-   * <p>
-   * <strong>This implementation renews current save-point to update its position within current
+   *
+   * <p><strong>This implementation renews current save-point to update its position within current
    * transaction.</strong>
    */
   @Override
@@ -118,9 +119,9 @@ public final class ScopedConnectionManager implements ConnectionManager {
 
   /**
    * {@inheritDoc}
-   * <p>
-   * <strong>This implementation reverts back to the current save-point discarding changes after its
-   * creation.</strong>
+   *
+   * <p><strong>This implementation reverts back to the current save-point discarding changes after
+   * its creation.</strong>
    */
   @Override
   public void rollback() {
@@ -141,8 +142,8 @@ public final class ScopedConnectionManager implements ConnectionManager {
 
   /**
    * {@inheritDoc}
-   * <p>
-   * <strong>This implementation releases current save-point.</strong>
+   *
+   * <p><strong>This implementation releases current save-point.</strong>
    */
   @Override
   public void release() {

@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore.script.read.block;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +31,11 @@ import ws.rocket.sqlstore.script.sql.SqlPartCondition;
 import ws.rocket.sqlstore.script.sql.SqlParts;
 import ws.rocket.sqlstore.script.sql.SqlScript;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Reads and evaluates the entire SQL script block of a script definition. To simplify its work,
  * this class relies on several readers.
- * <p>
- * An SQL block is everything between two marker lines (at least four consecutive equal signs
+ *
+ * <p>An SQL block is everything between two marker lines (at least four consecutive equal signs
  * starting from the first column) right after script name and parameters. This reader also includes
  * the marker lines in its parsing process.
  *

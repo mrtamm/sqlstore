@@ -16,13 +16,13 @@
 
 package ws.rocket.sqlstore.test.script.sql;
 
+import static org.testng.Assert.assertEquals;
+
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.sql.SqlPartCondition;
 import ws.rocket.sqlstore.test.helper.Factory;
 import ws.rocket.sqlstore.test.helper.ScriptBuilder;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * Contains common code for testing parameter-value-based {@link SqlPartCondition}s.

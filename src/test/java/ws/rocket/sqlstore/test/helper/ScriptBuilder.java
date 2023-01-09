@@ -16,6 +16,9 @@
 
 package ws.rocket.sqlstore.test.helper;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
@@ -27,9 +30,6 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.sql.SqlScript;
 import ws.rocket.sqlstore.test.db.model.Person;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Helper class for constructing {@link Script} and {@link ParamsSet} objects for testing purpose.

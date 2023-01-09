@@ -16,6 +16,9 @@
 
 package ws.rocket.sqlstore.test.script.sql;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -23,9 +26,6 @@ import org.testng.annotations.Test;
 import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.sql.ParamValueNonEmpty;
 import ws.rocket.sqlstore.script.sql.SqlPartCondition;
-
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link ParamValueNonEmpty} class.

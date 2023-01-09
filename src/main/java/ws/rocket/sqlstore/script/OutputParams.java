@@ -66,9 +66,9 @@ public final class OutputParams {
   /**
    * Performs parameter lookup based on given name. When the parameter with the same name is not
    * found, this method will return null. Otherwise, an instance of the matching named parameter.
-   * <p>
-   * This method is aware that not all out-parameters have names (e.g. result-set parameters). So it
-   * compares a name only to the names of named parameter instances.
+   *
+   * <p>This method is aware that not all out-parameters have names (e.g. result-set parameters).
+   * So it compares a name only to the names of named parameter instances.
    *
    * @param name A parameter name to be used for parameter lookup.
    * @return A matching named parameter instance, or null.
@@ -88,18 +88,18 @@ public final class OutputParams {
 
   /**
    * Creates a result instance for storing the results of a new execution of the script.
-   * <p>
-   * This method also triggers results container validation to make sure that the query can actually
-   * return collected results in given container and that the query actually has as many return
-   * column types (OUT-params) as provided here (also checking that the types match).
-   * <p>
-   * When the script does not return back any results (Void), this method will provide a results
+   *
+   * <p>This method also triggers results container validation to make sure that the query can
+   * actually return collected results in given container and that the query actually has as many
+   * return column types (OUT-params) as provided here (also checking that the types match).
+   *
+   * <p>When the script does not return back any results (Void), this method will provide a results
    * instance that will throw an exception when one attempts to add a value to it.
    *
    * @param resultContainerType The class of the container type, such as Void, Map, List, Object[].
    * @param columnTypes An array of classes that must match Java types of the OUT-params in the same
-   * order. When a type is null, it will not raise an exception but the corresponding type check
-   * will be just skipped.
+   *     order. When a type is null, it will not raise an exception but the corresponding type check
+   *     will be just skipped.
    * @return A new instance of results collector for storing query results.
    */
   public ResultsCollector createResultsCollector(Class<?> resultContainerType,
@@ -129,8 +129,8 @@ public final class OutputParams {
 
   /**
    * Provides a textual representation of current out-parameters.
-   * <p>
-   * When there are no output parameters, this method will return an empty string. Otherwise, it
+   *
+   * <p>When there are no output parameters, this method will return an empty string. Otherwise, it
    * will return a comma-separated list of output parameters wrapped in <code>OUT(...)</code>.
    *
    * @return A textual representation of current input parameters.

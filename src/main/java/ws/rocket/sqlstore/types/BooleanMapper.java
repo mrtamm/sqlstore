@@ -26,8 +26,8 @@ import ws.rocket.sqlstore.ScriptSetupException;
 /**
  * Default value mapper for primitive <code>boolean</code> and object
  * <code>java.lang.Boolean</code>.
- * <p>
- * This mapper makes restrictions on SQL types:
+ *
+ * <p>This mapper makes restrictions on SQL types:
  * <ol>
  * <li><code>BOOLEAN</code> (default) &ndash; the value will be stored and read as it is;
  * <li><code>CHAR</code>, <code>VARCHAR</code> &ndash; the value will be stored as 'Y' for true and

@@ -106,7 +106,7 @@ reduced the necessary Java code compared to what is usually needed with JDBC.
 Dependencies
 ------------
 
-SqlStore requires JDK 7 or newer for compiling and Java 7 or newer JVM for
+SqlStore requires JDK 17 or newer for compiling and Java 17 or newer JVM for
 running. It requires SLF4J logging API to be in classpath.
 
 The project uses [Apache Maven](https://maven.apache.org/) for development.

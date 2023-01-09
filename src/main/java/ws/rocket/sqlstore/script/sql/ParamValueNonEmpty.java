@@ -16,19 +16,19 @@
 
 package ws.rocket.sqlstore.script.sql;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A condition for <code>SqlPart</code> where the provided query parameter value must not be null
  * and also not an empty string, not an empty array and not an empty collection to be included in
  * the actually executed query.
- * <p>
- * This condition is expressed in SQLS file as <code>!(var.props){...}</code>. Notice that this is
- * default behaviour when the expression is not wrapped by a condition name. There is no explicit
+ *
+ * <p>This condition is expressed in SQLS file as <code>!(var.props){...}</code>. Notice that this
+ * is default behaviour when the expression is not wrapped by a condition name. There is no explicit
  * name to activate this condition.
  */
 public final class ParamValueNonEmpty implements SqlPartCondition {
@@ -62,9 +62,9 @@ public final class ParamValueNonEmpty implements SqlPartCondition {
    * @param value The value to check.
    * @return A boolean true when the value qualifies to an non-empty value.
    */
-  protected static boolean isNonEmpty(Object value) {
+  static boolean isNonEmpty(Object value) {
     if (value instanceof Collection) {
-      return !((Collection) value).isEmpty();
+      return !((Collection<?>) value).isEmpty();
     }
     if (value != null && value.getClass().isArray()) {
       return isNonEmptyArray(value);

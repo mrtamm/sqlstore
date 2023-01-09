@@ -16,13 +16,13 @@
 
 package ws.rocket.sqlstore.test;
 
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.ScriptSetupException;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.ScriptSetupException;
 
 /**
  * Tests for {@link ScriptSetupException} class.

@@ -16,18 +16,18 @@
 
 package ws.rocket.sqlstore.script.params;
 
+import static java.util.Objects.requireNonNull;
+
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.BeanUtil;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * The base solution of all kinds of parameters. A parameter must always have a Java type. SQL type
  * is not always required as it can be derived by asking from value converters when needed. However,
  * for all script in/out and result-set parameters must have a resolved SQL type so that it would be
  * known in advance that the Java type can be converted to SQL type and vice-versa.
- * <p>
- * The SQL type value can be either null or one of the values of constants from
+ *
+ * <p>The SQL type value can be either null or one of the values of constants from
  * {@link java.sql.Types}.
  */
 public abstract class Param {
@@ -73,14 +73,14 @@ public abstract class Param {
   /**
    * Informs whether the value of this parameter is assignable to a variable of given Java type.
    * When the given Java type is null, the result will be false.
-   * <p>
-   * When the target type is primitive, the input type must match either the primitive or its
+   *
+   * <p>When the target type is primitive, the input type must match either the primitive or its
    * wrapper type. However, when the target type is not a primitive type, the input type must also
    * not be a primitive type.
    *
    * @param javaType The type to check against, may be null.
    * @return A Boolean that is true when the values of this parameter are assignable to given
-   * variables of given type.
+   *     variables of given type.
    */
   public final boolean supports(Class<?> javaType) {
     return javaType != null && (javaType.isAssignableFrom(this.javaType)
@@ -92,8 +92,8 @@ public abstract class Param {
    * Provides textual representation of this parameter. The returned value informs about its types
    * and is either the simple class name of the Java type, or "&lt;simple class name&gt;|&lt;SQL
    * type int value&gt;".
-   * <p>
-   * (Sub-classes may enrich the textual representation.)
+   *
+   * <p>(Sub-classes may enrich the textual representation.)
    *
    * @return Textual representation of this parameter instance.
    */

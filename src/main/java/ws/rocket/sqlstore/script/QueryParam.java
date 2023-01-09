@@ -16,13 +16,13 @@
 
 package ws.rocket.sqlstore.script;
 
+import static java.util.Objects.requireNonNull;
+
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.params.Expression;
 import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A parameter or an expression to be used as statement IN/OUT parameter. This class adds the mode

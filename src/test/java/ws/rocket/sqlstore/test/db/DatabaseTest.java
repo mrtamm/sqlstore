@@ -16,6 +16,10 @@
 
 package ws.rocket.sqlstore.test.db;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -34,10 +38,6 @@ import org.testng.annotations.Test;
 import ws.rocket.sqlstore.SqlStore;
 import ws.rocket.sqlstore.connection.SharedConnectionManager;
 import ws.rocket.sqlstore.test.db.model.Person;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 /**
  * Integration tests for checking the overall functionality through SqlStore class.

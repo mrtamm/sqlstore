@@ -16,6 +16,17 @@
 
 package ws.rocket.sqlstore.test.types;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.asString;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.makeBlob;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.makeClob;
+import static ws.rocket.sqlstore.test.types.ConversionHelper.makeNclob;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,17 +45,6 @@ import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.types.EnvSupport;
 import ws.rocket.sqlstore.types.FileMapper;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.asString;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.makeBlob;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.makeClob;
-import static ws.rocket.sqlstore.test.types.ConversionHelper.makeNClob;
 
 /**
  * Tests for the {@link FileMapper} class.
@@ -113,7 +113,7 @@ public final class FileMappingTest {
     }
   }
 
-  public void shouldWriteNClob() throws SQLException, IOException {
+  public void shouldWriteNclob() throws SQLException, IOException {
     String content = "some nclob content";
     File tempFile = createFile(content);
     ArgumentCaptor<Reader> clob = ArgumentCaptor.forClass(Reader.class);
@@ -134,7 +134,7 @@ public final class FileMappingTest {
     CallableStatement ps = mock(CallableStatement.class);
     Blob blob = makeBlob("");
     Clob clob = makeClob("");
-    NClob nclob = makeNClob("");
+    NClob nclob = makeNclob("");
 
     when(ps.getBlob(1)).thenReturn(blob);
     when(ps.getClob(2)).thenReturn(clob);
@@ -149,7 +149,7 @@ public final class FileMappingTest {
     CallableStatement ps = mock(CallableStatement.class);
     Blob blob = makeBlob("blob value");
     Clob clob = makeClob("clob value");
-    NClob nclob = makeNClob("nclob value");
+    NClob nclob = makeNclob("nclob value");
 
     when(ps.getBlob(1)).thenReturn(blob);
     when(ps.getClob(2)).thenReturn(clob);
@@ -164,7 +164,7 @@ public final class FileMappingTest {
     ResultSet rs = mock(ResultSet.class);
     Blob blob = makeBlob("");
     Clob clob = makeClob("");
-    NClob nclob = makeNClob("");
+    NClob nclob = makeNclob("");
 
     when(rs.getBlob(1)).thenReturn(blob);
     when(rs.getClob(2)).thenReturn(clob);
@@ -179,7 +179,7 @@ public final class FileMappingTest {
     ResultSet rs = mock(ResultSet.class);
     Blob blob = makeBlob("blob value");
     Clob clob = makeClob("clob value");
-    NClob nclob = makeNClob("nclob value");
+    NClob nclob = makeNclob("nclob value");
 
     when(rs.getBlob(1)).thenReturn(blob);
     when(rs.getClob(2)).thenReturn(clob);

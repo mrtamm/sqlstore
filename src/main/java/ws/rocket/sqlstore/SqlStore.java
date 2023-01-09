@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationHandler;
@@ -36,24 +38,22 @@ import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.read.ScriptReader;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Stores SQL scripts loaded from an SQLS file. This is the main class of the library, and holds all
  * loaded scripts of a file, and executes them when needed (with runtime parameters).
- * <p>
- * An instance can be created by calling one of the <code>load(...)</code> methods. They load the
+ *
+ * <p>An instance can be created by calling one of the <code>load(...)</code> methods. They load the
  * scripts from an SQLS file for given class, and also register the data-source or SQL connection in
  * order to execute a script when needed.
- * <p>
- * To debug an SQL store, use the {@link #printState(java.io.PrintStream)} method, which outputs all
- * contained scripts and their details.
- * <p>
- * Upon parsing scripts, the <code>load(...)</code> methods may throw {@link ScriptSetupException}s.
- * After that, an application should stop loading further scripts, possibly halting so that the SQLS
- * file could be fixed before loading the resource again.
- * <p>
- * Instances of this class do not need any special destroy procedures to discard them. However,
+ *
+ * <p>To debug an SQL store, use the {@link #printState(java.io.PrintStream)} method, which outputs
+ * all contained scripts and their details.
+ *
+ * <p>Upon parsing scripts, the <code>load(...)</code> methods may throw
+ * {@link ScriptSetupException}s. After that, an application should stop loading further scripts,
+ * possibly halting so that the SQLS file could be fixed before loading the resource again.
+ *
+ * <p>Instances of this class do not need any special destroy procedures to discard them. However,
  * applications should not load scripts from a resource more than once per application life-cycle,
  * unless the previous instance is properly released.
  */
@@ -66,15 +66,16 @@ public final class SqlStore {
   /**
    * Attempts to load scripts for given class, and register a data-source so that loaded scripts
    * could be executed by name at any time.
-   * <p>
-   * The resource containing the scripts is expected to have same path as the given class package,
-   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
-   * extension (case-sensitive, again).
+   *
+   * <p>The resource containing the scripts is expected to have same path as the given class
+   * package, the file must have the same name (case-sensitive) as the class, and the file must have
+   * ".sqls" extension (case-sensitive, again).
    *
    * @param forClass The class for which the SQLS script is parsed.
    * @return An SQL store containing all the scripts from the SQLS file.
+   *
    * @throws ScriptSetupException When the resource could not be properly read, or it contained
-   * syntax or setup errors.
+   *     syntax or setup errors.
    * @see SharedConnectionManager
    */
   public static SqlStore load(Class<?> forClass) {
@@ -88,17 +89,18 @@ public final class SqlStore {
   /**
    * Attempts to load scripts for given class, and register a data-source so that loaded scripts
    * could be executed by name at any time.
-   * <p>
-   * The resource containing the scripts is expected to have same path as the given class package,
-   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
-   * extension (case-sensitive, again).
+   *
+   * <p>The resource containing the scripts is expected to have same path as the given class
+   * package, the file must have the same name (case-sensitive) as the class, and the file must have
+   * ".sqls" extension (case-sensitive, again).
    *
    * @param forClass The class for which the SQLS script is parsed.
    * @param dataSource The data-source to use at runtime in order to obtain connections and execute
-   * scripts.
+   *     scripts.
    * @return An SQL store containing all the scripts from the SQLS file.
+   *
    * @throws ScriptSetupException When the resource could not be properly read, or it contained
-   * syntax or setup errors.
+   *     syntax or setup errors.
    * @see DataSourceConnectionManager
    */
   public static SqlStore load(Class<?> forClass, DataSource dataSource) {
@@ -112,16 +114,17 @@ public final class SqlStore {
   /**
    * Attempts to load scripts for given class, and register a database connection so that loaded
    * scripts could be executed by name at any time.
-   * <p>
-   * The resource containing the scripts is expected to have same path as the given class package,
-   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
-   * extension (case-sensitive, again).
+   *
+   * <p>The resource containing the scripts is expected to have same path as the given class
+   * package, the file must have the same name (case-sensitive) as the class, and the file must have
+   * ".sqls" extension (case-sensitive, again).
    *
    * @param forClass The class for which the SQLS script is parsed.
    * @param connection The database connection to use at runtime in order to execute scripts.
    * @return An SQL store containing all the scripts from the SQLS file.
+   *
    * @throws ScriptSetupException When the resource could not be properly read, or it contained
-   * syntax or setup errors.
+   *     syntax or setup errors.
    * @see SingleConnectionManager
    */
   public static SqlStore load(Class<?> forClass, Connection connection) {
@@ -138,16 +141,17 @@ public final class SqlStore {
    * scripts could be executed by name at any time, all put behind a proxy that would invoke the
    * SqlStore scripts. Also checks that the scripts file contains a script for each method of the
    * interface.
-   * <p>
-   * The resource containing the scripts is expected to have same path as the given class package,
-   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
-   * extension (case-sensitive, again).
+   *
+   * <p>The resource containing the scripts is expected to have same path as the given class
+   * package, the file must have the same name (case-sensitive) as the class, and the file must have
+   * ".sqls" extension (case-sensitive, again).
    *
    * @param <P> The proxy instance type, also the class for which scripts are loaded.
    * @param forClass The class for which the SQLS script is parsed.
    * @return An SQL store containing all the scripts from the SQLS file.
+   *
    * @throws ScriptSetupException When the resource could not be properly read, or it contained
-   * syntax or setup errors.
+   *     syntax or setup errors.
    * @see SharedConnectionManager
    */
   public static <P> P proxy(Class<P> forClass) {
@@ -159,18 +163,19 @@ public final class SqlStore {
    * scripts could be executed by name at any time, all put behind a proxy that would invoke the
    * SqlStore scripts. Also checks that the scripts file contains a script for each method of the
    * interface.
-   * <p>
-   * The resource containing the scripts is expected to have same path as the given class package,
-   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
-   * extension (case-sensitive, again).
+   *
+   * <p>The resource containing the scripts is expected to have same path as the given class
+   * package, the file must have the same name (case-sensitive) as the class, and the file must have
+   * ".sqls" extension (case-sensitive, again).
    *
    * @param <P> The proxy instance type, also the class for which scripts are loaded.
    * @param forClass The class for which the SQLS script is parsed.
    * @param dataSource The data-source to use at runtime in order to obtain connections and execute
-   * scripts.
+   *     scripts.
    * @return A proxy of the given class for calling the SqlStore scripts.
+   *
    * @throws ScriptSetupException When the resource could not be properly read, or it contained
-   * syntax or setup errors.
+   *     syntax or setup errors.
    * @see DataSourceConnectionManager
    */
   public static <P> P proxy(Class<P> forClass, DataSource dataSource) {
@@ -182,17 +187,18 @@ public final class SqlStore {
    * scripts could be executed by name at any time, all put behind a proxy that would invoke the
    * SqlStore scripts. Also checks that the scripts file contains a script for each method of the
    * interface.
-   * <p>
-   * The resource containing the scripts is expected to have same path as the given class package,
-   * the file must have the same name (case-sensitive) as the class, and the file must have ".sqls"
-   * extension (case-sensitive, again).
+   *
+   * <p>The resource containing the scripts is expected to have same path as the given class
+   * package, the file must have the same name (case-sensitive) as the class, and the file must have
+   * ".sqls" extension (case-sensitive, again).
    *
    * @param <P> The proxy instance type, also the class for which scripts are loaded.
    * @param forClass The class for which the SQLS script is parsed.
    * @param connection The database connection to use at runtime in order to execute scripts.
    * @return A proxy of the given class for calling the SqlStore scripts.
+   *
    * @throws ScriptSetupException When the resource could not be properly read, or it contained
-   * syntax or setup errors.
+   *     syntax or setup errors.
    * @see SingleConnectionManager
    */
   public static <P> P proxy(Class<P> forClass, Connection connection) {
@@ -211,14 +217,14 @@ public final class SqlStore {
   }
 
   /**
-   * Informs whether this instance contains a script with given name and it supports parameter
-   * values of given types. A value type may also be a subtype of the required type (as defined with
-   * the IN-parameters in the scripts file). Note that this method does not check the return values
-   * (OUT-parameters) of the script!
+   * Informs whether this instance contains a script with given name and whether it supports
+   * parameter values of given types. A value type may also be a subtype of the required type (as
+   * defined with the IN-parameters in the scripts file). Note that this method does not check the
+   * return values (OUT-parameters) of the script!
    *
    * @param name The exact script name to look for.
    * @param types The value types that must be supported by the IN-parameters of the script. Order
-   * of the types must match. <code>null</code> is equivalent to an empty array.
+   *     of the types must match. <code>null</code> is equivalent to an empty array.
    * @return A Boolean true when such script is contained within this instance.
    */
   public boolean hasQuery(String name, Class<?>... types) {
@@ -228,13 +234,13 @@ public final class SqlStore {
 
   /**
    * Performs a contained query lookup by name, and validates the passed script arguments.
-   * <p>
-   * When any of the activities should fail, a runtime exception will be raised.
+   *
+   * <p>When any of the activities should fail, a runtime exception will be raised.
    *
    * @param name The query name (case-sensitive).
    * @param args Arguments to the query to be executed.
    * @return A query wrapper to also specify the return-value types and to execute the returned
-   * query.
+   *     query.
    */
   public Query query(String name, Object... args) {
     return composeQuery(name, args);
@@ -242,11 +248,11 @@ public final class SqlStore {
 
   /**
    * Executes a block of (multiple) SQL queries in a single transaction.
-   * <p>
-   * The block is given a different <code>SqlStore</code> instance, which does not commit changes
+   *
+   * <p>The block is given a different <code>SqlStore</code> instance, which does not commit changes
    * after executing each script, but just sets a save-point instead.
-   * <p>
-   * The transaction isolation with this method is <code>read-committed</code>.
+   *
+   * <p>The transaction isolation with this method is <code>read-committed</code>.
    *
    * @param block The block to be executed. When null, this process will be skipped.
    * @param <R> The custom return-value type of the block-function.
@@ -258,15 +264,16 @@ public final class SqlStore {
 
   /**
    * Executes a block of (multiple) SQL queries in a single transaction.
-   * <p>
-   * The block is given a different <code>SqlStore</code> instance, which does not commit changes
+   *
+   * <p>The block is given a different <code>SqlStore</code> instance, which does not commit changes
    * after executing each script, but just sets a save-point instead.
    *
    * @param block The block to be executed. When null, this process will be skipped.
    * @param transactionIsolation A custom transaction isolation option from the {@link Connection}
-   * class.
+   *     class.
    * @param <R> The custom return-value type of the block-function.
    * @return A value from the provided block-function, or null.
+   *
    * @see ScopedConnectionManager
    */
   public <R> R atomic(Function<SqlStore, R> block, int transactionIsolation) {
@@ -350,10 +357,10 @@ public final class SqlStore {
    */
   private static class ProxyHandler implements InvocationHandler {
 
-    private final SqlStore s;
+    private final SqlStore sqlStore;
 
-    ProxyHandler(SqlStore s) {
-      this.s = requireNonNull(s, "SqlStore instance is undefined.");
+    ProxyHandler(SqlStore sqlStore) {
+      this.sqlStore = requireNonNull(sqlStore, "SqlStore instance is undefined.");
     }
 
     @Override
@@ -367,7 +374,7 @@ public final class SqlStore {
         result = method.invoke(proxy, args);
 
       } else {
-        Query query = this.s.query(method.getName(), args);
+        Query query = this.sqlStore.query(method.getName(), args);
         Class<?> resultType = method.getReturnType();
 
         if (Void.TYPE.equals(resultType)) {
@@ -401,7 +408,7 @@ public final class SqlStore {
       return switch (method.getName()) {
         case "toString" -> {
           String className = proxy.getClass().getInterfaces()[0].getName();
-          yield "SqlStore proxy for " + className + ":\n" + this.s;
+          yield "SqlStore proxy for " + className + ":\n" + this.sqlStore;
         }
         case "equals" -> proxy == args[0];
         case "hashCode" -> System.identityHashCode(proxy);

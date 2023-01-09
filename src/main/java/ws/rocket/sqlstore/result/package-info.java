@@ -16,8 +16,9 @@
 
 /**
  * Classes for storing query results.
- * <p>
- * Currently there are three supported scenarios:
+ *
+ * <p>Currently, there are three supported scenarios:
+ *
  * <ol>
  * <li><code>VoidResult</code> &ndash; the script is not expected to return any results;
  * <li><code>ListResult</code> &ndash; the script is expected to return an object per row (zero,

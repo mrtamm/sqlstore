@@ -16,16 +16,16 @@
 
 package ws.rocket.sqlstore.test.connection;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.connection.SingleConnectionManager;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.connection.SingleConnectionManager;
 
 /**
  * Tests for {@link SingleConnectionManager} class.
@@ -87,7 +87,7 @@ public final class SingleConnectionManagerTest {
   }
 
   @Test(expectedExceptions = IllegalStateException.class)
-  public void shouldFailCommitWithoutObtain() throws SQLException {
+  public void shouldFailCommitWithoutObtain() {
     Connection con = mock(Connection.class);
     SingleConnectionManager manager = new SingleConnectionManager(con);
 
@@ -95,7 +95,7 @@ public final class SingleConnectionManagerTest {
   }
 
   @Test(expectedExceptions = IllegalStateException.class)
-  public void shouldFailRollbackWithoutObtain() throws SQLException {
+  public void shouldFailRollbackWithoutObtain() {
     Connection con = mock(Connection.class);
     SingleConnectionManager manager = new SingleConnectionManager(con);
 

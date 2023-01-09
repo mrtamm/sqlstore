@@ -18,24 +18,25 @@ package ws.rocket.sqlstore.result;
 
 /**
  * Represents a script results container.
- * <p>
- * Each container implementation holds results in a specific object type (e.g. Map, List), and that
- * type of result will be returned to the script executor.
- * <p>
- * The results container type for a script will be determined by the properties of the script being
- * executed. An instance will be created for each query execution, since container instances are not
- * reusable for another execution.
- * <p>
- * Implementation notes:
+ *
+ * <p>Each container implementation holds results in a specific object type (e.g. Map, List), and
+ * that type of result will be returned to the script executor.
+ *
+ * <p>The results container type for a script will be determined by the properties of the script
+ * being executed. An instance will be created for each query execution, since container instances
+ * are not reusable for another execution.
+ *
+ * <p>Implementation notes:
+ *
  * <ol>
  * <li>result containers should be lightweight (no synchronization);
  * <li>result containers may throw runtime exceptions when something seems wrong;
  * <li>this interface may go through some changes as practice will show more advanced needs.
  * </ol>
- * <p>
- * Currently there is no factory that would choose an appropriate implementation from the registered
- * result types. For now, all the choices are hard-coded, and this interface serves as the common
- * API of the implementation classes.
+ *
+ * <p>Currently, there is no factory that would choose an appropriate implementation from the
+ * registered result types. For now, all the choices are hard-coded, and this interface serves as
+ * the common API of the implementation classes.
  */
 public interface ResultsCollector {
 
@@ -44,14 +45,14 @@ public interface ResultsCollector {
    * should be a general type (e.g. <code>java.util.List</code> instead of
    * <code>java.util.ArrayList</code>.
    *
-   * @return The collection type for storing results used by this results container.
+   * @return The collection type for storing results used by this container.
    */
   Class<?> getType();
 
   /**
    * Sets a value for current row.
-   * <p>
-   * ResultsCollector containers may support multiple Java objects per row, such as
+   *
+   * <p>ResultsCollector containers may support multiple Java objects per row, such as
    * {@link MapResultsCollector}, which supports two values per row (key and its value). Therefore,
    * column index is needed to show the position where the value needs to be stored (e.g. for
    * <code>MapResultsCollector</code>, index 0 stores the value as the key of the map, 1 as the
@@ -67,12 +68,12 @@ public interface ResultsCollector {
    * Provides the last registered value for current row. May return null when such value is
    * undefined. The value returned is the same value that was set using
    * {@link #setRowValue(int, java.lang.Object)} in the most recent call.
-   * <p>
-   * When no value has been registered for current row at given column index, the result will be
+   *
+   * <p>When no value has been registered for current row at given column index, the result will be
    * null.
    *
    * @param columnIndex Zero-based index indicating the column from where the value needs to be
-   * returned.
+   *     returned.
    * @return The previously registered value in given column index, or null.
    */
   Object getRowValue(int columnIndex);

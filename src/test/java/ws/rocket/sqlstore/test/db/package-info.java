@@ -18,8 +18,8 @@
  * Contains integration-testing code that is executed against actual database. The main testing code
  * is in class <code>DatabaseTest</code> and the SqlStore queries interface is
  * <code>ScriptsFacade</code>.
- * <p>
- * <code>DatabaseTest</code> works only when it is able to read valid and suitable configuration
+ *
+ * <p><code>DatabaseTest</code> works only when it is able to read valid and suitable configuration
  * form "test.properties" resource in package <code>ws.rocket.sqlstore.test.db.test</code>. To
  * enable this test, the "mvn test" script must be called with JVM parameter
  * <code>testDatabase</code>, where its value is one of "derby", "postgresql", or "oracle". This

@@ -16,6 +16,12 @@
 
 package ws.rocket.sqlstore.test.script.read;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static ws.rocket.sqlstore.test.helper.Factory.inputStreamOf;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -27,12 +33,6 @@ import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.read.ScriptReader;
 import ws.rocket.sqlstore.test.script.read.model.InvalidTestModel;
 import ws.rocket.sqlstore.test.script.read.model.ValidTestModel;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static ws.rocket.sqlstore.test.helper.Factory.inputStreamOf;
 
 /**
  * Tests the {@link ScriptReader} class.
@@ -98,10 +98,12 @@ public final class ScriptReaderTest {
   }
 
   public void shouldCreateScript() throws IOException {
-    InputStream stream = inputStreamOf("testScript\n"
-        + "====\n"
-        + "   SELECT COUNT(*) FROM person   \n"
-        + "====\n");
+    InputStream stream = inputStreamOf("""
+        testScript
+        ====
+           SELECT COUNT(*) FROM person  \s
+        ====
+        """);
 
     ScriptReader reader = new ScriptReader(stream);
     assertTrue(reader.hasMore());
@@ -132,7 +134,7 @@ public final class ScriptReaderTest {
   }
 
   @Test(expectedExceptions = ScriptSetupException.class, expectedExceptionsMessageRegExp
-      = "The SQL script name testScript is defined more than once in InvalidTestModel.sqls\\: 8")
+      = "The SQL script name testScript is defined more than once in InvalidTestModel.sqls: 8")
   public void shouldFailToLoadScriptsFromFile() throws IOException {
     ScriptReader.load(InvalidTestModel.class);
   }

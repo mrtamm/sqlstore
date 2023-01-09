@@ -16,6 +16,12 @@
 
 package ws.rocket.sqlstore.test;
 
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+
 import java.sql.SQLException;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptExecuteException;
@@ -23,12 +29,6 @@ import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.sql.SqlScript;
-
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
 
 /**
  * Tests for {@link ScriptExecuteException} class.
@@ -73,10 +73,11 @@ public final class ScriptExecuteExceptionTest {
     assertSame(target.getCause(), other);
     assertNull(target.getContext());
     assertEquals(target.getMessage(), "Message with 12.");
-    assertEquals(target.toString(), "ws.rocket.sqlstore.ScriptExecuteException: Message with 12.\n"
-        + "SQL state: SQL state info\n"
-        + "SQL error code: 1024\n"
-        + "Cause 1. java.sql.SQLException: Other exception");
+    assertEquals(target.toString(), """
+        ws.rocket.sqlstore.ScriptExecuteException: Message with 12.
+        SQL state: SQL state info
+        SQL error code: 1024
+        Cause 1. java.sql.SQLException: Other exception""");
   }
 
   public void testMessageWithParentCause() {
@@ -86,10 +87,11 @@ public final class ScriptExecuteExceptionTest {
     assertSame(target.getCause(), other);
     assertNull(target.getContext());
     assertEquals(target.getMessage(), "Sample Message.");
-    assertEquals(target.toString(), "ws.rocket.sqlstore.ScriptExecuteException: Sample Message.\n"
-        + "SQL state: SQL state info\n"
-        + "SQL error code: 1024\n"
-        + "Cause 1. java.sql.SQLException: Other exception");
+    assertEquals(target.toString(), """
+        ws.rocket.sqlstore.ScriptExecuteException: Sample Message.
+        SQL state: SQL state info
+        SQL error code: 1024
+        Cause 1. java.sql.SQLException: Other exception""");
   }
 
   public void testMessageWithQueryContext() {
@@ -105,15 +107,16 @@ public final class ScriptExecuteExceptionTest {
 
   public void testWithParentCause() {
     SQLException other = new SQLException("Other exception", "SQL state info", 1024);
-    ScriptExecuteException target = new ScriptExecuteException(other, (QueryContext) null);
+    ScriptExecuteException target = new ScriptExecuteException(other, null);
 
     assertSame(target.getCause(), other);
     assertNull(target.getContext());
     assertEquals(target.getMessage(), "Other exception");
-    assertEquals(target.toString(), "ws.rocket.sqlstore.ScriptExecuteException: Other exception\n"
-        + "SQL state: SQL state info\n"
-        + "SQL error code: 1024\n"
-        + "Cause 1. java.sql.SQLException: Other exception");
+    assertEquals(target.toString(), """
+        ws.rocket.sqlstore.ScriptExecuteException: Other exception
+        SQL state: SQL state info
+        SQL error code: 1024
+        Cause 1. java.sql.SQLException: Other exception""");
   }
 
   public void testWithQueryContext() {

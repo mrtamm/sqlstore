@@ -16,15 +16,15 @@
 
 package ws.rocket.sqlstore.test.script;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.script.QueryHints;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  * Tests the {@link QueryHints} class.
@@ -93,7 +93,7 @@ public class QueryHintTest {
     verify(stmt).setEscapeProcessing(true);
   }
 
-  public void shouldUseReadOnly() throws SQLException {
+  public void shouldUseReadOnly() {
     Assert.assertFalse(this.hints.isReadOnly());
 
     this.hints.setHint("readOnly", "true");

@@ -35,8 +35,8 @@ import ws.rocket.sqlstore.types.Bindings;
 /**
  * A context for script execution. Unlike {@link Script}, this class is not thread-safe, and
  * maintains parameters and results for a single execution of a <code>Script</code>.
- * <p>
- * To simplify the work done by other classes in order to execute an SQL statement, this context
+ *
+ * <p>To simplify the work done by other classes in order to execute an SQL statement, this context
  * class also serves as the main facade over a script, providing lots of methods to understand or
  * update the context.
  */
@@ -56,7 +56,7 @@ public final class QueryContext {
 
   /**
    * Establishes a new context for given script to be executed with given parameters. The parameters
-   * will be validated immediately and it may result with
+   * will be validated immediately, and it may result with
    * {@link ws.rocket.sqlstore.ScriptExecuteException} upon failure to qualify.
    *
    * @param script The script to execute (required).
@@ -69,17 +69,17 @@ public final class QueryContext {
 
   /**
    * Initializes a query results collector, which is needed when executing a query.
-   * <p>
-   * This method also triggers results container validation to make sure that the query can actually
-   * return collected results in given container and that the query actually has as many return
-   * column types (OUT-params) as provided here (also checking that the types match).
+   *
+   * <p>This method also triggers results container validation to make sure that the query can
+   * actually return collected results in given container and that the query actually has as many
+   * return column types (OUT-params) as provided here (also checking that the types match).
    *
    * @param resultContainerType The class of the container type, such as Void, Map, List, Object[].
    * @param columnTypes An array of classes that must match Java types of the OUT-params in the same
-   * order. When a type is null, it will not raise an exception but the corresponding type check
-   * will be just skipped.
+   *     order. When a type is null, it will not raise an exception but the corresponding type check
+   *     will be just skipped.
    * @see ws.rocket.sqlstore.script.OutputParams#createResultsCollector(java.lang.Class,
-   * java.lang.Class...)
+   *     java.lang.Class...)
    */
   public void initResultsContainer(Class<?> resultContainerType, Class<?>... columnTypes) {
     if (this.resultsCollector != null) {
@@ -144,7 +144,7 @@ public final class QueryContext {
    * Informs whether the script should be executed with a <code>CallableStatement</code>.
    *
    * @return A Boolean that is true when current SQL script should be executed with a
-   * <code>CallableStatement</code>.
+   *     <code>CallableStatement</code>.
    */
   public boolean isCallStatement() {
     return this.script.getStatementType() == Script.StatementType.CALL;
@@ -154,7 +154,7 @@ public final class QueryContext {
    * Informs whether the script should be executed with a <code>PreparedStatement</code>.
    *
    * @return A Boolean that is true when current SQL script should be executed with a
-   * <code>PreparedStatement</code>.
+   *     <code>PreparedStatement</code>.
    */
   public boolean isPreparedStatement() {
     return this.script.getStatementType() == Script.StatementType.PREPARED;
@@ -164,7 +164,7 @@ public final class QueryContext {
    * Informs whether the script should be executed with a <code>Statement</code>.
    *
    * @return A Boolean that is true when current SQL script should be executed with a
-   * <code>Statement</code>.
+   *     <code>Statement</code>.
    */
   public boolean isSimpleStatement() {
     return this.script.getStatementType() == Script.StatementType.SIMPLE;
@@ -197,8 +197,8 @@ public final class QueryContext {
   /**
    * Provides the current value of updated [rows] count. The value is negative, if not known, zero
    * for DDL statements or when nothing was updated, and otherwise a positive number.
-   * <p>
-   * Upon execution this value will be updated whenever available.
+   *
+   * <p>Upon execution this value will be updated whenever available.
    *
    * @return An integer for updated count (may be negative!).
    */
@@ -219,8 +219,8 @@ public final class QueryContext {
    * Sets parameter values for given prepared (or even callable) statement. (This method is not
    * called when there are no query parameters by design.) This method also registers OUT-parameters
    * on a callable statement.
-   * <p>
-   * Note: this method is to be called with <code>PreparedStatement</code> or
+   *
+   * <p>Note: this method is to be called with <code>PreparedStatement</code> or
    * <code>CallableStatement</code>. Callers do not have to check whether the script accepts any
    * parameters.
    *
@@ -237,9 +237,9 @@ public final class QueryContext {
 
   /**
    * Reads the values of OUT-parameters (after the statement has been executed).
-   * <p>
-   * Note: this method is to be called only with <code>CallableStatement</code>. Callers do not have
-   * to check whether the script expects any OUT-parameters.
+   *
+   * <p>Note: this method is to be called only with <code>CallableStatement</code>. Callers do not
+   * have to check whether the script expects any OUT-parameters.
    *
    * @param stmt The statement from which the values can be read.
    * @throws SQLException When an unexpected problem should occur while reading a value.

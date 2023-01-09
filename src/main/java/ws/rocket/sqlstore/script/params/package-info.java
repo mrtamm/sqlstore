@@ -19,9 +19,9 @@
  * parameters, also parameters for reading results from (callable) statement, generated keys, and
  * query results. Since parameters are universal in the context of this library, it deserves its own
  * package.
- * <p>
- * The common parent class of parameters is {@link ws.rocket.sqlstore.script.params.Param}. Here is
- * a quick run-down on which parameter types are currently accepted in certain scenarios:
+ *
+ * <p>The common parent class of parameters is {@link ws.rocket.sqlstore.script.params.Param}. Here
+ * is a quick run-down on which parameter types are currently accepted in certain scenarios:
  * <ol>
  * <li>Script input parameters: {@link ws.rocket.sqlstore.script.params.TypeNameParam}
  * <li>Script output parameters: {@link ws.rocket.sqlstore.script.params.TypeNameParam},

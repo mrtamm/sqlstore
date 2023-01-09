@@ -24,15 +24,15 @@ import ws.rocket.sqlstore.script.sql.SqlScript;
 
 /**
  * Contains loaded information about a script.
- * <p>
- * An instance of a script should encapsulate enough data in order to validate input parameter
+ *
+ * <p>An instance of a script should encapsulate enough data in order to validate input parameter
  * values, determine JDBC statement type, bind the values to the statement, execute the SQL script,
  * extract results and return them to the caller. The script itself does not deal with all the
- * activities but just needs to be able provide the details so that an executor could work properly.
- * Therefore, the Script class is designed to contain the data in the format most suitable for fast
- * execution (minimal evaluation during execution).
- * <p>
- * Note that Script must be thread-safe so that multiple threads could execute the same script. A
+ * activities but just needs to be able to provide the details so that an executor could work
+ * properly. Therefore, the Script class is designed to contain the data in the format most suitable
+ * for fast execution (minimal evaluation during execution).
+ *
+ * <p>Note that Script must be thread-safe so that multiple threads could execute the same script. A
  * non-thread-safe <code>QueryContext</code> wraps the script to provide current execution specific
  * details to the executor.
  *
@@ -58,7 +58,7 @@ public final class Script {
      */
     CALL
 
-  };
+  }
 
   private final String name;
 
@@ -93,10 +93,10 @@ public final class Script {
    * @param name The script name by which it is called. Required.
    * @param line The line number where this script is defined. Required.
    * @param sqlScript The contained SQL statement/script with parameters. The script may be divided
-   * into multiple parts some of which may be conditional and thus omitted from an actual query
-   * depending on input parameters. Required.
+   *     into multiple parts some of which may be conditional and thus omitted from an actual query
+   *     depending on input parameters. Required.
    * @param params An engine instance taking care of the work related to binding parameters for
-   * input and output.
+   *     input and output.
    */
   public Script(String name, int line, SqlScript sqlScript, ParamsSet params) {
     if (name == null || name.isEmpty()) {
@@ -170,7 +170,7 @@ public final class Script {
   /**
    * Provides custom SQL execution hints, which are optional.
    *
-   * @return An hints object, or null.
+   * @return A hints object, or null.
    */
   public QueryHints getHints() {
     return this.hints;
@@ -178,8 +178,8 @@ public final class Script {
 
   /**
    * Provides access to query input parameters.
-   * <p>
-   * Even when the query has no input parameters, this method will still provide the parameters
+   *
+   * <p>Even when the query has no input parameters, this method will still provide the parameters
    * wrapper object. Use {@link InputParams#isEmpty()} to check whether there is at least one such
    * parameter.
    *
@@ -191,8 +191,8 @@ public final class Script {
 
   /**
    * Provides access to query output parameters.
-   * <p>
-   * Even when the query has no output parameters, this method will still provide the parameters
+   *
+   * <p>Even when the query has no output parameters, this method will still provide the parameters
    * wrapper object. Use {@link OutputParams#isEmpty()} to check whether there is at least one such
    * parameter.
    *
@@ -224,7 +224,7 @@ public final class Script {
    * Provides the list of column names to be used for retrieving generated keys.
    *
    * @return An array (not empty) of column names, or null when this script does not handle
-   * generated keys.
+   *     generated keys.
    */
   public String[] getGeneratedKeys() {
     return this.generatedKeys;

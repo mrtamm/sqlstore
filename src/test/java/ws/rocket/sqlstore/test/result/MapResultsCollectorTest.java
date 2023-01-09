@@ -16,15 +16,15 @@
 
 package ws.rocket.sqlstore.test.result;
 
-import java.util.Map;
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.result.MapResultsCollector;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+
+import java.util.Map;
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.result.MapResultsCollector;
 
 /**
  * Tests for the {@link MapResultsCollector} class.

@@ -26,20 +26,20 @@ import ws.rocket.sqlstore.ScriptSetupException;
 /**
  * Helper methods for working with Java bean types and bean objects. All Java beans related code
  * ought to be gathered in this class.
- * <p>
- * Users of the library ought to not use this class as it is designed for the needs of the SqlStore
- * library and is open for non-compatible modifications.
+ *
+ * <p>Users of the library ought to not use this class as it is designed for the needs of the
+ * SqlStore library and is open for non-compatible modifications.
  */
 public final class BeanUtil {
 
   private static final Class<?>[] PRIMITIVES = {
-    byte.class, char.class, short.class, int.class, long.class, float.class, double.class,
-    boolean.class
+      byte.class, char.class, short.class, int.class, long.class, float.class, double.class,
+      boolean.class
   };
 
   private static final Class<?>[] PRIMITIVE_WRAPPERS = {
-    Byte.class, Character.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
-    Boolean.class
+      Byte.class, Character.class, Short.class, Integer.class, Long.class, Float.class,
+      Double.class, Boolean.class
   };
 
   /**
@@ -83,6 +83,7 @@ public final class BeanUtil {
    *
    * @param fullName A class name.
    * @return The Class instance, or null.
+   *
    * @see #getPrimitiveClass(java.lang.String)
    */
   public static Class<?> getClass(String fullName) {
@@ -112,15 +113,15 @@ public final class BeanUtil {
 
   /**
    * Attempts to resolve the method or field for reading the given property of the bean class.
-   * <p>
-   * The method must be public, non-static, with a non-void return type, and not expecting any
+   *
+   * <p>The method must be public, non-static, with a non-void return type, and not expecting any
    * parameters. The method name is the property name with first letter in upper-case and with
    * prefix "is" (when return type is 'boolean') or "get".
-   * <p>
-   * When the read-method is not found, this method attempts to find public and non-static field
+   *
+   * <p>When the read-method is not found, this method attempts to find public and non-static field
    * with the exactly same name as the property.
-   * <p>
-   * When both read-method and field are not found, this method will throw a runtime exception.
+   *
+   * <p>When both read-method and field are not found, this method will throw a runtime exception.
    *
    * @param clazz The class from which the method for reading the property is searched.
    * @param property The name of the property (not null, valid minimum length is 1).
@@ -170,15 +171,15 @@ public final class BeanUtil {
 
   /**
    * Attempts to resolve the method or field for writing the given property of the bean class.
-   * <p>
-   * The method must be public, non-static, with a <code>void</code> return type, and expecting a
+   *
+   * <p>The method must be public, non-static, with a <code>void</code> return type, and expecting a
    * single parameter . The method name is the property name with first letter in upper-case and
    * with prefix "set".
-   * <p>
-   * When the write-method is not found, this method attempts to find public non-final and
+   *
+   * <p>When the write-method is not found, this method attempts to find public non-final and
    * non-static field with the exactly same name as the property.
-   * <p>
-   * When both write-method and field are not found, this method will throw a runtime exception.
+   *
+   * <p>When both write-method and field are not found, this method will throw a runtime exception.
    *
    * @param clazz The class from which the method or field for writing the property is searched.
    * @param property The name of the property (not null, valid minimum length is 1).
@@ -213,8 +214,8 @@ public final class BeanUtil {
 
     if (writer == null) {
       throw new RuntimeException(String.format("Could not find a method "
-          + "[public void %s(AnyType arg)] nor a public non-static and non-final field [%s] in "
-          + "%s for writing property [%s]",
+              + "[public void %s(AnyType arg)] nor a public non-static and non-final field [%s] in "
+              + "%s for writing property [%s]",
           methodName, property, clazz, property));
     }
 
@@ -223,8 +224,8 @@ public final class BeanUtil {
 
   /**
    * Attempts to read a value by calling the Java bean read-method on given instance.
-   * <p>
-   * Thrown checked exceptions will be wrapped into runtime exceptions.
+   *
+   * <p>Thrown checked exceptions will be wrapped into runtime exceptions.
    *
    * @param inst An object instance.
    * @param reader The read-method or public field for reading the value of the property.
@@ -251,8 +252,8 @@ public final class BeanUtil {
 
   /**
    * Attempts to write a value by calling the Java bean write-method on given instance.
-   * <p>
-   * Thrown checked exceptions will be wrapped into runtime exceptions.
+   *
+   * <p>Thrown checked exceptions will be wrapped into runtime exceptions.
    *
    * @param inst An object instance.
    * @param writer The write-method for writing the value to a property.

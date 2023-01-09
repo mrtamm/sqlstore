@@ -16,6 +16,8 @@
 
 package ws.rocket.sqlstore.script.read.block;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,20 +33,18 @@ import ws.rocket.sqlstore.script.sql.ParamValueNonEmpty;
 import ws.rocket.sqlstore.script.sql.ParamValueTrue;
 import ws.rocket.sqlstore.script.sql.SqlPartCondition;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Reads the condition of a conditional SQL script part (to evaluate whether that part is to be
  * included in the executed script). The condition is an expression that evaluates to either true or
  * false.
- * <p>
- * It is declared within script block where a line begins with an exclamation mark and opening
+ *
+ * <p>It is declared within script block where a line begins with an exclamation mark and opening
  * parenthesis and ends with "){": <code>!(...){</code>. This reader handles the content of the
  * condition, beginning right after the opening parenthesis, and stopping right after the opening
  * curly brace. The condition within parenthesis may by be surrounded by whitespace. (After the
  * opening curly brace comes the SQL script until the closing curly brace.)
- * <p>
- * Examples of valid condition expressions:
+ *
+ * <p>Examples of valid condition expressions:
  * <pre>
  * paramName
  * paramName.nested.prop
@@ -53,15 +53,15 @@ import static java.util.Objects.requireNonNull;
  * true( paramName )
  * true( paramName.nested.prop )
  * </pre>
- * <p>
- * Here <code>empty</code> and <code>true</code> are predicates indicating that the expression
+ *
+ * <p>Here <code>empty</code> and <code>true</code> are predicates indicating that the expression
  * within parenthesis should evaluate to an empty value (String or List, including nulls) and to
  * boolean true to activate the script block. Without predicates, the expression is evaluated to
  * true when the parameter (or its [nested] property) is not null nor empty (Object, Boolean, String
  * or List). Without predicates, Boolean false value of the property evaluates to true because it is
  * not undefined, but empty string evaluates to false because it is empty.
- * <p>
- * Example of how to use this class:
+ *
+ * <p>Example of how to use this class:
  * <pre>SqlPartCondition cond = conditionReader
  *     .parseCondition()
  *     .resolveParam(paramsSet)
@@ -95,8 +95,8 @@ public final class ConditionReader {
 
   /**
    * Parses the text from stream to identify the predicate mode and referenced parameters.
-   * <p>
-   * The next step is to evaluate the extracted parameters.
+   *
+   * <p>The next step is to evaluate the extracted parameters.
    *
    * @return The current reader instance.
    * @throws IOException When a stream-related exception occurs during reading.

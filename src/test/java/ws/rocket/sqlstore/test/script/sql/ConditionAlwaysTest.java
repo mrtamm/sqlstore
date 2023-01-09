@@ -16,11 +16,11 @@
 
 package ws.rocket.sqlstore.test.script.sql;
 
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.script.sql.ConditionAlways;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.script.sql.ConditionAlways;
 
 /**
  * Tests the {@link ConditionAlways} class.

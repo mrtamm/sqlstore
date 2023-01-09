@@ -27,16 +27,16 @@ import ws.rocket.sqlstore.types.Bindings;
 /**
  * Expressions are read-write parameters to a query that refer to declared IN and OUT parameters of
  * the script.
- * <p>
- * An expression always refers to a named variable, can read its (nested) properties (when needed).
- * When a value needs to be stored in an expression, it can alter the variable value (when no
- * properties are specified), or read the properties and alter the last property. The latter works
- * only when the intermediate properties do not return null; however, when the main variable is
- * null, it is attempted to create via default constructor before continuing with properties.
- * <p>
- * The Java type of an expression is the type of the last property. or the type of the main variable
- * when no properties. SQL type will be derived from the Java type unless explicitly provided. As
- * usually, a value converter must exist to support the Java and SQL types combination.
+ *
+ * <p>An expression always refers to a named variable, can read its (nested) properties (when
+ * needed). When a value needs to be stored in an expression, it can alter the variable value (when
+ * no properties are specified), or read the properties and alter the last property. The latter
+ * works only when the intermediate properties do not return null; however, when the main variable
+ * is null, it is attempted to create via default constructor before continuing with properties.
+ *
+ * <p>The Java type of an expression is the type of the last property. or the type of the main
+ * variable when no properties. SQL type will be derived from the Java type unless explicitly
+ * provided. As usually, a value converter must exist to support the Java and SQL types combination.
  */
 public final class Expression extends Param {
 
@@ -52,8 +52,8 @@ public final class Expression extends Param {
    *
    * @param namedParam The named parameter to bind with (required).
    * @param properties List of property names in the correct order to read the value of the
-   * expression, or to set the value of the last property. Also determines Java type of the
-   * expression.This may be null or empty when the expression just refers to a named parameter.
+   *     expression, or to set the value of the last property. Also determines Java type of the
+   *     expression.This may be null or empty when the expression just refers to a named parameter.
    * @param sqlType Optional SQL type for this property to override default.
    * @return A new expression instance.
    */
@@ -182,11 +182,11 @@ public final class Expression extends Param {
   }
 
   /**
-   * Provides textual representation of this parameter. The returned value has following format:
-   * <p>
-   * "&lt;simple class name&gt;|&lt;SQL type int value&gt; &lt;expression string&gt;"
-   * <p>
-   * For example: <code>Date|93 emp.birthDate</code>.
+   * Provides textual representation of this parameter. The returned value has the following format:
+   *
+   * <p><code>&lt;simple class name&gt;|&lt;SQL type int value&gt; &lt;expression string&gt;</code>.
+   *
+   * <p>For example: <code>Date|93 emp.birthDate</code>.
    *
    * @return Textual representation of this parameter instance.
    */

@@ -16,8 +16,11 @@
 
 package ws.rocket.sqlstore.test.script;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.List;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.execute.QueryContext;
@@ -28,10 +31,6 @@ import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.test.db.model.Person;
 import ws.rocket.sqlstore.test.helper.Factory;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link QueryParam} class.
@@ -96,22 +95,30 @@ public final class QueryParamTest {
   }
 
   public void shouldGetExpressionValue() {
-    Script script = Factory.script("testScript IN(ws.rocket.sqlstore.test.db.model.Person param)\n"
-        + "====\nSELECT ?{param.name}\n====\n");
+    Script script = Factory.script("""
+        testScript IN(ws.rocket.sqlstore.test.db.model.Person param)
+        ====
+        SELECT ?{param.name}
+        ====
+        """);
     Person paramValue = new Person();
     paramValue.setName("testValue");
     QueryContext ctx = new QueryContext(script, new Object[] { paramValue });
 
     Expression expression = Expression.create(Factory.typeParam(Person.class, "param"),
-        Arrays.asList("name"), null);
+        List.of("name"), null);
     QueryParam param = new QueryParam(ParamMode.IN, expression);
 
     assertEquals(param.getValue(ctx), "testValue");
   }
 
   public void shouldSetParamValue() {
-    Script script = Factory.script("testScript OUT(String param)\n====\n"
-        + "SELECT ?{OUT(param)}\n====\n");
+    Script script = Factory.script("""
+        testScript OUT(String param)
+        ====
+        SELECT ?{OUT(param)}
+        ====
+        """);
     QueryContext ctx = new QueryContext(script, new Object[0]);
     ctx.initResultsContainer(List.class, String.class);
 

@@ -30,29 +30,30 @@ import ws.rocket.sqlstore.script.params.Param;
 /**
  * A registry of {@link ValueMapper}s that is used by SqlStore at runtime in order to set and later
  * read JDBC statement and result-set parameters.
- * <p>
- * The registry can be initialized only once. When custom handlers are not registered before parsing
- * any SQLS file, default handlers will be registered and used throughout the JVM instance lifetime.
- * <p>
- * The <code>ValueMapper</code>s are provided as an array. The order of handlers is a little bit
+ *
+ * <p>The registry can be initialized only once. When custom handlers are not registered before
+ * parsing any SQLS file, default handlers will be registered and used throughout the JVM instance
+ * lifetime.
+ *
+ * <p>The <code>ValueMapper</code>s are provided as an array. The order of handlers is a bit
  * important: every time a mapper is searched for, the array will be traversed from the beginning
  * until a matching mapper is found. Therefore, the most common mappers should be placed before less
  * common ones. Also, when a mapper handles a subtype of a Java class handled by another mapper, the
  * subtype handler should be placed before that other so that the generic version would not
- * accidentally handle the sub-case.
- * <p>
- * This class is initialized by registering custom handlers (via
+ * accidentally handle the subcase.
+ *
+ * <p>This class is initialized by registering custom handlers (via
  * {@link #register(ws.rocket.sqlstore.types.ValueMapper...)}) or using the default ones defined in
  * the ({@link #getInstance()} method. After initialization, reference to the instance will be
  * maintained in the class and used until the JVM terminates.
- * <p>
- * A custom registry should be initialized by the main thread of an application before loading
+ *
+ * <p>A custom registry should be initialized by the main thread of an application before loading
  * scripts from SQLS files and before starting other threads that use SqlStore to guarantee that
  * custom registry will be created successfully.
- * <p>
- * The methods in this class are similar to the methods of {@link ValueMapper}. However, the methods
- * here are more generic and enable working at the query context and at the current parameter level
- * &mdash; <code>ValueMapper</code> lookup is handled by the methods.
+ *
+ * <p>The methods in this class are similar to the methods of {@link ValueMapper}. However, the
+ * methods here are more generic and enable working at the query context and at the current
+ * parameter level &mdash; <code>ValueMapper</code> lookup is handled by the methods.
  */
 public final class Bindings {
 
@@ -127,8 +128,8 @@ public final class Bindings {
 
   /**
    * Registers a parameter value on a statement.
-   * <p>
-   * This method performs the parameter value lookup from the context and sets the value at given
+   *
+   * <p>This method performs the parameter value lookup from the context and sets the value at given
    * index on the statement.
    *
    * @param ctx The current query context.
@@ -152,9 +153,9 @@ public final class Bindings {
 
   /**
    * Reads a parameter value from a callable statement (after execute).
-   * <p>
-   * This method reads the value at given index from the statement and lets the parameter definition
-   * update the query context with the value read.
+   *
+   * <p>This method reads the value at given index from the statement and lets the parameter
+   * definition update the query context with the value read.
    *
    * @param ctx The current query context.
    * @param param The parameter definition.
@@ -173,8 +174,8 @@ public final class Bindings {
 
   /**
    * Reads a parameter value from a result-set row (after execute).
-   * <p>
-   * This method reads the value at given index from the row and lets the parameter definition
+   *
+   * <p>This method reads the value at given index from the row and lets the parameter definition
    * update the query context with the value read.
    *
    * @param ctx The current query context.

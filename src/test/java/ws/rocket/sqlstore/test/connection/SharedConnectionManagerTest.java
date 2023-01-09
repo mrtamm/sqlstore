@@ -16,17 +16,17 @@
 
 package ws.rocket.sqlstore.test.connection;
 
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
 import java.sql.Connection;
 import javax.sql.DataSource;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.connection.DataSourceConnectionManager;
 import ws.rocket.sqlstore.connection.SharedConnectionManager;
 import ws.rocket.sqlstore.connection.SingleConnectionManager;
-
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 /**
  * Tests for {@link SharedConnectionManager} class.

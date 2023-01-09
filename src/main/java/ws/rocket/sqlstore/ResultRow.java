@@ -28,8 +28,9 @@ import java.lang.annotation.Target;
  * abstract method is being translated into a script call while the method returns a collection or
  * array type. In that case, the query row types cannot be inferred from the method signature and
  * this annotation can help bring clarification to the problem.
- * <p>
- * Value expectations depending on the method return type:
+ *
+ * <p>Value expectations depending on the method return type:
+ *
  * <ul>
  * <li><code>java.util.List</code> -- the expected type of the list items.
  * <li><code>java.util.Map</code> -- the expected types for the map key and value (two classes!).
@@ -37,8 +38,8 @@ import java.lang.annotation.Target;
  * <li><code>java.lang.Object[][]</code> -- the expected type of the inner array items.
  * <li><em>other cases</em> -- this annotation will be ignored.
  * </ul>
- * <p>
- * As always, the type(s) provided with this annotation must match the script result types. This
+ *
+ * <p>As always, the type(s) provided with this annotation must match the script result types. This
  * will be checked before executing the script.
  *
  * @see SqlStore#proxy(java.lang.Class)
@@ -52,8 +53,8 @@ public @interface ResultRow {
    * Defines the Java types of the row values returned by script execution. These types are
    * validated against the script definition (look for the OUT-parameter).
    *
-   * @return List of Java types that are expected to be extracted from a result-set row in given
-   * order.
+   * @return Array of Java types that are expected to be extracted from a result-set row in given
+   *     order.
    */
   Class<?>[] value();
 

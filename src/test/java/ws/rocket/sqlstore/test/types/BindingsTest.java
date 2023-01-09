@@ -16,6 +16,11 @@
 
 package ws.rocket.sqlstore.test.types;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
@@ -27,11 +32,6 @@ import ws.rocket.sqlstore.script.params.ParamMode;
 import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.types.Bindings;
 import ws.rocket.sqlstore.types.ValueMapper;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
 
 /**
  * Tests for the {@link Bindings} class.

@@ -19,8 +19,8 @@ package ws.rocket.sqlstore.script.read.block;
 /**
  * A class devoted to storing and updating the SQL, while being parsed, and reflecting back when a
  * different reader needs to be used to continue parsing.
- * <p>
- * An instance of this class is safe to use while parsing several scripts from one or even more
+ *
+ * <p>An instance of this class is safe to use while parsing several scripts from one or even more
  * files. However, this class is not thread-safe.
  *
  * @see ws.rocket.sqlstore.script.read.StreamReader#parseSql(SqlBuffer)
@@ -36,22 +36,26 @@ public final class SqlBuffer {
      * Initial state, meaning that no event has occurred yet.
      */
     NONE,
+
     /**
      * Reached SQL script parameter expression. Expression reader should continue from the current
      * stream position. After that, may continue filling in the SQL buffer.
      */
     EXPRESSION,
+
     /**
      * Reached SQL script part condition. When the SQL buffer is not empty, it should be used to
-     * form a script part, and then reset. The condition Condition reader should continue from the
-     * current stream position. After that, may continue filling in the SQL buffer for the new part.
+     * form a script part, and then reset. The condition reader should continue from the current
+     * stream position. After that, may continue filling in the SQL buffer for the new part.
      */
     CONDITION,
+
     /**
      * Reached the end of a conditional block. SQL buffer content can be retrieved and reset to form
      * the SQL part object.
      */
     END_BLOCK,
+
     /**
      * Reached the end of a script block. SQL buffer content can be retrieved and reset to form the
      * SQL part object (when content is not empty). When there are multiple parts for one script
@@ -84,10 +88,11 @@ public final class SqlBuffer {
 
   /**
    * Provides the last parsing event. Initially, it returns NONE. Every time that
-   * {@link #next(int, int, int)} method returns false, this event information will be updated to
+   * {@link #next(int, int)} method returns false, this event information will be updated to
    * inform why the SQL block now needs special reader or evaluation.
    *
    * @return The last event.
+   *
    * @see ParseEvent
    */
   public ParseEvent getLastEvent() {
@@ -139,12 +144,12 @@ public final class SqlBuffer {
    * Updates the buffer content with the next character from stream.
    *
    * @param cp The character code-point.
-   * @param line The line number (1-based) where the character is located.
    * @param column The column number (1-based) where the character is located.
    * @return Whether to continue reading SQL (true) or another reader is required (false).
+   *
    * @see #getLastEvent()
    */
-  public boolean next(int cp, int line, int column) {
+  public boolean next(int cp, int column) {
     if (cp == -1) {
       return false;
     } else if (this.mode == ParseMode.SIMPLE) {

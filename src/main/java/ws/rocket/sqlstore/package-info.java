@@ -15,16 +15,16 @@
  */
 /**
  * The main classes that users of <em>SqlStore</em> library interact with.
- * <p>
- * Class {@link ws.rocket.sqlstore.SqlStore} and its minor companions
+ *
+ * <p>Class {@link ws.rocket.sqlstore.SqlStore} and its minor companions
  * {@link ws.rocket.sqlstore.Query} is used for executing preloaded SQL queries via JDBC API over a
  * (<code>DataSource</code>-pooled or direct) database connection.
- * <p>
- * To categorize failure scenarios, {@link ws.rocket.sqlstore.ScriptSetupException} and
+ *
+ * <p>To categorize failure scenarios, {@link ws.rocket.sqlstore.ScriptSetupException} and
  * {@link ws.rocket.sqlstore.ScriptExecuteException} are used to wrap errors at scripts loading time
  * and at script execution time correspondingly.
- * <p>
- * Unlike <code>java.sql.SQLException</code>, these are runtime exceptions and therefore simplify
+ *
+ * <p>Unlike <code>java.sql.SQLException</code>, these are runtime exceptions and therefore simplify
  * working with the library. With JDBC, the exception must be checked so that code would be forced
  * to catch failures and close resources. Since SqlStore does that under its hood, and also logs the
  * errors, catching exceptions is not that relevant, though still possible.

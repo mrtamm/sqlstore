@@ -16,19 +16,19 @@
 
 package ws.rocket.sqlstore.test.connection;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.connection.ConnectionManager;
-import ws.rocket.sqlstore.connection.ScopedConnectionManager;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.connection.ConnectionManager;
+import ws.rocket.sqlstore.connection.ScopedConnectionManager;
 
 /**
  * Tests for {@link ScopedConnectionManager} class.
@@ -105,7 +105,7 @@ public class ScopedConnectionManagerTest {
   }
 
   @Test(expectedExceptions = IllegalStateException.class)
-  public void shouldFailCommitWithoutObtain() throws SQLException {
+  public void shouldFailCommitWithoutObtain() {
     ConnectionManager inner = mock(ConnectionManager.class);
     ScopedConnectionManager manager = new ScopedConnectionManager(inner);
 
@@ -113,7 +113,7 @@ public class ScopedConnectionManagerTest {
   }
 
   @Test(expectedExceptions = IllegalStateException.class)
-  public void shouldFailRollbackWithoutObtain() throws SQLException {
+  public void shouldFailRollbackWithoutObtain() {
     ConnectionManager inner = mock(ConnectionManager.class);
     ScopedConnectionManager manager = new ScopedConnectionManager(inner);
 

@@ -16,6 +16,14 @@
 
 package ws.rocket.sqlstore.test.types;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -24,14 +32,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.types.BigDecimalMapper;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for the {@link BigDecimalMapper} class.

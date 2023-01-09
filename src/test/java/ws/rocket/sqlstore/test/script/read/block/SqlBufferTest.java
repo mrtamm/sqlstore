@@ -16,13 +16,13 @@
 
 package ws.rocket.sqlstore.test.script.read.block;
 
-import org.testng.annotations.Test;
-import ws.rocket.sqlstore.script.read.block.SqlBuffer;
-import ws.rocket.sqlstore.script.read.block.SqlBuffer.ParseEvent;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+
+import org.testng.annotations.Test;
+import ws.rocket.sqlstore.script.read.block.SqlBuffer;
+import ws.rocket.sqlstore.script.read.block.SqlBuffer.ParseEvent;
 
 /**
  * Tests the {@link SqlBuffer} class.
@@ -30,15 +30,11 @@ import static org.testng.Assert.assertTrue;
 @Test
 public class SqlBufferTest {
 
-  private static final int LINE = 1;
-
-  private static final int COLUMN = 1;
-
   private static boolean applyChars(SqlBuffer buffer, String text) {
     boolean canContinue = true;
 
     for (int i = 0; canContinue && i < text.length(); i++) {
-      canContinue = buffer.next(text.codePointAt(i), LINE, i + 1);
+      canContinue = buffer.next(text.codePointAt(i), i + 1);
     }
 
     return canContinue;
@@ -52,7 +48,7 @@ public class SqlBufferTest {
     assertEquals(buffer.getLastEvent(), ParseEvent.NONE);
     assertEquals(buffer.resetSqlContent(), "SELECT 1");
 
-    canContinue = buffer.next(-1, LINE, COLUMN);
+    canContinue = buffer.next(-1, 1);
     assertFalse(canContinue);
   }
 

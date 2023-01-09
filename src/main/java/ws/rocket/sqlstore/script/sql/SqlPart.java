@@ -16,16 +16,16 @@
 
 package ws.rocket.sqlstore.script.sql;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
 import java.util.List;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Abstraction for SQL, which may be divided into parts, some of which may be rendered differently
- * depending on input parameters. For each script there is always an SQL part which will be always
+ * depending on input parameters. For each script there is always an SQL part which will always be
  * included (condition = always).
  */
 public final class SqlPart implements SqlScript {
@@ -40,8 +40,8 @@ public final class SqlPart implements SqlScript {
    * Initializes the SQL part with permanent data.
    *
    * @param condition The condition when this part is allowed in the query (required).
-   * @param sql The SQL (may be partial) to be included in the final query when condition is
-   * satisfied. Must not be empty.
+   * @param sql The SQL (can be partial) to be included in the final query when condition is
+   *     satisfied. Must not be empty.
    * @param params A parameters array for the query. May be empty bot not null.
    */
   public SqlPart(SqlPartCondition condition, String sql, QueryParam[] params) {

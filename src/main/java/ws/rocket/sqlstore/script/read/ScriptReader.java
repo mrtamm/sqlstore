@@ -32,9 +32,10 @@ import ws.rocket.sqlstore.script.sql.SqlScript;
 /**
  * Helper class for parsing meta-data of a script from an SQLS file and produces a valid
  * {@link Script} object to be executed via SqlStore.
- * <p>
- * This reader exposes an API for directing the parse process. The correct order for parsing, is
+ *
+ * <p>This reader exposes an API for directing the parse process. The correct order for parsing, is
  * following:
+ *
  * <ol>
  * <li>{@link #parseJavaTypeAliases()} (first time and only once)
  * <li>{@link #parseName()}
@@ -42,12 +43,12 @@ import ws.rocket.sqlstore.script.sql.SqlScript;
  * <li>{@link #parseSql()}
  * <li>{@link #createScript()}
  * </ol>
- * <p>
- * To simplify that work, this class exposes static method {@link #load(java.lang.Class)}, which
+ *
+ * <p>To simplify that work, this class exposes static method {@link #load(java.lang.Class)}, which
  * parses all the scripts from the scripts file associated with given class.
- * <p>
- * A <code>ScriptReader</code> instance is bound to a single SQLS file and can be used to parse all
- * the scripts from the file.
+ *
+ * <p>A <code>ScriptReader</code> instance is bound to a single SQLS file and can be used to parse
+ * all the scripts from the file.
  *
  * @see #load(Class)
  */
@@ -70,24 +71,25 @@ public final class ScriptReader implements Closeable {
 
   /**
    * Loads scripts from an SQLS resource of given class.
-   * <p>
-   * This reader assumes that for the provided class name (e.g. <code>com.company.dao.Sample</code>)
-   * there exists a text file with the same name as the class but with ".sqls" suffix
-   * (case-sensitive; e.g. <code>/com/company/dao/Sample.sqls</code>). When the resource is not
-   * found, this method will return an empty map. Otherwise, this method will return a map
-   * containing parsed scripts by their names.
-   * <p>
-   * In addition to <code>IOException</code>, this method is likely to throw
+   *
+   * <p>This reader assumes that for the provided class name (e.g.
+   * <code>com.company.dao.Sample</code>) there exists a text file with the same name as the class
+   * but with ".sqls" suffix (case-sensitive; e.g. <code>/com/company/dao/Sample.sqls</code>).
+   * When the resource is not found, this method will return an empty map.
+   * Otherwise, this method will return a map containing parsed scripts by their names.
+   *
+   * <p>In addition to <code>IOException</code>, this method is likely to throw
    * {@link ws.rocket.sqlstore.ScriptSetupException} when the SQLS resource contains syntax or logic
    * errors. In such case the loading process is halted.
-   * <p>
-   * Description of the expected resource content is given with the class-level documentation of
+   *
+   * <p>Description of the expected resource content is given with the class-level documentation of
    * this class.
    *
    * @param clazz The class for which the related SQLS resource is to be loaded.
    * @return A map of scripts by their name, or an empty map when the resource is not found.
+   *
    * @throws IOException The stream errors are delegated for diagnosing issues. None of which are
-   * thrown by this method.
+   *     thrown by this method.
    */
   public static Map<String, Script> load(Class<?> clazz) throws IOException {
     Map<String, Script> results = new HashMap<>();
@@ -158,6 +160,7 @@ public final class ScriptReader implements Closeable {
    * is more data to be read.
    *
    * @return A Boolean that is true when there is more data to be read.
+   *
    * @throws IOException When a stream-related exception occurs during reading.
    */
   public boolean hasMore() throws IOException {
@@ -180,6 +183,7 @@ public final class ScriptReader implements Closeable {
    * resulting script unit info object.
    *
    * @return The current reader.
+   *
    * @throws IOException When a stream-related exception occurs during reading.
    * @see #createScript()
    */
@@ -192,16 +196,17 @@ public final class ScriptReader implements Closeable {
 
   /**
    * Parses IN, OUT, UPDATE parameters of the script.
-   * <p>
-   * Each parameters group begins with keyword "IN", "OUT', or "UPDATE" directly followed by an
+   *
+   * <p>Each parameter-group begins with keyword "IN", "OUT', or "UPDATE" directly followed by an
    * opening parenthesis (no whitespace between). Each group has its own rules for specifying
    * parameters. All groups end with closing parenthesis. The order of these groups is not defined.
    * Each group can be specified only once.
-   * <p>
-   * The parsed parameters will be stored in this reader. Once the script unit is parsed, they will
-   * be used for constructing the resulting script unit info object.
+   *
+   * <p>The parsed parameters will be stored in this reader. Once the script unit is parsed, they
+   * will be used for constructing the resulting script unit info object.
    *
    * @return The current reader.
+   *
    * @throws IOException When a stream-related exception occurs during reading.
    * @see #createScript()
    */
@@ -213,9 +218,10 @@ public final class ScriptReader implements Closeable {
   /**
    * Parses the SQL of the script unit (SQL comes the output parameters, surrounded by
    * curly-braces). The parsed SQL will be stored in this reader. Once the script unit is parsed, it
-   * be used for constructing the resulting script unit info object.
+   * can be used for constructing the resulting script unit info object.
    *
    * @return The current reader.
+   *
    * @throws IOException When a stream-related exception occurs during reading.
    * @see #createScript()
    */

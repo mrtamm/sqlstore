@@ -16,13 +16,13 @@
 
 package ws.rocket.sqlstore.test.script.sql;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.sql.ParamValueTrue;
 import ws.rocket.sqlstore.script.sql.SqlPartCondition;
-
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link ParamValueTrue} class.

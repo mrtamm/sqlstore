@@ -16,14 +16,14 @@
 
 package ws.rocket.sqlstore.test.script.params;
 
+import static org.testng.Assert.assertEquals;
+
 import java.sql.Types;
 import java.util.List;
 import org.testng.annotations.Test;
 import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.params.TypeParam;
 import ws.rocket.sqlstore.test.helper.ScriptBuilder;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * Tests the {@link TypeParam} class.

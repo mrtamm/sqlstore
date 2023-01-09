@@ -16,6 +16,14 @@
 
 package ws.rocket.sqlstore.test.script.read;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.sql.Types;
 import org.testng.annotations.Test;
@@ -28,14 +36,6 @@ import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.read.StreamReader;
 import ws.rocket.sqlstore.test.db.model.Person;
 import ws.rocket.sqlstore.test.helper.Factory;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link ParamsReader} class.

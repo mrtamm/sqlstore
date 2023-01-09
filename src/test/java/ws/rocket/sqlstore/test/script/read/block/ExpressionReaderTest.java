@@ -16,6 +16,12 @@
 
 package ws.rocket.sqlstore.test.script.read.block;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.sql.Types;
 import org.testng.annotations.Test;
@@ -24,12 +30,6 @@ import ws.rocket.sqlstore.script.params.TypeNameParam;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.read.block.ExpressionReader;
 import ws.rocket.sqlstore.test.helper.Factory;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Tests the {@link ExpressionReader} class.
@@ -50,14 +50,14 @@ public final class ExpressionReaderTest {
     return expressions[0];
   }
 
-  private static ParamsSet inParams(TypeNameParam inParam) throws IOException {
+  private static ParamsSet inParams(TypeNameParam inParam) {
     ParamsSet params = new ParamsSet();
     params.addInParam(inParam);
     params.initInOutUpdateParams();
     return params;
   }
 
-  private static ParamsSet outParam() throws IOException {
+  private static ParamsSet outParam() {
     ParamsSet params = new ParamsSet();
     params.addOutParam(Long.class, Types.BIGINT, "outParamName", false);
     params.initInOutUpdateParams();

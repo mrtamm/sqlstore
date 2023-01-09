@@ -30,8 +30,8 @@ import ws.rocket.sqlstore.ScriptExecuteException;
  * connection instance during initialization. In such cases, <code>SqlStore</code> assumes that the
  * application is mostly single-threaded and connection/database access must be synchronized.
  * Therefore, this manager uses a lock to limit concurrent access to the connection instance.
- * <p>
- * The lock is enforced before connection is obtained in {@link #obtain(boolean)}, and unlocking
+ *
+ * <p>The lock is enforced before connection is obtained in {@link #obtain(boolean)}, and unlocking
  * occurs after {@link #release()}. Therefore, calling the {@link #release()} method is mandatory
  * even if the {@link #obtain(boolean)} method failed with a runtime exception to avoid locking
  * issues.
@@ -46,8 +46,8 @@ public final class SingleConnectionManager implements ConnectionManager {
 
   /**
    * Creates a new manager for given database connection.
-   * <p>
-   * The provided connection must not be null nor closed. Failure to qualify will result in a
+   *
+   * <p>The provided connection must not be null nor closed. Failure to qualify will result in a
    * runtime exception.
    *
    * @param connection A valid connection to database.
