@@ -18,22 +18,24 @@ package ws.rocket.sqlstore.result;
 
 import java.util.ArrayList;
 import java.util.List;
+import ws.rocket.sqlstore.ResultsCollector;
 
 /**
  * A results container that stores and returns execution results in an <code>Object[][]</code>.
  */
 public final class ArrayResultsCollector implements ResultsCollector {
 
-  private final List<Object> result = new ArrayList<>();
+  private final List<Object[]> result = new ArrayList<>();
 
   private final int rowLength;
 
+  // Tracks which columns of current row have a value defined.
   private final boolean[] valueDefined;
 
   private Object[] row;
 
   /**
-   * Initializes an array-based results collector. Each row has the same number of columns, which
+   * Initializes an array-based result collector. Each row has the same number of columns, which
    * will be fixed here.
    *
    * @param columnCount The number of columns expected in the results.
@@ -57,7 +59,7 @@ public final class ArrayResultsCollector implements ResultsCollector {
   @Override
   public void setRowValue(int columnIndex, Object value) {
     if (columnIndex < 0 || columnIndex >= this.rowLength) {
-      throw new IllegalArgumentException("Expected column index from 0 to " + (columnIndex - 1)
+      throw new IllegalArgumentException("Expected column index from 0 to " + (this.rowLength - 1)
           + ", got: " + columnIndex);
     } else if (this.valueDefined[columnIndex]) {
       throw new IllegalStateException("Attempted to set a row value twice.");
@@ -70,7 +72,7 @@ public final class ArrayResultsCollector implements ResultsCollector {
   @Override
   public Object getRowValue(int columnIndex) {
     if (columnIndex < 0 || columnIndex >= this.rowLength) {
-      throw new IllegalArgumentException("Expected column index from 0 to " + (columnIndex - 1)
+      throw new IllegalArgumentException("Expected column index from 0 to " + (this.rowLength - 1)
           + ", got: " + columnIndex);
     }
     return this.row[columnIndex];

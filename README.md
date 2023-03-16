@@ -119,11 +119,11 @@ following databases:
 
 Some guidelines on how to prepare the environment for executing these tests on
 an actual database are outlined in [database setup
-README](src/test/resources/ws/rocket/sqlstore/test/db/README.md).
+README](src/test/resources/ws/rocket/sqlstore/db/README.md).
 
 (Without database-specific configuration in test classpath, and just running
 command `mvn test`, the database tests in
-`ws.rocket.sqlstore.test.DatabaseTest` will be skipped.)
+`ws.rocket.sqlstore.DatabaseTest` will be skipped.)
 
 
 Additional Information

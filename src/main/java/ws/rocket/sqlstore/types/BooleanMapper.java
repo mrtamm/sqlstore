@@ -29,11 +29,11 @@ import ws.rocket.sqlstore.ScriptSetupException;
  *
  * <p>This mapper makes restrictions on SQL types:
  * <ol>
- * <li><code>BOOLEAN</code> (default) &ndash; the value will be stored and read as it is;
- * <li><code>CHAR</code>, <code>VARCHAR</code> &ndash; the value will be stored as 'Y' for true and
+ * <li><code>BOOLEAN</code> (default) – the value will be stored and read as it is;
+ * <li><code>CHAR</code>, <code>VARCHAR</code> – the value will be stored as 'Y' for true and
  * 'N' for false, and the read value will be true when it is 'Y', otherwise false;
  * <li><code>NUMERIC</code>, <code>DECIMAL</code>, <code>INTEGER</code>, <code>SMALLINT</code>,
- * <code>TINYINT</code> &ndash; the value will be stored as 1 for true and 0 for false, and the read
+ * <code>TINYINT</code> – the value will be stored as 1 for true and 0 for false, and the read
  * value will be true when it is positive, otherwise false;
  * <li><code>null</code> for boolean values will always be read and stored as NULL;
  * <li>unmentioned SQL types will raise an {@link ScriptSetupException} when encountered.

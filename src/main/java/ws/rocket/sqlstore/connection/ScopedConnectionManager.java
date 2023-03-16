@@ -32,10 +32,9 @@ import ws.rocket.sqlstore.ScriptExecuteException;
  *
  * <p>This manager wraps previous connection manager and creates a save-point when a "transaction"
  * is started in {@link #obtain(boolean)} method. The save-point is released in the
- * {@link #release()} method. Theand {@link #rollback()} methods, although the latter also reverts
- * changes.
+ * {@link #release()} and {@link #rollback()} methods (the latter also reverts changes).
  *
- * <p>The {@link #release()} method is does not anything to support executing scripts in a block as
+ * <p>The {@link #release()} method does not do anything to support executing scripts in a block
  * in a single transaction. The connection can be released properly by calling
  * {@link #releaseFinally()}. This should be done in the code block that creates an instance of this
  * manager.
@@ -96,8 +95,8 @@ public final class ScopedConnectionManager implements ConnectionManager {
   /**
    * {@inheritDoc}
    *
-   * <p><strong>This implementation renews current save-point to update its position within current
-   * transaction.</strong>
+   * <p><strong>This implementation just renews current save-point to update its position within
+   * current transaction. The new savepoint will refer to current state in the transaction.</strong>
    */
   @Override
   public void commit() {

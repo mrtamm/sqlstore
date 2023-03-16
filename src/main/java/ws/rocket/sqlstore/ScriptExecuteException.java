@@ -16,8 +16,8 @@
 
 package ws.rocket.sqlstore;
 
+import java.io.Serial;
 import java.sql.SQLException;
-import ws.rocket.sqlstore.execute.QueryContext;
 
 /**
  * The runtime exception class for all errors reported at script execution. When an error is related
@@ -25,8 +25,10 @@ import ws.rocket.sqlstore.execute.QueryContext;
  * execution was in progress, the related query context is also made available in the thrown
  * exception.
  */
-@SuppressWarnings("serial")
 public final class ScriptExecuteException extends RuntimeException {
+
+  @Serial
+  private static final long serialVersionUID = 0L;
 
   private final QueryContext context;
 

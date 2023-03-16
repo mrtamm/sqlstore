@@ -19,6 +19,12 @@
  * connection, data source connections, scoped connection). Since <code>SqlStore</code> instances
  * need to be thread-safe, connection managers also need to comply with that.
  *
+ * <p>Users of <code>SqlStore</code> are most likely interested in
+ * {@link ws.rocket.sqlstore.connection.SharedConnectionManager}, which enables to define common
+ * connection information though this class. Otherwise, custom <code>DataSource</code> or
+ * <code>Connection</code> objects can be provided as a parameter to the
+ * {@link ws.rocket.sqlstore.SqlStore} methods.</p>
+ *
  * <p>Note: connection managers are determined and used by <code>SqlStore</code> internally and
  * cannot be customized directly by the users of the library. In addition, connection managers log
  * their activity but only at the TRACE level. Exceptions are not logged as they are handled by a

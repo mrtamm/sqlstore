@@ -18,6 +18,7 @@ package ws.rocket.sqlstore.result;
 
 import java.util.ArrayList;
 import java.util.List;
+import ws.rocket.sqlstore.ResultsCollector;
 
 /**
  * A results container that stores and returns execution results in an <code>ArrayList</code>.

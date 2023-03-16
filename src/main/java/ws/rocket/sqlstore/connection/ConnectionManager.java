@@ -31,14 +31,16 @@ import java.sql.Connection;
  * <h2>Usage</h2>
  *
  * <p>When a connection is obtained by calling {@link #obtain(boolean)}, it must always be released
- * by calling {@link #release()} after executing scripts. The <code>release()</code> must be called
+ * by calling {@link #release()} after executing scripts. The <code>release()</code> may be called
  * even if obtaining connection failed (and most likely was not created) as the method accepts the
- * fact that the connection does not exist or is possibly already closed. While connection is
- * active, the methods {@link #commit()} and {@link #release()} may be called to store data changes
- * or revert them. However, calling these two methods is optional, for example, when the JDBC
- * executor has detected that no data changes occurred (by checking update count of statements).
- * These methods may be called several times during a connection. However, when these two methods
- * detect that active connection does not exist, will throw an <code>IllegalStateException</code>.
+ * fact that the connection does not exist or is possibly already closed.
+ *
+ * <p>While connection is active, the methods {@link #commit()} and {@link #release()} may be called
+ * to store data changes or revert them. However, calling these two methods is optional, for
+ * example, when the JDBC executor has detected that no data changes occurred (by checking update
+ * count of statements). These methods may be called several times during a connection. However,
+ * when the methods detect that active connection does not exist, they will throw an
+ * <code>IllegalStateException</code>.
  *
  * <p>The common aspect of all these methods is that all checked <code>SQLException</code>s will be
  * wrapped into unchecked <code>ScriptExecuteException</code>s, which may contain information about

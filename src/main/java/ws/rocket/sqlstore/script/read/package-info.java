@@ -22,11 +22,11 @@
  * handled:
  *
  * <ol>
- * <li><code>ScriptsReader</code> &ndash; the most generic level, the scope is the entire scripts
+ * <li><code>ScriptsReader</code> – the most generic level, the scope is the entire scripts
  * file;
- * <li><code>ScriptReader</code> &ndash; reusable, but parses just one script from the file;
- * <li><code>ParamsSet</code> &ndash; reusable helper, but handles the parameters setup of a script;
- * <li><code>StreamReader</code> &ndash; the most lower level, works with symbols from the file;
+ * <li><code>ScriptReader</code> – reusable, but parses just one script from the file;
+ * <li><code>ParamsSet</code> – reusable helper, but handles the parameters setup of a script;
+ * <li><code>StreamReader</code> – the most lower level, works with symbols from the file;
  * </ol>
  *
  * <h2>The SQLS File</h2>
@@ -164,12 +164,12 @@
  * <code>Statement</code>:
  *
  * <ol>
- * <li><code>queryTimeout</code> &ndash; {@link java.sql.Statement#setQueryTimeout(int)};
- * <li><code>fetchSize</code> &ndash; {@link java.sql.Statement#setFetchSize(int)};
- * <li><code>maxRows</code> &ndash; {@link java.sql.Statement#setMaxRows(int)};
- * <li><code>maxFieldSize</code> &ndash; {@link java.sql.Statement#setMaxFieldSize(int)};
- * <li><code>poolable</code> &ndash; {@link java.sql.Statement#setPoolable(boolean)};
- * <li><code>escapeProcessing</code> &ndash; {@link java.sql.Statement#setEscapeProcessing(boolean)}
+ * <li><code>queryTimeout</code> – {@link java.sql.Statement#setQueryTimeout(int)};
+ * <li><code>fetchSize</code> – {@link java.sql.Statement#setFetchSize(int)};
+ * <li><code>maxRows</code> – {@link java.sql.Statement#setMaxRows(int)};
+ * <li><code>maxFieldSize</code> – {@link java.sql.Statement#setMaxFieldSize(int)};
+ * <li><code>poolable</code> – {@link java.sql.Statement#setPoolable(boolean)};
+ * <li><code>escapeProcessing</code> – {@link java.sql.Statement#setEscapeProcessing(boolean)}
  * <li><code>readOnly</code> {@link java.sql.Connection#setReadOnly(boolean)}
  * </ol>
  *
@@ -239,7 +239,7 @@
  * <p>Examples of items that are checked during script parsing:
  *
  * <ol>
- * <li>uniqueness of a name (script name &ndash; per file; parameter name &ndash; per script);
+ * <li>uniqueness of a name (script name – per file; parameter name – per script);
  * <li>Java type exists;
  * <li>SQL type exists or can be determined by Java type;
  * <li>references to bean properties (for reading or writing values)

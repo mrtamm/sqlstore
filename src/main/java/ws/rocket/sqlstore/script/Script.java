@@ -17,7 +17,7 @@
 package ws.rocket.sqlstore.script;
 
 import java.util.List;
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.read.ParamsSet;
 import ws.rocket.sqlstore.script.sql.SqlScript;
@@ -36,7 +36,7 @@ import ws.rocket.sqlstore.script.sql.SqlScript;
  * non-thread-safe <code>QueryContext</code> wraps the script to provide current execution specific
  * details to the executor.
  *
- * @see ws.rocket.sqlstore.execute.QueryContext
+ * @see QueryContext
  */
 public final class Script {
 

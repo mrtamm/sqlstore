@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import ws.rocket.sqlstore.connection.ConnectionManager;
 import ws.rocket.sqlstore.execute.JdbcExecutor;
-import ws.rocket.sqlstore.execute.QueryContext;
 
 /**
  * Wraps an SQL script context and waits for a command to execute it.
@@ -33,13 +32,13 @@ import ws.rocket.sqlstore.execute.QueryContext;
  * <p>The options are simple but should cover most use-cases (only one of them per query execution):
  *
  * <ol>
- * <li>{@link #execute()} &ndash; execution that ignores results;
- * <li>{@link #forValue(java.lang.Class) } &ndash; execution that reads just the first result and
+ * <li>{@link #execute()} – execution that ignores results;
+ * <li>{@link #forValue(java.lang.Class) } – execution that reads just the first result and
  * ignores others;
- * <li>{@link #forValues(java.lang.Class) } &ndash; execution that reads all results;
- * <li>{@link #forMap(java.lang.Class, java.lang.Class)} &ndash; execution that expects key-value
+ * <li>{@link #forValues(java.lang.Class) } – execution that reads all results;
+ * <li>{@link #forMap(java.lang.Class, java.lang.Class)} – execution that expects key-value
  * pairs;
- * <li>{@link #forUpdateCount()} &ndash; execution with feedback about the amount of rows updated;
+ * <li>{@link #forUpdateCount()} – execution with feedback about the amount of rows updated;
  * </ol>
  *
  * <p>When the return type is not supported for the script, the method will throw a

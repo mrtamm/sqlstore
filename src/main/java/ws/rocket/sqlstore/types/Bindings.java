@@ -22,8 +22,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Objects;
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.ScriptSetupException;
-import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 import ws.rocket.sqlstore.script.params.Param;
 

@@ -30,10 +30,10 @@ import ws.rocket.sqlstore.ScriptSetupException;
  *
  * <p>This mapper makes restrictions on SQL types:
  * <ol>
- * <li><code>BLOB</code> (default) &ndash; the upper limit of how much data is read from database is
+ * <li><code>BLOB</code> (default) – the upper limit of how much data is read from database is
  * restricted (all data might not fit into a byte array), however all the byte array content can be
  * stored within the BLOB in database.
- * <li><code>BINARY</code>, <code>VARBINARY</code>, <code>LONGVARBINARY</code> &ndash; the value
+ * <li><code>BINARY</code>, <code>VARBINARY</code>, <code>LONGVARBINARY</code> – the value
  * will be stored and read as an array;
  * <li><code>null</code> for <code>byte[]</code> values will always be read and stored as NULL;
  * <li>unmentioned SQL types will raise an {@link ScriptSetupException} when encountered.

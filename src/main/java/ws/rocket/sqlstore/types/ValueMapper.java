@@ -31,15 +31,15 @@ import java.sql.SQLException;
  * <p>The methods of a value mapper are called in the following order (in a thread scope):
  *
  * <ol>
- * <li>{@link #supports(java.lang.Class)} &ndash; whenever the registry is asked to find a value
+ * <li>{@link #supports(java.lang.Class)} – whenever the registry is asked to find a value
  * mapper for a Java type of a value;
- * <li>{@link #confirmSqlType(java.lang.Integer)} &ndash; during script parsing this method is used
+ * <li>{@link #confirmSqlType(java.lang.Integer)} – during script parsing this method is used
  * to resolve or validate the SQL type of a parameter that has passed the <code>supports()</code>
  * method test;
- * <li>{@link #write(java.sql.PreparedStatement, int, java.lang.Object, int)} &ndash; for setting
+ * <li>{@link #write(java.sql.PreparedStatement, int, java.lang.Object, int)} – for setting
  * each value in a prepared statement;
- * <li>{@link #read(java.sql.ResultSet, int, int)} &ndash; for reading each value from a result set;
- * <li>{@link #read(java.sql.CallableStatement, int, int)} &ndash; for reading each value for a
+ * <li>{@link #read(java.sql.ResultSet, int, int)} – for reading each value from a result set;
+ * <li>{@link #read(java.sql.CallableStatement, int, int)} – for reading each value for a
  * previously registered OUT-parameter.
  * </ol>
  */

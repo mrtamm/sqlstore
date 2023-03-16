@@ -34,7 +34,6 @@ import ws.rocket.sqlstore.connection.DataSourceConnectionManager;
 import ws.rocket.sqlstore.connection.ScopedConnectionManager;
 import ws.rocket.sqlstore.connection.SharedConnectionManager;
 import ws.rocket.sqlstore.connection.SingleConnectionManager;
-import ws.rocket.sqlstore.execute.QueryContext;
 import ws.rocket.sqlstore.script.Script;
 import ws.rocket.sqlstore.script.read.ScriptReader;
 

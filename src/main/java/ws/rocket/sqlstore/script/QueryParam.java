@@ -18,7 +18,7 @@ package ws.rocket.sqlstore.script;
 
 import static java.util.Objects.requireNonNull;
 
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.script.params.Expression;
 import ws.rocket.sqlstore.script.params.Param;
 import ws.rocket.sqlstore.script.params.ParamMode;
@@ -75,7 +75,7 @@ public final class QueryParam {
    * Informs whether the wrapped parameter value must be set on the statement before execution.
    *
    * @return A Boolean that is true when the value must be set before execution.
-   * @see #getValue(ws.rocket.sqlstore.execute.QueryContext)
+   * @see #getValue(QueryContext)
    */
   public boolean isForInput() {
     return this.mode != ParamMode.OUT;
@@ -85,7 +85,7 @@ public final class QueryParam {
    * Informs whether the wrapped parameter value must be set on the statement after execution.
    *
    * @return A Boolean that is true when the value must be set after execution.
-   * @see #setValue(ws.rocket.sqlstore.execute.QueryContext, java.lang.Object)
+   * @see #setValue(QueryContext, java.lang.Object)
    */
   public boolean isForOutput() {
     return this.mode != ParamMode.IN;
