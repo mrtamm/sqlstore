@@ -16,10 +16,12 @@
 
 package ws.rocket.sqlstore.result;
 
+import ws.rocket.sqlstore.ResultsCollector;
 import ws.rocket.sqlstore.ScriptExecuteException;
 
 /**
  * A results container that checks that no result item is returned from a script execution.
+ * Setting a value through {@link #setRowValue(int, Object)} will trigger an exception.
  */
 public final class VoidResultsCollector implements ResultsCollector {
 

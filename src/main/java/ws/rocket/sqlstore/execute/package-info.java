@@ -16,6 +16,7 @@
 
 /**
  * Classes for executing a <code>Script</code> (with runtime parameter values).
+ * This package is for internal use.
  *
  * <p>The smallest example for executing a script is following:
  *

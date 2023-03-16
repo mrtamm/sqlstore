@@ -17,7 +17,7 @@
 package ws.rocket.sqlstore.script.sql;
 
 import java.util.List;
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 
 /**

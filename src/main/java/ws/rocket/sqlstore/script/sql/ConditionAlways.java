@@ -16,7 +16,7 @@
 
 package ws.rocket.sqlstore.script.sql;
 
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 
 /**
  * A condition for <code>SqlPart</code> that must always be included in the actually executed query.

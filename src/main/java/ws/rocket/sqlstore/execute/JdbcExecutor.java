@@ -24,29 +24,31 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.ScriptExecuteException;
 import ws.rocket.sqlstore.ScriptSetupException;
 import ws.rocket.sqlstore.connection.ConnectionManager;
 
 /**
  * Executes an SQL query via JDBC API. This class contains the main work-flow of a query execution
- * while some details are of the query are delegated to other classes.
+ * while some tasks are delegated to other classes.
  *
  * <p>Being a central place for query execution, this class also provides several logging features.
  * Here they are listed by logger name:
  *
  * <ol>
- * <li><code>ws.rocket.sqlstore.timer.EXEC</code> at TRACE level &ndash; the time it took to
+ * <li><code>ws.rocket.sqlstore.timer.EXEC</code> at TRACE level – the time it took to
  * prepare, execute, and handle results of a query;
- * <li><code>ws.rocket.sqlstore.timer.DB</code> at TRACE level &ndash; just the time of the
+ * <li><code>ws.rocket.sqlstore.timer.DB</code> at TRACE level – just the time of the
  * execution in database;
- * <li><code>ws.rocket.sqlstore.execute.JdbcExecutor</code> at DEBUG level &ndash; logs the steps
+ * <li><code>ws.rocket.sqlstore.execute.JdbcExecutor</code> at DEBUG level – logs the steps
  * taken for preparing, executing, and handling the results of a script.
  * </ol>
  *
- * <p>An instance of this class should be just to execute a script with arguments once, and is not
+ * <p>An instance of this class should be used to execute a script with arguments ONCE, and is not
  * currently meant to be reused for multiple executes.
  */
 public final class JdbcExecutor {
@@ -74,15 +76,18 @@ public final class JdbcExecutor {
    * @param ctx A query execution context.
    */
   public void execute(QueryContext ctx) {
-    long beginTime = System.currentTimeMillis();
+    long beginTime = System.nanoTime();
 
     try {
+      // This connection is closed below through this.connections.release().
+      final Connection connection = this.connections.obtain(ctx.isReadOnly());
+
       if (ctx.isCallStatement()) {
-        executeCall(ctx);
+        executeCall(ctx, connection);
       } else if (ctx.isPreparedStatement()) {
-        executePrepared(ctx);
+        executePrepared(ctx, connection);
       } else {
-        executeStatement(ctx);
+        executeStatement(ctx, connection);
       }
 
       this.connections.commit();
@@ -92,16 +97,16 @@ public final class JdbcExecutor {
     } finally {
       if (TIME_EXEC.isTraceEnabled()) {
         TIME_EXEC.trace("Execution of script '{}' took {} ms.", ctx.getName(),
-            System.currentTimeMillis() - beginTime);
+            TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - beginTime));
       }
       this.connections.release();
     }
   }
 
-  private void executeCall(QueryContext ctx) {
+  private void executeCall(QueryContext ctx, Connection connection) {
     LOG.debug("About to execute a JDBC CallableStatement for '{}'", ctx.getName());
 
-    try (CallableStatement stmt = connection(ctx).prepareCall(ctx.getSqlQuery())) {
+    try (CallableStatement stmt = connection.prepareCall(ctx.getSqlQuery())) {
       ctx.setHints(stmt);
       ctx.setParameters(stmt);
 
@@ -121,12 +126,12 @@ public final class JdbcExecutor {
     }
   }
 
-  private void executePrepared(QueryContext ctx) {
+  private void executePrepared(QueryContext ctx, Connection connection) {
     String[] keys = ctx.getQueryKeys();
 
     LOG.debug("About to execute a JDBC PreparedStatement for '{}'", ctx.getName());
 
-    try (PreparedStatement stmt = connection(ctx).prepareStatement(ctx.getSqlQuery(), keys)) {
+    try (PreparedStatement stmt = connection.prepareStatement(ctx.getSqlQuery(), keys)) {
       ctx.setHints(stmt);
       ctx.setParameters(stmt);
 
@@ -145,10 +150,10 @@ public final class JdbcExecutor {
     }
   }
 
-  private void executeStatement(QueryContext ctx) {
+  private void executeStatement(QueryContext ctx, Connection connection) {
     LOG.debug("About to execute a JDBC Statement for '{}'", ctx.getName());
 
-    try (Statement stmt = connection(ctx).createStatement()) {
+    try (Statement stmt = connection.createStatement()) {
       ctx.setHints(stmt);
 
       String[] keys = ctx.getQueryKeys();
@@ -219,10 +224,6 @@ public final class JdbcExecutor {
         }
       }
     }
-  }
-
-  private Connection connection(QueryContext ctx) {
-    return this.connections.obtain(ctx.isReadOnly());
   }
 
 }

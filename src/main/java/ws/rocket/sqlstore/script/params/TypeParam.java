@@ -16,7 +16,7 @@
 
 package ws.rocket.sqlstore.script.params;
 
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 
 /**
  * A write-only parameter that is only described by its types. This kind of parameter is used only

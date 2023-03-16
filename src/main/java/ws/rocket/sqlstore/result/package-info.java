@@ -15,15 +15,15 @@
  */
 
 /**
- * Classes for storing query results.
+ * Classes for storing query results. This package is for internal use.
  *
  * <p>Currently, there are three supported scenarios:
  *
  * <ol>
- * <li><code>VoidResult</code> &ndash; the script is not expected to return any results;
- * <li><code>ListResult</code> &ndash; the script is expected to return an object per row (zero,
- * one, or more instances in total);
- * <li><code>MapResult</code> &ndash; the script is expected to return two objects per row (zero,
+ * <li><code>VoidResult</code> – the script is not expected to return any results;
+ * <li><code>ListResult</code> – the script is expected to return a Java object per row (zero, one,
+ * or more instances in total);
+ * <li><code>MapResult</code> – the script is expected to return two Java objects per row (zero,
  * one, or more pair instances in total), and the first object will be used as a
  * <code>HashMap</code> key.
  * </ol>

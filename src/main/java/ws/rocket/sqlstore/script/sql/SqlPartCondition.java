@@ -16,7 +16,7 @@
 
 package ws.rocket.sqlstore.script.sql;
 
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 
 /**
  * Contract condition implementations to be used by {@link SqlPart}.

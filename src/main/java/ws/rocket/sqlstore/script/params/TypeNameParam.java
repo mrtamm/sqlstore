@@ -16,8 +16,8 @@
 
 package ws.rocket.sqlstore.script.params;
 
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.ScriptExecuteException;
-import ws.rocket.sqlstore.execute.QueryContext;
 
 /**
  * A read-write parameter that is described by its types and a simple name. This kind of parameter

@@ -38,7 +38,7 @@ public final class DataSourceConnectionManager implements ConnectionManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSourceConnectionManager.class);
 
-  private final ThreadLocal<Connection> connection = new ThreadLocal<>();
+  private final ThreadLocal<Connection> connection = new InheritableThreadLocal<>();
 
   private final DataSource dataSource;
 
@@ -115,7 +115,7 @@ public final class DataSourceConnectionManager implements ConnectionManager {
     if (c != null) {
       try {
         c.close();
-        LOG.trace("Released current connection.");
+        LOG.trace("Released current connection to data source.");
       } catch (SQLException e) {
         throw new ScriptExecuteException(e, "Failed to release a database connection "
             + "to data source");

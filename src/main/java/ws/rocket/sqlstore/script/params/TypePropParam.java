@@ -19,7 +19,7 @@ package ws.rocket.sqlstore.script.params;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.script.BeanUtil;
 import ws.rocket.sqlstore.types.Bindings;
 

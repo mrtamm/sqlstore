@@ -20,7 +20,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.script.BeanUtil;
 import ws.rocket.sqlstore.types.Bindings;
 
@@ -75,7 +75,6 @@ public final class Expression extends Param {
       exprJavaType = namedParam.getJavaType();
       exprSqlType = Bindings.getInstance().confirmTypes(exprJavaType, sqlType);
       readers = null;
-      writer = null;
       expression = namedParam.getName();
 
     } else {

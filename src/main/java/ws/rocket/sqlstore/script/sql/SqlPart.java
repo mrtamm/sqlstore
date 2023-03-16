@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
 import java.util.List;
-import ws.rocket.sqlstore.execute.QueryContext;
+import ws.rocket.sqlstore.QueryContext;
 import ws.rocket.sqlstore.script.QueryParam;
 
 /**
