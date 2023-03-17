@@ -70,6 +70,7 @@ public class DatabaseTest {
     }
 
     try {
+      System.setProperty("sqlstore.path.prefix", "/sql/db/");
       System.setProperty("sqlstore.path.suffix", "_" + testDatabase + ".sqls");
       this.scripts = SqlStore.proxy(ScriptsFacade.class, con);
 
