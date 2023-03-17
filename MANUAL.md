@@ -96,7 +96,7 @@ is to be returned.
 Here are few examples for class _com.sample.db.AuthenticationProvider_. First
 is the scripts file in class-path.
 
-_com/sample/db/AuthenticationProvider.sqls_:
+_/sql/AuthenticationProvider.sqls_:
 
 ```
 isAuthenticationValid IN(String username, String passwordHash) OUT(boolean)
@@ -115,7 +115,7 @@ VALUES (login_attempt_seq.nextval, ?{login.username}, ?{login.ipAddress}, SYSDAT
 ====
 ```
 
-_com/sample/db/AuthenticationProvider.java_:
+_/sql/AuthenticationProvider.java_:
 
 ```java
 package com.sample.db;
@@ -180,10 +180,10 @@ scripts file, which is identified by a class:
 SqlStore sql = SqlStore.load(MyClass.class);
 ```
 
-The load process also validates the scripts file contents. The file is assumed
-to be located at the same folder and have the same name as the class, only with
-a different extension: `sqls`. This way the scripts are always tied to some Java
-class, and can be identified where they are used.
+By default, the corresponding file of SQL scripts is loaded from class-path
+resources: `/sql/[SimpleClassName].sqls`. So for the previous code sample, the
+target file will be `/sql/MyClass.sqls`. The load process also validates the
+scripts file contents.
 
 The `SqlStore.load` method also accepts `javax.sql.DataSource` or
 `java.sql.Connection` instance as its second parameter. The recommended way is
@@ -364,10 +364,30 @@ is more memory-efficient.
 The SQL Scripts File
 --------------------
 
-A scripts file used by a Java class must be in the same package, with the same
-name, and with extension ".sqls". This makes it easier to understand where the
-scripts belong to in the sense of Java code. The file is expected to contain
-zero or more type aliases and script declarations (in the given order).
+By default, the corresponding scripts are loaded from class-path resources:
+`/sql/[SimpleClassName].sqls` (using the simple name of the provided class).
+This makes it easier to understand which Java class is using the scripts.
+
+The file is expected to contain zero or more type aliases followed by script
+declarations.
+
+The filepath resolution can be customized through JVM system properties:
+
+* `sqlstore.path.prefix` (default value: `/sql/`)
+* `sqlstore.path.suffix` (default value: `.sqls`)
+
+The `ScriptReader` class just adds the simple name of the provided class in
+between. The prefix and suffix must be customized before loading the scripts
+(afterwards, changes to paths or files do not trigger reloading)!
+
+Usually, the default values should be sufficient. However, the properties can
+be useful when application supports multiple databases and the scripts
+containing the same class name are differentiated by database-specific parent
+directory or custom filename suffix (e.g. `_postgres.sqls`).
+
+> NOTE: By changing the prefix, it is also possible to load the files from
+> external path (`file:///app/sql/`) or from the same package as the specified
+> class (using empty prefix value).
 
 
 Java Type Aliases

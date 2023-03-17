@@ -133,7 +133,7 @@ public final class ScriptReaderTest {
   }
 
   @Test(expectedExceptions = ScriptSetupException.class, expectedExceptionsMessageRegExp
-      = "The SQL script name testScript is defined more than once in InvalidTestModel.sqls: 8")
+      = "The SQL script name testScript is defined more than once in /sql/InvalidTestModel.sqls: 8")
   public void shouldFailToLoadScriptsFromFile() throws IOException {
     ScriptReader.load(InvalidTestModel.class);
   }

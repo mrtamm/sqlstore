@@ -61,7 +61,7 @@ public final class ScriptReader implements Closeable {
   private static final String PATH_SUFFIX;
 
   static {
-    PATH_PREFIX = System.getProperty("sqlstore.path.prefix", "");
+    PATH_PREFIX = System.getProperty("sqlstore.path.prefix", "/sql/");
     PATH_SUFFIX = System.getProperty("sqlstore.path.suffix", ".sqls");
   }
 

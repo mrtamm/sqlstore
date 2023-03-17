@@ -9,11 +9,16 @@ API to the next level by
 
  1. providing a simplified API for invoking queries and mapping results back to
     objects (similar to JdbcTemplate from Spring framework), and
- 2. by externalizing SQL code from Java code (similar to WEB4J framework).
+ 2. by externalizing SQL code from Java code.
 
 SqlStore is small and easy to learn, it does not introduce a fat runtime layer
 for managing SQL statements. Understanding and managing SQL code of an
 application becomes significantly more convenient.
+
+**STATUS**: the library is becoming mature but needs more testing before being
+used in actual business application. Current estimate for that is **September
+2023**. There is no release yet. Meanwhile, disrupting API changes may be
+expected.
 
 
 Documentation
@@ -43,9 +48,9 @@ public interface DocumentsRepo {
 }
 ```
 
-Now the SQL query is defined in the same package with the same name as the
+Now the SQL query is defined in a separate file with the same name as the
 interface, but with file extension `sqls`:
- _com/example/repo/DocumentsRepo.sqls_.
+ _/sql/DocumentsRepo.sqls_.
 
 ```
 !Document=com.example.data.Document
@@ -113,13 +118,13 @@ The project uses [Apache Maven](https://maven.apache.org/) for development.
 
 There are database-dependant tests to verify JDBC-driver compatibility with
 following databases:
-* Derby 10.12: `mvn test -DtestDatabase=derby clean test`
-* PostgreSQL 9.4: `mvn test -DtestDatabase=postgresql clean test`
-* Oracle 11g: `mvn test -DtestDatabase=oracle clean test`
+* Derby: `mvn test -DtestDatabase=derby clean test`
+* PostgreSQL: `mvn test -DtestDatabase=postgresql clean test`
+* Oracle: `mvn test -DtestDatabase=oracle clean test`
 
 Some guidelines on how to prepare the environment for executing these tests on
 an actual database are outlined in [database setup
-README](src/test/resources/ws/rocket/sqlstore/db/README.md).
+README](src/test/resources/sql/db/README.md).
 
 (Without database-specific configuration in test classpath, and just running
 command `mvn test`, the database tests in
